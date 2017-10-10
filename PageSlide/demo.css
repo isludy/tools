@@ -1,0 +1,27 @@
+html,body{
+    height: 100%;
+}
+body{
+    overflow: hidden;
+}
+.header{
+    height: 20%;
+    background: #800;
+}
+.page{
+    height: 80%;
+    overflow: auto;
+    background: #080;
+}
+.page-view{
+    width: 40%;
+    height: 500px;
+    border: 1px solid #c00;
+    display: inline-block;
+}
+.page-slide:nth-child(2){
+    background: purple;
+}
+.page-slide:nth-child(2){
+    background: orange;
+}
