@@ -19,6 +19,10 @@
         }
         options = null;
 
+        //check view
+        var view = document.querySelector(o.view);
+        if(!view) return;
+
         //初始化必要的style
         if(!document.getElementById('page-slide-id')){
             var style = document.createElement('style'),
@@ -33,7 +37,7 @@
                 }
             }
             style.id = 'page-slide-id';
-            style.innerText = o.view+'{position:relative; overflow:hidden; width:100%; height:100%;}'+
+            style.innerText = o.view+'{position:relative; overflow:hidden;}'+
                 o.wrapper+'{height: 100%;}'+
                 o.slide+'{height: 100%;}';
 
@@ -44,8 +48,7 @@
             }
         }
 
-        var view = document.querySelector(o.view),
-            wrapper = view.querySelector(o.wrapper),
+        var wrapper = view.querySelector(o.wrapper),
             slide = view.querySelectorAll(o.slide),
             maxIndex = slide.length - 1,
             isTouch = 'ontouchstart' in document,
@@ -141,6 +144,5 @@
     window.Page = Page;
 }();
 
-Page();
-Page({view: '.page-1'});
+
 
