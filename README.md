@@ -1,5 +1,5 @@
-# tools : ±£´æ³£ÓÃµÄÒ»Ð©º¯Êý¡¢×é¼þµÈ´úÂë¿â
-1. PageSlide:
-	Ò»¸öPCºÍÒÆ¶¯¶Ë¹²ÓÃµÄÒ³Ãæ»®ÆÁÇÐ»»º¯Êý£¬Çø±ðÓÚÆäËûµÄslide£¨Èçswiper£©ÔÚÓÚ,µ±PageÖÐÓÐ¹ö¶¯ÌõÊ±£¬Ëü²»»á×èÖ¹¹ö¶¯ÌõµÄ»®¶¯£¬¶øÊÇµÈ¹ö¶¯Ìõµ½´ï¶¥²¿»òµ×²¿Ê±£¬²Å´¥·¢ÇÐ»»PageµÄ¡£
-	ÓÃ·¨£º
-	ÔÚbodyµ×ÒýÈëPageSlide.js»òÕßÖ±½Ó°Ñº¯Êý¸´ÖÆµ½ÄãµÄjsÖÐ, È»ºóÍ¨¹ýPage()À´µ÷ÓÃ£¬×¢Òâ¿´demoµÄhtml½á¹¹£¬È»ºóÉèÖÃÄãÏëÒªµÄstyle¡£
+# tools : ä¿å­˜å¸¸ç”¨çš„ä¸€äº›å‡½æ•°ã€ç»„ä»¶ç­‰ä»£ç åº“
+	#1. PageSlide:
+	ä¸€ä¸ªPCå’Œç§»åŠ¨ç«¯å…±ç”¨çš„é¡µé¢åˆ’å±åˆ‡æ¢å‡½æ•°ï¼ŒåŒºåˆ«äºŽå…¶ä»–çš„slideï¼ˆå¦‚swiperï¼‰åœ¨äºŽ,å½“Pageä¸­æœ‰æ»šåŠ¨æ¡æ—¶ï¼Œå®ƒä¸ä¼šé˜»æ­¢æ»šåŠ¨æ¡çš„åˆ’åŠ¨ï¼Œè€Œæ˜¯ç­‰æ»šåŠ¨æ¡åˆ°è¾¾é¡¶éƒ¨æˆ–åº•éƒ¨æ—¶ï¼Œæ‰è§¦å‘åˆ‡æ¢Pageçš„ã€‚
+	ç”¨æ³•ï¼š
+	åœ¨bodyåº•å¼•å…¥PageSlide.jsæˆ–è€…ç›´æŽ¥æŠŠå‡½æ•°å¤åˆ¶åˆ°ä½ çš„jsä¸­, ç„¶åŽé€šè¿‡Page()æ¥è°ƒç”¨ï¼Œæ³¨æ„çœ‹demoçš„htmlç»“æž„ï¼Œç„¶åŽè®¾ç½®ä½ æƒ³è¦çš„styleã€‚
