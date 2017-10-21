@@ -70,6 +70,7 @@
 
         view.addEventListener(events[0], startFn, false);
         function startFn(e){
+            if(e.button === 2) return false;
             var that = this;
             start = isTouch ? e.targetTouches[0].clientY : e.clientY;
             wrapperTop = getTranslateY(wrapper);
