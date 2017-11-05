@@ -73,6 +73,8 @@
             if(e.button === 2) return false;
             var that = this;
             start = isTouch ? e.targetTouches[0].clientY : e.clientY;
+            end = start;
+            delta = 0;
             wrapperTop = getTranslateY(wrapper);
             wrapper.style.transition = 'none';
             scrollBody = getScrollElement(e.target, that, scrollClass);
