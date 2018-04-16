@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>扩展Date用于日历</title>
+	<script>
+		Date.prototype.format = function (format, time) {
+			var date = new Date();
+			time = time || this.getTime();
+			date.setTime(time);
+			var o = {
+				Y: date.getFullYear(),
+				m: date.getMonth()+1,
+				d: date.getDate(),
+				h: date.getHours(),
+				i: date.getMinutes(),
+				s: date.getSeconds(),
+				c: date.getMilliseconds()
+			};
+			o.y = (o.Y+'').slice(2);
+			o.M = (o.m+100+'').slice(1);
+			o.D = (o.d+100+'').slice(1);
+			o.H = (o.h+100+'').slice(1);
+			o.I = (o.i+100+'').slice(1);
+			o.S = (o.s+100+'').slice(1);
+			o.C = (o.c+1000+'').slice(1);
+			if(format){
+				format = format.split('');
+				for(var len=format.length; len--;){
+					var k = format[len];
+					if(o[k]) format[len] = o[k];
+				}
+				return format.join('');
+			}
+			return o.Y + '-' + o.M + '-' + o.D + ' ' + o.H + ':' + o.I + ':' + o.S + ':' + o.C;
+		}
+		Date.prototype.lastDate = function (month) {
+			var date = new Date();
+			if(month)
+				date.setMonth(month);
+			else
+				date.setMonth(this.getMonth()+1);
+			date.setDate(0);
+			return date.getDate();
+		}
+		Date.prototype.dateTable = function (month) {
+			var today = this.getDate(),
+				last = this.lastDate(month),
+				firstDay,
+				lastDay,
+				startDate,
+				endDate,
+				table = {
+					today: null,
+					days: []
+				};
+			this.setDate(1);
+			firstDay = this.getDay();
+			this.setDate(last);
+			lastDay = this.getDay();
+			this.setDate(1-firstDay);
+			startDate = this.getTime();
+			console.log(this.format('',startDate))
+			this.setDate(today);
+			if(this.tableMode === 1){
+
+			}
+			console.log(last, firstDay, lastDay);
+		}
+
+	</script>
+</head>
+<body>
+	<script>
+		var date = new Date('2018/04/05 2:25:6:88');
+		console.log(date.dateTable())
+	</script>
+</body>
+</html>

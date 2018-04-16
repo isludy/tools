@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>demo</title>
+	<style type="text/css">
+		.slider-bar{
+			text-align: center;
+			font-size: 0;
+			white-space: nowrap;
+			box-sizing: border-box;
+			padding: 20px;
+		}
+		.slider-text,
+		.slider-track{
+			display: inline-block;
+			vertical-align: middle;
+			font-size: 14px;
+		}
+		.slider-text{
+			width: 8em;
+		}
+		.slider-track{
+			width: calc(100% - 16em);
+			box-sizing: border-box;
+			border: 1px solid #ccc;
+			height: 10px;
+			border-radius: 5px;
+			position: relative;
+		}
+		.slider-thumb{
+			width: 16px;
+			height: 16px;
+			background: #4aaaff;
+			border-radius: 100%;
+			position: absolute;
+			left: 0;
+			top: -4px;
+			cursor: pointer;
+		}
+		.btns{
+			text-align: center;
+			font-size: 20px;
+		}
+	</style>
+</head>
+<body>
+	<div class="slider-bar">
+		<div class="slider-text">0ml</div>
+		<div class="slider-track">
+			<div class="slider-thumb"></div>
+		</div>
+		<div class="slider-text">60ml</div>
+	</div>
+	<div class="btns">
+		<button class="minus">-</button>
+		<button class="plus">+</button>
+	</div>
+	<script type="text/javascript" src="jquery.min.js"></script>
+	<script type="text/javascript">
+		/*
+		分析： 
+			处理的问题一： track 和 thumb之间的数值计算
+			处理的问题二： thumb 滑块的事件。
+
+		注意的点：
+			因为定位thumb元素是用left的，所以thumb的活动范围只能在 0 到 （track.width - thumb.width）之间,
+			track （滑过部分）蓝色背景的百分比也只有从 0 到 （track.width - thumb.width）/ track.width;
+		
+		*/
+		var track = $('.slider-track'),
+			thumb = $('.slider-thumb'),
+			text = $('.slider-text'),
+			plus = $('.plus'),
+			minus = $('.minus'),
+			min = 0,
+			max = 60,
+			start = 0,
+			end = 0,
+			step = 1,
+			limit = 0,
+			percent = 0;
+
+		function init(){
+			start = thumb.position().left;
+
+			limit = track.width();
+			end = limit - thumb.width();
+
+			//累加的步数要与真正的max值进行比例换算。如果想每点击一次累加2，则step =（end / max）* 2 即可
+			step = end / max;
+
+			text.eq(1).text(max+'ml');
+
+			render();
+		}
+		init();
+
+		plus.on('click', function(){
+			if(start < end-step){
+				start += step;
+			}else{
+				start = end;
+			}
+			render();
+		});
+
+		minus.on('click', function(){
+			if(start > step){
+				start -= step;
+			}else{
+				start = 0;
+			}
+			render();
+		});
+
+		function render(){
+			text.eq(0).text(Math.round(start/step)+'ml');
+			percent = start/limit*100;
+			thumb.css('left', start);
+			track.css('background-image','linear-gradient(90deg, #4aaaff, #4aaaff '+percent+'%, transparent '+percent+'%)');
+		}
+
+		var doc = $(document),
+			curStart = start,
+			startX = 0,
+			endX = 0;
+		thumb.on('mousedown', function(e){
+			startX = e.clientX;
+			endX = startX;
+			curStart = start;
+			doc.on('mousemove', moveFn);
+			doc.on('mouseup', endFn);
+		});
+		function moveFn(e){
+			e.preventDefault();
+			endX = e.clientX;
+			//左滑时，start不能小于0
+			if(endX < startX){
+				if(start > 0){
+					start = curStart + endX - startX;
+				}else{
+					start = 0;
+				}
+			}
+			//右滑时，start不能大于end
+			else{
+				if(start < end){
+					start = curStart + endX - startX;
+				}else{
+					start = end;
+				}
+			}
+			render();
+		}
+		function endFn(){
+			doc.off('mousemove', moveFn);
+			doc.off('mouseup', endFn);
+		}
+	</script>
+</body>
+</html>
