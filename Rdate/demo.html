@@ -43,7 +43,8 @@
 			dlist = document.getElementById('date-list'),
 			year = 2018,
 			month = 4,
-			dates = date.dateTable(year, month,1,'d'),
+			options = {mode: 1, limitRow: true, format: 'd'},
+			dates = date.dateTable(year, month, options),
 			next = document.getElementById('next'),
 			prev= document.getElementById('prev'),
 			curdate = document.getElementById('curdate'),
@@ -69,7 +70,7 @@
 				month = 1;
 				year++;
 			}
-			dates = date.dateTable(year,month,1,'d');
+			dates = date.dateTable(year,month, options);
 			render();
 		}
 		prev.onclick = function(){
@@ -78,10 +79,9 @@
 				month = 12;
 				year--;
 			}
-			dates = date.dateTable(year, month, 1,'d');
+			dates = date.dateTable(year, month, options);
 			render();
 		}
-		console.log(dates, date.lastDate(2018,1))
 	</script>
 </body>
 </html>

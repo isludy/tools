@@ -48,7 +48,7 @@ Date.prototype.dateBetween = function(start, end){
 	}
 	return list;
 }
-Date.prototype.dateTable = function (year, month, mode, format) {
+Date.prototype.dateTable = function (year, month, o) {
 	var date = new Date(), last, beforeDays, afterDays, startTime, total, table;
 	if(typeof year === 'number' && year > 0)
 		date.setFullYear(year);
@@ -58,8 +58,9 @@ Date.prototype.dateTable = function (year, month, mode, format) {
 		date.setTime(this.getTime());
 
 	last = this.lastDate(date.getFullYear(), date.getMonth()+1);
-	console.log(last)
-	format = format || 'Y/M/D';
+	console.log(o.format)
+	o.format = o.format || 'Y/M/D';
+
 	table = {
 		year: date.getFullYear(),
 		month: date.getMonth()+1,
@@ -78,12 +79,22 @@ Date.prototype.dateTable = function (year, month, mode, format) {
 	afterDays = afterDays ? 7-afterDays : 0;
 	total = beforeDays + last + afterDays;
 
-	if(mode === 1){
+	//mode: 0 或 默认，周日在首，周六在末
+	//mode: 1，周一在首，周日在末
+	if(o.mode === 1){
+		//前月填充部分大于0时，整个列队前移1位后，起始时间戳加1天，前部减1天，尾部加1天，如果原本是6天，加1天之后为7天，刚好一行，删除它，total减7
 		if(beforeDays){
 			startTime += 86400000;
 			beforeDays--;
-			afterDays++;
+			if(afterDays < 6)
+				afterDays++;
+			else{
+				afterDays = 0;
+				total -= 7;
+			}
 		}else{
+			//前月填充为0时，整个列队前移1位后，前面需要六个填补，起始时间戳往前6天，尾部如果大于等于6，则减去6天，
+			//前后抵销total不变，否则尾部加一天，加上前部添的6天，total加7天，其实就相当添了一行。
 			startTime -= 6*86400000;
 			beforeDays += 6;
 			if(afterDays >= 6)
@@ -93,19 +104,30 @@ Date.prototype.dateTable = function (year, month, mode, format) {
 				total += 7;
 			}
 		}
-	}else if(mode > 1 && total < 42){
-		if(beforeDays){
-			afterDays += 7;
-		}else{
+	}
+	//limitRow: 默认false, 不保持7x6格布局
+	//limitRow: true, 保持7x6格布局
+	if(o.limitRow && total < 42){
+		//如果天数只有四行，比如2月份有可能，则分别添加到前、后各一行
+		if(42 - total >= 14){
 			startTime -= 7 * 86400000;
 			beforeDays += 7;
+			afterDays += 7;
+		}else{
+			//比较前后部分填充的量，补一行在较少部分
+			if(beforeDays < afterDays){
+				startTime -= 7 * 86400000;
+				beforeDays += 7;
+			}else{
+				afterDays += 7;
+			}
 		}
 		total = 42;
 	}
 
 	for(; total--;)
-		table.items.unshift(this.format(format, startTime+total*86400000));
-	table.today = this.format(format, new Date().getTime());
+		table.items.unshift(this.format(o.format, startTime+total*86400000));
+	table.today = this.format(o.format, new Date().getTime());
 
 	table.prevItems = table.items.splice(0, beforeDays);
 	table.nextItems = table.items.splice(-afterDays, afterDays);
