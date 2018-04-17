@@ -39,36 +39,36 @@ Date.prototype.lastDate = function (year, month) {
 	date.setDate(0);
 	return date.getDate();
 }
-Date.prototype.dateBetween = function(start, end){
-	var list = [];
-	start = new Date(start).getTime();
-	end = new Date(end).getTime()+86400000;
-	for(; start < end; start += 86400000){
-		list.push(this.format('Y/M/D',start));
-	}
-	return list;
-}
+Date.prototype.weeks = ['日','一','二','三','四','五','六'];
 Date.prototype.dateTable = function (year, month, o) {
-	var date = new Date(), last, beforeDays, afterDays, startTime, total, table;
-	if(typeof year === 'number' && year > 0)
+	var date = new Date(),
+		today = date.getTime(),
+		last,
+		beforeDays,
+		afterDays,
+		startTime,
+		total,
+		table;
+	if(typeof year === 'object')
+		o = year;
+	else if(typeof year === 'number' && year > 0 && typeof month === 'number' && month <= 12 && month > 0){
 		date.setFullYear(year);
-	if(typeof month === 'number' && month <= 12 && month > 0)
 		date.setMonth(month-1);
-	else
+	}else
 		date.setTime(this.getTime());
 
 	last = this.lastDate(date.getFullYear(), date.getMonth()+1);
-	console.log(o.format)
 	o.format = o.format || 'Y/M/D';
 
 	table = {
 		year: date.getFullYear(),
 		month: date.getMonth()+1,
 		date: date.getDate(),
-		today: null,
-		items: [],
-		prevItems: [],
-		nextItems: []
+		today: this.format(o.format, today),
+		weeks: this.weeks.slice(0),
+		dates: [],
+		prevDates: [],
+		nextDates: []
 	};
 
 	date.setDate(1);
@@ -104,6 +104,8 @@ Date.prototype.dateTable = function (year, month, o) {
 				total += 7;
 			}
 		}
+		table.weeks.splice(0, 1);
+		table.weeks.push(this.weeks[0]);
 	}
 	//limitRow: 默认false, 不保持7x6格布局
 	//limitRow: true, 保持7x6格布局
@@ -126,10 +128,29 @@ Date.prototype.dateTable = function (year, month, o) {
 	}
 
 	for(; total--;)
-		table.items.unshift(this.format(o.format, startTime+total*86400000));
-	table.today = this.format(o.format, new Date().getTime());
+		table.dates.unshift(this.format(o.format, startTime+total*86400000));
 
-	table.prevItems = table.items.splice(0, beforeDays);
-	table.nextItems = table.items.splice(-afterDays, afterDays);
+	table.prevDates = table.dates.splice(0, beforeDays);
+	table.nextDates = table.dates.splice(-afterDays, afterDays);
 	return table;
+}
+//这是用于获取两个时间之间的日期，用于移动端竖向列表。
+Date.prototype.dateBetween = function(start, end, format){
+	var list = [];
+	if(typeof start === 'string' && typeof end === 'string'){
+		start = new Date(start).getTime();
+		end = new Date(end).getTime()+86400000;
+	}else if(typeof start === 'number' && typeof end === 'string'){
+		end = new Date(end).getTime()+86400000;
+		start = end - start*86400000;
+	}else if(typeof start === 'string' && typeof end === 'number'){
+		start = new Date(start).getTime();
+		end = start + end*86400000;
+	}else{
+		return list;
+	}
+	for(; start < end; start += 86400000){
+		list.push(this.format((format || 'Y/M/D'),start));
+	}
+	return list;
 }
