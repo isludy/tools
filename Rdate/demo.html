@@ -3,77 +3,85 @@
 <head>
 	<meta charset="UTF-8">
 	<title>扩展Date用于日历</title>
-	<script>
-		Date.prototype.format = function (format, time) {
-			var date = new Date();
-			time = time || this.getTime();
-			date.setTime(time);
-			var o = {
-				Y: date.getFullYear(),
-				m: date.getMonth()+1,
-				d: date.getDate(),
-				h: date.getHours(),
-				i: date.getMinutes(),
-				s: date.getSeconds(),
-				c: date.getMilliseconds()
-			};
-			o.y = (o.Y+'').slice(2);
-			o.M = (o.m+100+'').slice(1);
-			o.D = (o.d+100+'').slice(1);
-			o.H = (o.h+100+'').slice(1);
-			o.I = (o.i+100+'').slice(1);
-			o.S = (o.s+100+'').slice(1);
-			o.C = (o.c+1000+'').slice(1);
-			if(format){
-				format = format.split('');
-				for(var len=format.length; len--;){
-					var k = format[len];
-					if(o[k]) format[len] = o[k];
-				}
-				return format.join('');
-			}
-			return o.Y + '-' + o.M + '-' + o.D + ' ' + o.H + ':' + o.I + ':' + o.S + ':' + o.C;
+	<script src="Rdate.js"></script>
+	<style type="text/css">
+		.list{
+			list-style: none;
+			margin: 0;
+			padding: 0;
+			font-size: 0;
 		}
-		Date.prototype.lastDate = function (month) {
-			var date = new Date();
-			if(month)
-				date.setMonth(month);
-			else
-				date.setMonth(this.getMonth()+1);
-			date.setDate(0);
-			return date.getDate();
+		.list-item{
+			width: 14%;
+			display: inline-block;
+			vertical-align: top;
+			border: 1px solid #ddd;
+			text-align: center;
+			font-size: 15px;
 		}
-		Date.prototype.dateTable = function (month) {
-			var today = this.getDate(),
-				last = this.lastDate(month),
-				firstDay,
-				lastDay,
-				startDate,
-				endDate,
-				table = {
-					today: null,
-					days: []
-				};
-			this.setDate(1);
-			firstDay = this.getDay();
-			this.setDate(last);
-			lastDay = this.getDay();
-			this.setDate(1-firstDay);
-			startDate = this.getTime();
-			console.log(this.format('',startDate))
-			this.setDate(today);
-			if(this.tableMode === 1){
-
-			}
-			console.log(last, firstDay, lastDay);
+		.list-prev,
+		.list-next{
+			background: #ddd;
 		}
-
-	</script>
+	</style>
 </head>
 <body>
+	<ul class="list">
+		<li class="list-item">一</li>
+		<li class="list-item">二</li>
+		<li class="list-item">三</li>
+		<li class="list-item">四</li>
+		<li class="list-item">五</li>
+		<li class="list-item">六</li>
+		<li class="list-item">日</li>
+	</ul>
+	<ul id="date-list" class="list"></ul>
+	<button id="prev">-</button><button id="next">+</button>
+	<input id="curdate" type="text" name="">
 	<script>
-		var date = new Date('2018/04/05 2:25:6:88');
-		console.log(date.dateTable())
+		var date = new Date(),
+			dlist = document.getElementById('date-list'),
+			year = 2018,
+			month = 4,
+			dates = date.dateTable(year, month,1,'d'),
+			next = document.getElementById('next'),
+			prev= document.getElementById('prev'),
+			curdate = document.getElementById('curdate'),
+			html;
+		function render(){
+			html = '';
+			dates.prevItems.forEach(item=>{
+				html += '<li class="list-item list-prev">'+item+'</li>';
+			});
+			dates.items.forEach(item=>{
+				html += '<li class="list-item">'+item+'</li>';
+			});
+			dates.nextItems.forEach(item=>{
+				html += '<li class="list-item list-next">'+item+'</li>';
+			});
+			dlist.innerHTML = html;
+			curdate.value = year+'/'+month;
+		}
+		render();
+		next.onclick = function(){
+			month++;
+			if(month > 12){
+				month = 1;
+				year++;
+			}
+			dates = date.dateTable(year,month,1,'d');
+			render();
+		}
+		prev.onclick = function(){
+			month--;
+			if(month < 1){
+				month = 12;
+				year--;
+			}
+			dates = date.dateTable(year, month, 1,'d');
+			render();
+		}
+		console.log(dates, date.lastDate(2018,1))
 	</script>
 </body>
 </html>
