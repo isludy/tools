@@ -5,10 +5,8 @@
 	<title>复制</title>
 </head>
 <body>
-	<div id="ttt">
-		<div id="text">复制的内容</div>
-		<img id="img" src="https://www.baidu.com/img/bd_logo1.png?where=super" alt="baidu">
-	</div>
+	<div id="text">复制的内容</div>
+	<img id="img" src="https://www.baidu.com/img/bd_logo1.png?where=super" alt="baidu">
 	<button id="copyText">复制文本</button>
 	<button id="copyImage">复制图片</button>
 	<script>
@@ -23,7 +21,7 @@
 			document.body.removeChild(area);
 			area = null;
 		}
-		// 复制文本方法三：创建range选区
+		// 复制文本方法二：创建range选区
 		copyText.onclick = function(){
 			var range = document.createRange(),
 				sel = window.getSelection();
