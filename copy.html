@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>复制</title>
+</head>
+<body>
+	<div id="ttt">
+		<div id="text">复制的内容</div>
+		<img id="img" src="https://www.baidu.com/img/bd_logo1.png?where=super" alt="baidu">
+	</div>
+	<button id="copyText">复制文本</button>
+	<button id="copyImage">复制图片</button>
+	<script>
+		// 复制文本方法一: 创建临时textarea
+		copyText.onclick = function(){
+			var area = document.createElement('textarea');
+			area.value = text.innerHTML;
+			area.style.opacity = 0;
+			document.body.appendChild(area);
+			area.select();
+			document.execCommand('copy');
+			document.body.removeChild(area);
+			area = null;
+		}
+		// 复制文本方法二：创建range选区
+		copyText.onclick = function(){
+			var range = document.createRange(),
+				sel = window.getSelection();
+			if(sel.rangeCount) sel.removeAllRanges();
+			range.selectNodeContents(text);
+			sel.addRange(range);
+			document.execCommand('copy');
+			sel.removeAllRanges();
+			range.detach();
+		}
+        // 复制图片方法一：range对象，与上面的方法基本相同
+        copyImage.onclick = function(){
+        	var range = document.createRange(),
+        		sel = window.getSelection();
+            if(sel.rangeCount) sel.removeAllRanges();
+            range.selectNode(img);
+            sel.addRange(range);
+        	document.execCommand('copy');
+            sel.removeAllRanges();
+            range.detach();
+        }
+	</script>
+</body>
+</html>
