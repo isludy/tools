@@ -23,7 +23,7 @@
 			document.body.removeChild(area);
 			area = null;
 		}
-		// 复制文本方法二：创建range选区
+		// 复制文本方法三：创建range选区
 		copyText.onclick = function(){
 			var range = document.createRange(),
 				sel = window.getSelection();
@@ -34,17 +34,17 @@
 			sel.removeAllRanges();
 			range.detach();
 		}
-        // 复制图片方法一：range对象，与上面的方法基本相同
-        copyImage.onclick = function(){
-        	var range = document.createRange(),
-        		sel = window.getSelection();
-            if(sel.rangeCount) sel.removeAllRanges();
-            range.selectNode(img);
-            sel.addRange(range);
-        	document.execCommand('copy');
-            sel.removeAllRanges();
-            range.detach();
-        }
+		// 复制图片方法一：range对象，与上面的方法基本相同
+		copyImage.onclick = function(){
+			var range = document.createRange(),
+				sel = window.getSelection();
+			if(sel.rangeCount) sel.removeAllRanges();
+			range.selectNode(img);
+			sel.addRange(range);
+			document.execCommand('copy');
+			sel.removeAllRanges();
+			range.detach();
+		}
 	</script>
 </body>
 </html>
