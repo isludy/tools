@@ -4,4 +4,6 @@
 	用法：
 	在body底引入PageSlide.js或者直接把函数复制到你的js中, 然后通过Page()来调用，注意看demo的html结构，然后设置你想要的style。
 2. Rdate:
-	
+	一个基于Date对象原型链接上的日期小功能库。
+3. RrangeSlide:
+    未完善。
