@@ -40,7 +40,7 @@ Date.prototype.format = function (format, time) {
 /**
  * 获取某个月的最后一天的日期，这是为了方便获取当月的天数
  * @param year {number} 年，可选，不输入时默认当前年份
- * @param month {month} 月，可选，不输入时默认当前月份
+ * @param month {number} 月，可选，不输入时默认当前月份
  */
 Date.prototype.lastDate = function (year, month) {
 	var date = new Date();
