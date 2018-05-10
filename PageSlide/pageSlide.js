@@ -30,8 +30,10 @@ function Page(options){
     
     function addEvent(node, evt, fn){
         if(window.addEventListener){
-            
-        }else if(window.atechEvent)
+            node
+        }else if(window.attachEvent){
+
+        }
     }
 
 
