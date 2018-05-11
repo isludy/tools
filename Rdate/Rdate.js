@@ -2,9 +2,9 @@
  * 格式化时间
  * @param format {String} 格式字符串，ymdhisc几个字母，大写表示不满10（毫秒1000）时前位填充0。 字符任意组合与排序，中间也可以放任意符号。
       例如： 
-      普通 = "Y/M/D H:I:S.C"，
-      文艺 = "Y-M-D H:I:S.C"，
-      二B = "i/d-h*y-m-Y" 或 "YYYYDDDDDDDmmm" 或 "Y-/#$@M***m H"....
+      普通 => "Y/M/D H:I:S.C"
+      文艺 => "Y-M-D H:I:S.C" 或 "Y-m-d h:i:s"
+      二狗 => "i/d-h*y-m-Y" 或 "YYYYDDDDDDDmmm" 或 "Y-/#$@M***m H"....
    @param time {number} 时间戳，可选参数，如果不传入参数，则会输出当天日期
  */
 Date.prototype.format = function (format, time) {

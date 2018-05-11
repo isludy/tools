@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
     <title>Demo</title>
     <style>
         html,body{
@@ -9,6 +10,7 @@
         }
         body{
             overflow: hidden;
+            margin: 0;
         }
         h1,h2,h3{
             text-align: center;
@@ -19,8 +21,8 @@
             padding: 0 15px;
         }
         .page-view{
-            max-width: 600px;
-            height: 500px;
+            max-width: 640px;
+            height: 100%;
             border: 1px solid #ccc;
             margin: 0 auto;
             overflow: hidden;
@@ -31,7 +33,7 @@
             background: #aea;
         }
         .main{
-            height: calc(500px - 80px - 50px);
+            height: calc(100% - 80px - 50px);
             background: #ded;
             overflow: auto;
         }
@@ -49,77 +51,78 @@
     </style>
 </head>
 <body>
-<h1> example </h1>
 <div class="page-view">
     <div class="page-wrapper">
         <div class="page-slide">
             <div class="header">
-                <h2>Page 1 Header Content</h2>
+                <h2>header</h2>
             </div>
-            <div class="main page-scroll">
-                <h2>Page 1 Main Content Overflow</h2>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
+            <div class="main page-scrollbar">
+                <h2>有滚动条，且 不满页 的body</h2>
+                <p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p>
+                <p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p>
+                <p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p>
+                <p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p>
+                <p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p>
+                <p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p>
+                <p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p>
+                <p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p>
+                <p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p>
+                <p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p>
+                <p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p>
+                <p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p>
+                <p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p><p>有滚动条，且 不满页 的页面的测试内容</p>
             </div>
             <div class="footer">
-                <h2>Page 1 Footer Content</h2>
+                <h2>footer</h2>
             </div>
         </div>
         <div class="page-slide bg-1">
-            <h2> Page 2 Content</h2>
-            <p> Not overflow </p>
+            <h2> 第 三 页内容</h2>
+            <p> 没有滚动条的页面 </p>
         </div>
         <div class="page-slide bg-2">
-            <div class="main page-scroll" style="height: 100%;">
-                <h2>Page 3 Main Content Overflow</h2>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
-                <p>This is a paragraph content for test. In the page-slide, you can do anything you need. Just give the label a class-name like "page-scroll" or any you like and set overflow to "scroll" or "auto", then, scroll-bar will work perfectly when content overflow.</p>
+            <div class="main page-scrollbar" style="height: 100%;">
+                <h2>有滚动条的 满页 页面</h2>
+                <p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p>
+                <p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p>
+                <p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p>
+                <p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p>
+                <p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p>
+                <p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p>
+                <p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p>
+                <p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p>
+                <p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p>
+                <p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p>
+                <p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p>
+                <p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p>
+                <p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p>
+                <p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p><p>有滚动条的 满页 页面的测试内容</p>
             </div>
         </div>
         <div class="page-slide bg-1">
-            <h2> Page 4 Content</h2>
-            <p> Not overflow </p>
+            <h2> 第 四 页内容</h2>
+            <p> 没有滚动条的页面 </p>
         </div>
     </div>
 </div>
-<script src="pageSlide.min.js"></script>
+<script src="dist/PageSlide.min.js"></script>
 <script>
-    Page({
-        /* 以下是默认参数配置
+    PageSlide(
+    /* 以下是默认参数配置
+    {
         view: '.page-view', //page-view的选择器，如果一个页面想用多个，它必须是唯一的。它相当于id，也推荐用id
-        wrapper: '.page-wrapper',
-        slide: '.page-slide',
-        scrollClass: 'page-scroll', //注意：这个只需要类名，不是选择器
+        wrapper: '.page-wrapper', //选择器
+        slide: '.page-slide', //选择器
+        scrollbar: 'page-scrollbar', //注意：这个只需要类名，不是选择器
         deviation: 5, //允许误差值。理论上，scrollHeight - scrollTop - offsetHeight = 0 时，表示滚动条到达底部，但在移动端，有些时候会产生一两个像素的误差。
         distance: 100, //划动此距离后会触发切换。
-        time: 1, //切换动画的时长，单位 s。
-        viewHeight: 'auto', //视口的高度，默认会自动获取page-wrapper的高度
-        beforeChange: null, //切换发生前执行的回调
-        afterChange: null //切换动画完成后执行的回调
-        */
-    });
+        fireDistance: 0, //有时候需要手指划一小段距离才让页面启用滑动，设置此值即可
+        duration: 1000, //切换动画的时长，单位 ms。
+        beforeSlide: null, //切换发生前执行的回调
+        afterSlide: null //切换动画完成后执行的回调
+    }
+    */);
 </script>
 </body>
 </html>
