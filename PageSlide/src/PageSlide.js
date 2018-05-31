@@ -1,3 +1,7 @@
+/**
+ * 需要从utils.js中使用工具方法写到这里
+ * @type {Object}
+ */
 const utils = {
     addEvent: null,
     removeEvent: null,
@@ -6,6 +10,7 @@ const utils = {
     setTransition: null,
     setTransform: null
 };
+
 module.exports = {
     name: 'PageSlide',
     utils,

@@ -1,9 +1,8 @@
 .player{
     display: block;
     position: relative;
-    cursor: default;
+    cursor: url(http://image.wenweipo.com/www/wwp2014/logo.png),default;
     background: #000;
-    border: 1px solid #ccc;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
@@ -14,7 +13,7 @@
     height: 100%;
     display: block;
 }
-.player-controller{
+.player-controls{
     background: rgba(0, 0, 0, .5);
     display: none;
     position: absolute;
@@ -23,7 +22,7 @@
     left: 0;
     color: #fff;
 }
-.player:hover .player-controller{
+.player-controls-show{
     display: block;
 }
 .player-slider{
@@ -46,9 +45,13 @@
     padding: 5px;
     white-space: nowrap;
     font-size: 0;
+    background: url("http://assets.wenweipo.com/img/favicon.png") no-repeat 5px center;
+    -webkit-background-size: auto 96%;
+    background-size: auto 96%;
 }
 .player-toolbar-left{
     float: left;
+    margin-left: 32px;
 }
 .player-toolbar-right{
     float: right;
@@ -93,7 +96,6 @@
 }
 .player-duration{
     border-left: 1px solid;
-
 }
 .player-volume-slider{
     width: 100px;
@@ -171,4 +173,37 @@
     border-style: none;
     border-left-style: solid;
     border-top-style: solid;
+}
+
+@media all and (max-width: 639px) {
+    .player-btn{
+        border-left: 12px solid;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+    }
+    .player-btn-playing{
+        border-left: 5px solid;
+        border-right: 5px solid;
+        width: 14px;
+        height: 16px;
+    }
+    .player-current-time,
+    .player-duration{
+        font-size: 12px;
+    }
+    .player-volume-slider{
+        width: 80px;
+        margin-right: 10px;
+    }
+    .player-fullscreen{
+        width: 16px;
+        height: 16px;
+    }
+    .player-fullscreen-tl,
+    .player-fullscreen-tr,
+    .player-fullscreen-bl,
+    .player-fullscreen-br{
+        width: 4px;
+        height: 4px;
+    }
 }
