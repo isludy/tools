@@ -10,13 +10,14 @@ window.Player=function (type){
 
         controls.innerHTML = `
             <div class="player-slider">
+                <div data-name="buf" class="player-slider-buf"></div>
                 <div data-name="thumb" class="player-slider-thumb"></div>
             </div>
             <div class="player-toolbar">
                 <div class="player-toolbar-left">
                     <span data-name="btn" class="player-btn"></span>
-                    <span data-name="cur" class="player-current-time">00:00:00</span>
-                    <span data-name="dur" class="player-duration">00:00:00</span>
+                    <span data-name="cur" class="player-current-time">00:00</span>
+                    <span data-name="dur" class="player-duration">/ 00:00</span>
                 </div>
                 <div class="player-toolbar-right">
                     <span class="player-volume-slider">
@@ -49,9 +50,10 @@ window.Player=function (type){
         }
 
         utils.addEvent(video, 'durationchange', function(){
-            els.dur.innerText = utils.timemat(this.duration);
+            els.dur.innerText = '/ ' + utils.timemat(this.duration);
         });
         utils.addEvent(video, 'timeupdate', function () {
+            els.buf.style.width = (video.buffered.end(video.buffered.length-1) / this.duration) * 100 + '%';
             els.cur.innerText = utils.timemat(this.currentTime);
             els.thumb.style.width = (this.currentTime / this.duration) * 100 + '%';
         });

@@ -82,15 +82,15 @@ module.exports = {
             el.style.top = bool ? v+'px' : '-'+v+'00%';
         }
     },
-    timemat(time){
-        let h = Math.floor(time/3600),
+    timemat(time, type=0){
+        let h = !type ? 0 : Math.floor(time/3600),
             i = Math.floor((time - h*3600) / 60),
             s = Math.floor(time - h*3600 - i*60);
 
         h = h < 10 ? '0' + h : h;
         i = i < 10 ? '0' + i : i;
         s = s < 10 ? '0' + s : s;
-        return h + ':' + i + ':' + s;
+        return (!type ? '' : (h + ':')) + i + ':' + s;
     },
     fullscreen(el){
         if(el.requestFullscreen) {

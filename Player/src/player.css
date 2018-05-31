@@ -1,8 +1,8 @@
 .player{
     display: block;
     position: relative;
-    cursor: url(http://image.wenweipo.com/www/wwp2014/logo.png),default;
-    background: #000;
+    cursor: default;
+    background-color: #000;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
@@ -14,7 +14,7 @@
     display: block;
 }
 .player-controls{
-    background: rgba(0, 0, 0, .5);
+    background-color: #333;
     display: none;
     position: absolute;
     width: 100%;
@@ -26,15 +26,27 @@
     display: block;
 }
 .player-slider{
-    background: #bbb;
+    background-color: #525050;
     height: 6px;
     cursor: pointer;
     position: relative;
 }
+.player-slider-buf,
 .player-slider-thumb{
-    width: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
     height: 100%;
-    background: #d22;
+    width: 0;
+}
+.player-slider-buf{
+    background-color: #999;
+    width: 0;
+    z-index: 0;
+}
+.player-slider-thumb{
+    z-index: 1;
+    background-color: #2aa126;
 }
 .player-toolbar{
     position: relative;
@@ -42,16 +54,12 @@
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-    padding: 5px;
+    padding: 8px;
     white-space: nowrap;
     font-size: 0;
-    background: url("http://assets.wenweipo.com/img/favicon.png") no-repeat 5px center;
-    -webkit-background-size: auto 96%;
-    background-size: auto 96%;
 }
 .player-toolbar-left{
     float: left;
-    margin-left: 32px;
 }
 .player-toolbar-right{
     float: right;
@@ -74,28 +82,30 @@
     cursor: pointer;
     width: 0;
     height: 0;
-    color: #d22;
-    border-left: 20px solid;
-    border-top: 12px solid transparent;
-    border-bottom: 12px solid transparent;
+    color: #999;
+    border-left: 12px solid;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
     margin: 0 5px;
 }
+.player-btn:hover{
+    color: #fff;
+}
 .player-btn-playing{
-    border-left: 7px solid;
-    border-right: 7px solid;
+    border-left: 4px solid;
+    border-right: 4px solid;
     border-top: 0;
     border-bottom: 0;
-    width: 20px;
-    height: 24px;
+    width: 12px;
+    height: 14px;
 }
 .player-current-time,
 .player-duration{
-    letter-spacing: 1px;
     font-size: 14px;
-    padding: 0 4px;
+    padding: 0 2px;
 }
 .player-duration{
-    border-left: 1px solid;
+    color: #ddd;
 }
 .player-volume-slider{
     width: 100px;
@@ -113,11 +123,11 @@
     width: 100%;
     height: 100%;
     display: block;
-    background: #d22;
+    background: #2aa126;
 }
 .player-fullscreen{
-    width: 22px;
-    height: 22px;
+    width: 16px;
+    height: 16px;
     margin: 1px 5px;
     cursor: pointer;
 }
@@ -126,8 +136,8 @@
 .player-fullscreen-bl,
 .player-fullscreen-br{
     position: absolute;
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
     border-width: 2px;
 }
 .player-fullscreen-tl{
@@ -173,37 +183,4 @@
     border-style: none;
     border-left-style: solid;
     border-top-style: solid;
-}
-
-@media all and (max-width: 639px) {
-    .player-btn{
-        border-left: 12px solid;
-        border-top: 8px solid transparent;
-        border-bottom: 8px solid transparent;
-    }
-    .player-btn-playing{
-        border-left: 5px solid;
-        border-right: 5px solid;
-        width: 14px;
-        height: 16px;
-    }
-    .player-current-time,
-    .player-duration{
-        font-size: 12px;
-    }
-    .player-volume-slider{
-        width: 80px;
-        margin-right: 10px;
-    }
-    .player-fullscreen{
-        width: 16px;
-        height: 16px;
-    }
-    .player-fullscreen-tl,
-    .player-fullscreen-tr,
-    .player-fullscreen-bl,
-    .player-fullscreen-br{
-        width: 4px;
-        height: 4px;
-    }
 }
