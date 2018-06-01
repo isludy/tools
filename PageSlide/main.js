@@ -1,6 +1,5 @@
 import utils from '../utils/utils';
 
-
 function PageSlide(options){
     let o = {
         view: '.page-view',

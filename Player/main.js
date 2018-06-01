@@ -1,6 +1,6 @@
 import utils from '../utils/utils';
 
-function Player(type){
+function Player(){
     let player = document.createElement('div'),
         video = document.createElement('video'),
         controls = document.createElement('div');
@@ -38,23 +38,22 @@ function Player(type){
         i = 0,
         els = {},
         timer;
+
     for(; i<len; i++){
         els[names[i].getAttribute('data-name')] = names[i];
         names[i].removeAttribute('data-name');
     }
 
-    if(type){
-        video.style.display = 'none';
-        utils.addClass(controls, 'player-controls-show');
-        player.style.height = '36px';
-        els.vthumb.parentNode.style.marginRight = els.fscreen.style.opacity = els.fscreen.style.width= 0;
-    }
+    els.vthumb.style.width = '50%';
+    video.volume = .5;
 
     utils.addEvent(video, 'durationchange', function(){
         els.dur.innerText = '/ ' + utils.timemat(this.duration);
     });
     utils.addEvent(video, 'timeupdate', function () {
-        els.buf.style.width = (video.buffered.end(video.buffered.length-1) / this.duration) * 100 + '%';
+        try{
+            els.buf.style.width = (video.buffered.end(video.buffered.length-1) / this.duration) * 100 + '%';
+        }catch (err){}
         els.cur.innerText = utils.timemat(this.currentTime);
         els.thumb.style.width = (this.currentTime / this.duration) * 100 + '%';
     });
@@ -89,12 +88,10 @@ function Player(type){
         }
     });
     utils.addEvent(video, 'mousemove', function(){
-        if(!type){
-            if(timer) clearTimeout(timer);
-            player.style.cursor = 'default';
-            utils.addClass(controls, 'player-controls-show');
-            timer = setTimeout(hideMouse, 2000);
-        }
+        if(timer) clearTimeout(timer);
+        player.style.cursor = 'default';
+        utils.addClass(controls, 'player-controls-show');
+        timer = setTimeout(hideMouse, 2000);
     });
 
     function hideMouse(){
@@ -105,13 +102,25 @@ function Player(type){
 
     player.appendChild(video);
     player.appendChild(controls);
+
+    function setOptions(o){
+        if(typeof o === 'object'){
+            for(let key in o){
+                video[key] = o[key];
+            }
+        }else if(typeof o === 'string' && arguments[1]){
+            video[o] = arguments[1];
+        }
+    }
+    setOptions(arguments[0], arguments[1]);
+
     return {
         el: player,
-        poster(src){
-            video.poster = src;
-        },
-        src(src){
-            video.src = src;
+        set: setOptions,
+        get(attr){
+            if(attr)
+                return video.getAttribute(attr);
+            return video;
         }
     };
 }

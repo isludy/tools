@@ -1,20 +1,10 @@
 module.exports = {
-    indexOf(arr, v){
-        if(arr.indexOf){
-            return arr.indexOf(v);
-        }else{
-            for(let i=0, len=arr.length; i<len; i++){
-                if(arr[i] === v) return i;
-            }
-            return -1;
-        }
-    },
     addClass(el, cls){
         if(el.classList){
             el.classList.add(cls);
         }else{
             let list = el.className.split(/\s+/);
-            if(this.indexOf(list, cls) === -1){
+            if(list.indexOf(cls) === -1){
                 list.push(cls);
             }
             el.className = list.join(' ');
@@ -26,7 +16,7 @@ module.exports = {
         }else{
             let list = el.className.split(/\s+/),
                 index;
-            if((index = this.indexOf(list, cls)) !== -1){
+            if((index = list.indexOf(cls)) !== -1){
                 list.splice(index, 1);
             }
             el.className = list.join(' ');
@@ -37,7 +27,7 @@ module.exports = {
             return el.classList.contains(cls);
         }else{
             let list = el.className.split(/\s+/);
-            return this.indexOf(list, cls) !== -1;
+            return list.indexOf(cls) !== -1;
         }
     },
     addEvent(el, evt, fn){

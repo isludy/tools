@@ -9,13 +9,20 @@
 <body>
 <h1>播放器</h1>
 <div id="box"></div>
-
+<button id="next">next</button>
 <script type="text/javascript" src="dist/Player.min.js"></script>
+
 <script>
-	var p = Player();
+	var p = Player({
+		src: 'http://fs.w.kugou.com/201806012357/c87096ddb9c28c44c49139ab530f9f32/G119/M01/03/18/F4cBAFoSPMuAIdvfAEKq9z2g2pM623.mp3',
+		// src: 'http://assets.wenweipo.com/video/mv/2018/05/26/20180526v2.mp4',
+		// poster: 'http://image.wenweipo.com/2018/05/26/20180526ls0016.png'
+	});
     document.getElementById('box').appendChild(p.el);
-	p.src('http://assets.wenweipo.com/video/mv/2018/05/26/20180526v0.mp4');
-	p.poster('http://image.wenweipo.com/2018/05/26/20180526ls0016.png');
+	var next = document.getElementById('next');
+	next.onclick = function(){
+	    p.set('src','http://assets.wenweipo.com/video/mv/2018/05/25/20180525v0.mp4');
+	}
 </script>
 </body>
 </html>
