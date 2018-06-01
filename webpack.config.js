@@ -6,7 +6,7 @@ const config = {
     entry: {},
     output: {
         filename: '[name].min.js',
-        path: path.join(__dirname, 'dist')
+        path: __dirname
     },
     module: {
         rules: [{
@@ -29,39 +29,18 @@ function factory(name){
                 fnMap.set(name, utils[name]);
             }
         });
+        let writePath = path.join(__dirname, name, name+'.js');
         fs.writeFileSync(
-            path.join(__dirname, name, name+'.js'),
+            writePath,
             'const utils = {\n\t'+Array.from(fnMap.values()).join(',\n\t')+'\n};\n'+data.toString().replace(/(import\s+utils\s+from\s+\S+\s+)|((let|const)\s+utils\s*=\s*require\([^)]*?\)\s*[;]*\s+)/g,'')
         );
+        config.entry['/'+name+'/dist/'+name] = writePath;
     }catch (err){
         throw err.message;
     }
 }
 factory('PageSlide');
-/*
-const utils = require('./utils/utils');
-const PageSlide = require('./PageSlide/src/PageSlide');
-const Player = require('./Player/src/Player');
-
-
-
-function factory(obj, cfg){
-    let code = [],
-        name = obj.name,
-        outils = obj.utils;
-    for(let k in outils){
-        if(utils.hasOwnProperty(k)){
-            code.push(utils[k].toString());
-        }
-    }
-    fs.writeFileSync('./'+name+'/factory/utils.js', 'export default {\n\t'+code.join(',\n\t')+'\n}');
-    fs.writeFileSync('./'+name+'/factory/'+name+'.js', 'import utils from \'./utils\';\nwindow.'+name+'='+obj.fn.toString());
-    cfg.entry[name] = __dirname+'/'+name+'/factory/'+name+'.js';
-    cfg.output.path = __dirname + '/dist';
-}
-
-factory(PageSlide, config);
-factory(Player, config);
+factory('Player');
 
 module.exports = config;
-*/
+
