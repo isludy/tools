@@ -1,5 +1,4 @@
 import utils from '../utils/utils';
-
 function Player(){
     let player = document.createElement('div'),
         video = document.createElement('video'),
@@ -21,6 +20,16 @@ function Player(){
                     <span data-name="dur" class="player-duration">/ 00:00</span>
                 </div>
                 <div class="player-toolbar-right">
+                    <span data-name="vswitch" class="player-volume-switch">
+                        <i class="player-volume-switch-rect"></i>
+                        <i class="player-volume-switch-tri"></i>
+                        <i class="player-volume-switch-stat">
+                            <i class="player-volume-switch-dot1"></i>
+                            <i class="player-volume-switch-dot2"></i>
+                            <i class="player-volume-switch-dot3"></i>
+                            <i class="player-volume-switch-mute">&times;</i>
+                        </i>
+                    </span>
                     <span class="player-volume-slider">
                         <i data-name="vthumb" class="player-volume-slider-thumb"></i>
                     </span>
@@ -87,11 +96,23 @@ function Player(){
             utils.addClass(els.fscreen, 'player-fullscreen-on');
         }
     });
-    utils.addEvent(video, 'mousemove', function(){
+    utils.addEvent(els.vswitch, 'click', function () {
+        if(video.muted = !video.muted){
+            utils.addClass(player, 'player-muted');
+        }else{
+            utils.removeClass(player, 'player-muted');
+        }
+    });
+    utils.addEvent(player, 'mousemove', function(e){
         if(timer) clearTimeout(timer);
-        player.style.cursor = 'default';
-        utils.addClass(controls, 'player-controls-show');
-        timer = setTimeout(hideMouse, 2000);
+        if(e.target === video){
+            player.style.cursor = 'default';
+            utils.addClass(controls, 'player-controls-show');
+            timer = setTimeout(hideMouse, 2000);
+        }
+    });
+    utils.addEvent(player, 'mouseleave', function () {
+        hideMouse();
     });
 
     function hideMouse(){
@@ -124,8 +145,5 @@ function Player(){
         }
     };
 }
-if(window){
-    window.Player = Player;
-}else{
-    module.exports = Player;
-}
+
+export default Player;

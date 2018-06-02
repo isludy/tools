@@ -5,8 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node tools.js --mode development",
-    "build": "node tools.js --mode production"
+    "dev-e": "node tools.pretreat.js development every",
+    "dev-c": "node tools.pretreat.js development current",
+    "dev-m": "node tools.pretreat.js development merge",
+    "build-e": "node tools.pretreat.js production every",
+    "build-c": "node tools.pretreat.js production current",
+    "build-m": "node tools.pretreat.js production merge"
   },
   "repository": {
     "type": "git",

@@ -99,11 +99,9 @@ function PageSlide(options){
     }
     if(view) main();
 }
-if(window){
-    window.PageSlide = PageSlide;
-}else{
-    module.exports = PageSlide;
-}
+
+export default PageSlide;
+
 
 
 
