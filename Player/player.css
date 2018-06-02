@@ -32,6 +32,9 @@
 .player-lrc-line{
     opacity: 0;
 }
+.player-lrc-line-active{
+    color: #ff862a;
+}
 .player-controls{
     background-color: #333;
     position: absolute;

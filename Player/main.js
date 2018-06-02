@@ -1,21 +1,34 @@
 import utils from '../utils/utils';
 
-export default (arg1, arg2)=>{
-    let player = document.createElement('div'),
-        video = document.createElement('video'),
-        controls = document.createElement('div'),
-        lrcBox = document.createElement('div'),
-        xhr = new XMLHttpRequest(),
-        lrcKeys = [],
-        lrcLen = 0,
-        lrcData;
+class Player{
+    constructor(id, opt=''){
+        if(typeof id === 'object'){
+            opt = id;
+            id = opt.selector;
+        }
+        if(typeof id === 'string'){
+            if(typeof opt === 'object'){
+                this.options = opt;
+            }
+            this.init(document.querySelector(id));
+        }
 
-    player.className = 'player';
-    video.className = 'player-video';
-    controls.className = 'player-controls';
-    lrcBox.className = 'player-lrc';
-
-    controls.innerHTML = `
+    }
+    init(box){
+        this.currentTime = 0;
+        this.duration = 0;
+        this.volume = .5;
+        this.createDom();
+        this.defineProps();
+        box.appendChild(this[0]);
+    }
+    createDom(){
+        this[0] = document.createElement('div');
+        this[0].className = 'player';
+        this[0].innerHTML = `
+        <video data-name="video" class="player-video"></video>
+        <div data-name="lrc" class="player-lrc"></div>
+        <div data-name="ctrls" class="player-controls">
             <div class="player-slider">
                 <div data-name="buf" class="player-slider-buf"></div>
                 <div data-name="thumb" class="player-slider-thumb"></div>
@@ -23,8 +36,8 @@ export default (arg1, arg2)=>{
             <div class="player-toolbar">
                 <div class="player-toolbar-left">
                     <span data-name="btn" class="player-btn"></span>
-                    <span data-name="cur" class="player-current-time">00:00</span>
-                    <span data-name="dur" class="player-duration">/ 00:00</span>
+                    <span data-name="cur" class="player-current-time">--:--</span>
+                    <span data-name="dur" class="player-duration">/ --:--</span>
                 </div>
                 <div class="player-toolbar-right">
                     <span data-name="vswitch" class="player-volume-switch">
@@ -47,162 +60,117 @@ export default (arg1, arg2)=>{
                         <i class="player-fullscreen-br"></i>
                     </span>
                 </div>
-            </div>`;
+            </div>
+        </div>`;
 
-    let names = controls.querySelectorAll('[data-name]'),
-        len = names.length,
-        i = 0,
-        els = {},
-        timer;
+        this.els = {};
 
-    for(; i<len; i++){
-        els[names[i].getAttribute('data-name')] = names[i];
-        names[i].removeAttribute('data-name');
-    }
-
-    els.vthumb.style.width = '50%';
-    video.volume = .5;
-
-    utils.addEvent(video, 'durationchange', function(){
-        els.dur.innerText = '/ ' + utils.timemat(this.duration);
-        showLrc(0);
-    });
-    utils.addEvent(video, 'timeupdate', function () {
-        try{
-            els.buf.style.width = (video.buffered.end(video.buffered.length-1) / this.duration) * 100 + '%';
-        }catch (err){}
-
-        showLrc(this.currentTime);
-
-        els.cur.innerText = utils.timemat(this.currentTime);
-        els.thumb.style.width = (this.currentTime / this.duration) * 100 + '%';
-    });
-    utils.addEvent(els.thumb.parentNode, 'click', function(e){
-        if(video.duration > 0){
-            let percent = e.offsetX / this.offsetWidth;
-            els.thumb.style.width = percent * 100 + '%';
-            video.currentTime = Math.round(percent * video.duration);
-            els.cur.innerText = utils.timemat(video.currentTime);
-        }
-    });
-    utils.addEvent(els.btn, 'click', function(){
-        if(video.paused){
-            video.play();
-            utils.addClass(els.btn, 'player-btn-playing');
-        }else{
-            video.pause();
-            utils.removeClass(els.btn, 'player-btn-playing');
-        }
-    });
-    utils.addEvent(els.vthumb.parentNode, 'click',function(e){
-        video.volume = e.offsetX / this.offsetWidth;
-        els.vthumb.style.width = Math.round(video.volume * 100) + '%';
-    });
-    utils.addEvent(els.fscreen, 'click', function(){
-        if(utils.isFullscreen()){
-            utils.exitFullscreen();
-            utils.removeClass(els.fscreen, 'player-fullscreen-on');
-        }else{
-            utils.fullscreen(player);
-            utils.addClass(els.fscreen, 'player-fullscreen-on');
-        }
-    });
-    utils.addEvent(els.vswitch, 'click', function () {
-        if(video.muted = !video.muted){
-            utils.addClass(player, 'player-muted');
-        }else{
-            utils.removeClass(player, 'player-muted');
-        }
-    });
-    utils.addEvent(player, 'mousemove', function(e){
-        if(timer) clearTimeout(timer);
-        if(e.target === video || lrcData){
-            player.style.cursor = 'default';
-            utils.addClass(controls, 'player-controls-show');
-            timer = setTimeout(hideMouse, 2000);
-        }
-    });
-    utils.addEvent(player, 'mouseleave', function () {
-        hideMouse();
-    });
-
-    function hideMouse(){
-        clearTimeout(timer);
-        player.style.cursor = 'none';
-        utils.removeClass(controls, 'player-controls-show');
-    }
-
-    function setOptions(o){
-        utils.removeClass(lrcBox, 'player-lrc-show');
-        video.lrc = '';
-        lrcBox.innerHTML = '';
-        lrcData = null;
-        lrcKeys = [];
-        lrcLen = 0;
-        if(typeof o === 'object'){
-            for(let key in o){
-                video[key] = o[key];
-            }
-        }else if(typeof o === 'string' && arguments[1]){
-            video[o] = arguments[1];
-        }
-        if(video.lrc){
-            loadLyc(video.lrc);
-        }
-        if(o.container && o.container.nodeType === 1){
-            o.container.innerHTML = '';
-            o.container.appendChild(player);
+        for(let els = this[0].querySelectorAll('[data-name]'),
+                len=els.length,
+                i=0;
+            i<len; i++){
+            this.els[els[i].getAttribute('data-name')] = els[i];
+            els[i].removeAttribute('data-name');
         }
     }
-
-    function loadLyc(lrcUrl){
-        xhr.open('get', lrcUrl, true);
-        xhr.onreadystatechange = function () {
-            if(xhr.readyState === 4 && xhr.status === 200){
-                lrcData = utils.readLyric(xhr.responseText);
-                let frag = document.createDocumentFragment(),
-                    lrcLine = document.createElement('p');
-                lrcLine.className = 'player-lrc-line';
-                for(let k in lrcData){
-                    lrcLine = lrcLine.cloneNode(true);
-                    lrcLine.innerText = lrcData[k];
-                    lrcData[k] = lrcLine;
-                    frag.appendChild(lrcLine);
+    defineProps(){
+        let _this = this,
+            curtime = this.currentTime,
+            volume = this.volume;
+        Object.defineProperty(this, 'currentTime', {
+            set(val){
+                if(val !== curtime){
+                    curtime = val;
+                    _this.els.cur.innerText = utils.timemat(curtime);
+                    _this.els.thumb.style.width = (curtime / _this.duration) * 100 + '%';
                 }
-                lrcBox.appendChild(frag);
-                utils.addClass(lrcBox, 'player-lrc-show');
-                lrcKeys = Object.keys(lrcData);
-                lrcLen = lrcKeys.length;
+            },
+            get(){
+                return curtime;
             }
-        };
-        xhr.send();
+        });
+        Object.defineProperty(this, 'volume', {
+            set(val){
+                if(val !== volume){
+                    volume = val;
+                    _this.els.video.volume = volume;
+                    _this.els.vthumb.style.width = volume * 100 + '%';
+                }
+            },
+            get(){
+                return volume
+            }
+        });
     }
+    bindEvent(){
+        let _this = this,
+            video = _this.els.video,
+            btn = _this.els.btn,
+            timer;
+        utils.addEvent(video, 'durationchange', function(){
+            _this.duration = this.duration;
+            _this.els.dur.innerText = '/ ' + utils.timemat(this.duration);
+            _this.showLrc(0);
+        });
+        utils.addEvent(btn, 'click', function(){
+            if(video.paused){
+                video.play();
+                utils.addClass(btn, 'player-btn-playing');
+            }else{
+                video.pause();
+                utils.removeClass(btn, 'player-btn-playing');
+            }
+        });
+        utils.addEvent(video, 'timeupdate', function () {
+            try{
+                _this.els.buf.style.width = (video.buffered.end(video.buffered.length-1) / this.duration) * 100 + '%';
+            }catch (err){}
 
-    function showLrc(curtime){
-        for(let i=0, delta; i<lrcLen; i++){
-            delta = (1 - Math.abs(utils.time(lrcKeys[i]) - curtime)/10);
-            if(delta > .96){
-                lrcBox.style.top = player.offsetHeight/2-lrcData[lrcKeys[i]].offsetTop + 'px';
+            _this.currentTime = this.currentTime;
+            _this.showLrc(this.currentTime);
+        });
+
+        utils.addEvent(_this.els.thumb.parentNode, 'click', function(e){
+            if(video.duration > 0){
+                let percent = e.offsetX / this.offsetWidth;
+                _this.currentTime = percent * video.duration;
+                video.currentTime = Math.round(percent * video.duration);
             }
-            if(delta >= -10){
-                lrcData[lrcKeys[i]].style.opacity = delta;
+        });
+        utils.addEvent(_this.els.vthumb.parentNode, 'click',function(e){
+            _this.volume = e.offsetX / this.offsetWidth;
+        });
+        utils.addEvent(_this.els.fscreen, 'click', function(){
+            if(utils.isFullscreen()){
+                utils.exitFullscreen();
+                utils.removeClass(_this.els.fscreen, 'player-fullscreen-on');
+            }else{
+                utils.fullscreen(_this[0]);
+                utils.addClass(_this.els.fscreen, 'player-fullscreen-on');
             }
-        }
+        });
+        utils.addEvent(_this.els.vswitch, 'click', function () {
+            if(video.muted = !video.muted){
+                utils.addClass(_this[0], 'player-muted');
+            }else{
+                utils.removeClass(_this[0], 'player-muted');
+            }
+        });
+        //TODO================
+        // utils.addEvent(_this[0], 'mousemove', function(e){
+        //     if(timer) clearTimeout(timer);
+        //     if(e.target === video || lrcData){
+        //         player.style.cursor = 'default';
+        //         utils.addClass(controls, 'player-controls-show');
+        //         timer = setTimeout(hideMouse, 2000);
+        //     }
+        // });
+        // utils.addEvent(player, 'mouseleave', function () {
+        //     hideMouse();
+        // });
     }
+    showLrc(curtime){
 
-    player.appendChild(video);
-    player.appendChild(lrcBox);
-    player.appendChild(controls);
-
-    setOptions(arg1, arg2);
-
-    return {
-        el: player,
-        set: setOptions,
-        get(attr){
-            if(attr)
-                return video.getAttribute(attr);
-            return video;
-        }
-    };
+    }
 }
+export default Player;
