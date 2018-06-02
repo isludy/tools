@@ -48,16 +48,12 @@ function writeEntryFile(folder, merge=false){
             data = fs.readFileSync(path.join(__dirname, folder, item.entry+'.js')),
             sourceCode = data.toString().replace(/(import\s+utils\s+from\s+\S+\s+)|((let|const|var)\s+utils\s*=\s*require\([^)]*?\)\s*[;]*\s+)/g,'');
 
-        sourceCode = sourceCode.replace(/(?:module\.)*exports\s*=\s*([^;]+)[\s;]+/g, function($0, $1){
-            if($1)
-                return defaultMount+'.' + name + '=' + $1;
-            return $0;
+        sourceCode = sourceCode.replace(/(?:module\.)*exports\s*=\s*/g, function($0){
+            return defaultMount+'.' + name + '=';
         });
 
-        sourceCode = sourceCode.replace(/export\s+default\s+([^;]+)[\s;]+/g, function($0, $1){
-            if($1)
-                return defaultMount+'.' + name + '=' + $1;
-            return $0;
+        sourceCode = sourceCode.replace(/export\s+default\s+/g, function($0){
+            return defaultMount+'.' + name + '=';
         });
 
         findUtils(data);

@@ -2,20 +2,35 @@
     display: block;
     position: relative;
     cursor: default;
-    background-color: #000;
+    background-color: #111;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
     width: 100%;
     overflow: hidden;
-    -webkit-box-shadow: 0 0 5px #000;
-    -moz-box-shadow: 0 0 5px #000;
-    box-shadow: 0 0 5px #000;
+    border: 1px solid #eee;
 }
 .player-video{
     width: 100%;
     height: 100%;
     display: block;
+}
+.player-lrc{
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    color: #fff;
+    font-size: 14px;
+}
+.player-lrc-show{
+    display: block;
+}
+.player-lrc-line{
+    opacity: 0;
 }
 .player-controls{
     background-color: #333;
@@ -142,14 +157,18 @@
     font-size: 0;
     cursor: pointer;
     margin-right: 8px;
+    color: #999;
+}
+.player-volume-switch:hover{
+    color: #fff;
 }
 .player-volume-switch-rect{
-    background-color: #999;
+    border-top: 6px solid;
     width: 3px;
-    height: 6px;
+    height: 0;
 }
 .player-volume-switch-tri{
-    border-right: 12px solid #999;
+    border-right: 12px solid;
     border-top: 5px solid transparent;
     border-bottom: 5px solid transparent;
     width: 0;
@@ -162,9 +181,9 @@
 .player-volume-switch-dot1,
 .player-volume-switch-dot2,
 .player-volume-switch-dot3{
-    background-color: #999;
+    border-top: 2px solid;
     width: 3px;
-    height: 2px;
+    height: 0;
     display: block;
 }
 .player-volume-switch-dot2{
@@ -173,7 +192,6 @@
 .player-volume-switch-mute{
     font-size: 20px;
     line-height: 16px;
-    color: #999;
     font-family: Arial, sans-serif !important;
     display: none;
 }

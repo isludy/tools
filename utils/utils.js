@@ -72,6 +72,14 @@ module.exports = {
             el.style.top = bool ? v+'px' : '-'+v+'00%';
         }
     },
+    time(timemat){
+        let arr = timemat.split(/[:：]+/);
+        if(arr.length === 3){
+            return parseInt(arr[0])*3600 + parseInt(arr[1])*60 + parseFloat(arr[2]);
+        }else{
+            return parseInt(arr[0])*60 + parseFloat(arr[1]);
+        }
+    },
     timemat(time, type=0){
         let h = !type ? 0 : Math.floor(time/3600),
             i = Math.floor((time - h*3600) / 60),
@@ -108,5 +116,14 @@ module.exports = {
     },
     isFullscreen() {
         return document.fullscreen || document.webkitIsFullScreen || document.mozFullScreen || false;
+    },
+    readLyric(lrc){
+        let lrcCache = {};
+        lrc.split(/\n+/).join('#').replace(/\[([\d:.\[\]]+)\]([\s\S]*?)#/ig, function($0, $1, $2){
+            for(let keys = $1.split(/\]\s*\[/), len = keys.length, i = 0; i<len; i++){
+                lrcCache[keys[i]] = $2;
+            }
+        });
+        return lrcCache;
     }
 };

@@ -1,12 +1,19 @@
 import utils from '../utils/utils';
-function Player(){
+
+export default (arg1, arg2)=>{
     let player = document.createElement('div'),
         video = document.createElement('video'),
-        controls = document.createElement('div');
+        controls = document.createElement('div'),
+        lrcBox = document.createElement('div'),
+        xhr = new XMLHttpRequest(),
+        lrcKeys = [],
+        lrcLen = 0,
+        lrcData;
 
     player.className = 'player';
     video.className = 'player-video';
     controls.className = 'player-controls';
+    lrcBox.className = 'player-lrc';
 
     controls.innerHTML = `
             <div class="player-slider">
@@ -58,11 +65,15 @@ function Player(){
 
     utils.addEvent(video, 'durationchange', function(){
         els.dur.innerText = '/ ' + utils.timemat(this.duration);
+        showLrc(0);
     });
     utils.addEvent(video, 'timeupdate', function () {
         try{
             els.buf.style.width = (video.buffered.end(video.buffered.length-1) / this.duration) * 100 + '%';
         }catch (err){}
+
+        showLrc(this.currentTime);
+
         els.cur.innerText = utils.timemat(this.currentTime);
         els.thumb.style.width = (this.currentTime / this.duration) * 100 + '%';
     });
@@ -105,7 +116,7 @@ function Player(){
     });
     utils.addEvent(player, 'mousemove', function(e){
         if(timer) clearTimeout(timer);
-        if(e.target === video){
+        if(e.target === video || lrcData){
             player.style.cursor = 'default';
             utils.addClass(controls, 'player-controls-show');
             timer = setTimeout(hideMouse, 2000);
@@ -121,10 +132,13 @@ function Player(){
         utils.removeClass(controls, 'player-controls-show');
     }
 
-    player.appendChild(video);
-    player.appendChild(controls);
-
     function setOptions(o){
+        utils.removeClass(lrcBox, 'player-lrc-show');
+        video.lrc = '';
+        lrcBox.innerHTML = '';
+        lrcData = null;
+        lrcKeys = [];
+        lrcLen = 0;
         if(typeof o === 'object'){
             for(let key in o){
                 video[key] = o[key];
@@ -132,8 +146,55 @@ function Player(){
         }else if(typeof o === 'string' && arguments[1]){
             video[o] = arguments[1];
         }
+        if(video.lrc){
+            loadLyc(video.lrc);
+        }
+        if(o.container && o.container.nodeType === 1){
+            o.container.innerHTML = '';
+            o.container.appendChild(player);
+        }
     }
-    setOptions(arguments[0], arguments[1]);
+
+    function loadLyc(lrcUrl){
+        xhr.open('get', lrcUrl, true);
+        xhr.onreadystatechange = function () {
+            if(xhr.readyState === 4 && xhr.status === 200){
+                lrcData = utils.readLyric(xhr.responseText);
+                let frag = document.createDocumentFragment(),
+                    lrcLine = document.createElement('p');
+                lrcLine.className = 'player-lrc-line';
+                for(let k in lrcData){
+                    lrcLine = lrcLine.cloneNode(true);
+                    lrcLine.innerText = lrcData[k];
+                    lrcData[k] = lrcLine;
+                    frag.appendChild(lrcLine);
+                }
+                lrcBox.appendChild(frag);
+                utils.addClass(lrcBox, 'player-lrc-show');
+                lrcKeys = Object.keys(lrcData);
+                lrcLen = lrcKeys.length;
+            }
+        };
+        xhr.send();
+    }
+
+    function showLrc(curtime){
+        for(let i=0, delta; i<lrcLen; i++){
+            delta = (1 - Math.abs(utils.time(lrcKeys[i]) - curtime)/10);
+            if(delta > .96){
+                lrcBox.style.top = player.offsetHeight/2-lrcData[lrcKeys[i]].offsetTop + 'px';
+            }
+            if(delta >= -10){
+                lrcData[lrcKeys[i]].style.opacity = delta;
+            }
+        }
+    }
+
+    player.appendChild(video);
+    player.appendChild(lrcBox);
+    player.appendChild(controls);
+
+    setOptions(arg1, arg2);
 
     return {
         el: player,
@@ -145,5 +206,3 @@ function Player(){
         }
     };
 }
-
-export default Player;
