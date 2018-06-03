@@ -9,7 +9,7 @@
 <body>
 <h1 style="text-align: center;">播放器</h1>
 <div id="box" style="max-width: 1280px; margin: 0 auto;"></div>
-<p><button id="btn">更新</button></p>
+<p id="pppp"><button id="btn">更新</button></p>
 <script type="text/javascript" src="dist/Player.min.js"></script>
 <!--<script src="main.js"></script>-->
 <script>
@@ -25,7 +25,7 @@
     };
 	var player = new Player('#box', option);
 	btn.onclick = function () {
-		option.src = 'http://localhost/music/lanlianhua.mp3';
+		option.src = 'http://localhost/music/lanlianhua1.mp3';
 		option.lrc = 'http://localhost/music/lanlianhua.lrc';
         // option.src = 'http://localhost/music/yuanzougaofei.mp3';
         // option.lrc = 'http://localhost/music/yuanzougaofei.lrc';
@@ -36,7 +36,6 @@
 	// for(let k in player){
 	//     console.log(k);
 	// }
-	// console.log(Player)
 </script>
 </body>
 </html>

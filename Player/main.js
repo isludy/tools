@@ -53,8 +53,6 @@ class Player{
 
         this.__bindEvent__();
         box.appendChild(this[0]);
-
-        this.setLrcToTop();
     }
     __dom__(){
         this.__check__('__createDom__');
@@ -63,7 +61,6 @@ class Player{
         this[0].innerHTML = `
         <video data-name="video"${this.options.src ? ' src="'+this.options.src+'"':''} poster="${this.options.poster||''}" class="player-video"></video>
         <div data-name="lrc" class="player-lrc"></div>
-        
         <div data-name="ctrls" class="player-controls">
             <div class="player-slider">
                 <div data-name="buf" class="player-slider-buf"></div>
@@ -99,7 +96,11 @@ class Player{
             </div>
         </div>`;
 
-        this.els = {};
+        this.els = {
+            loading: document.createElement('div')
+        };
+
+        this.els.loading.className = 'loading';
 
         for(let els = this[0].querySelectorAll('[data-name]'),
                 len=els.length,
@@ -157,14 +158,20 @@ class Player{
             });
         }
     }
+
     __bindEvent__(){
         this.__check__('bindEvent');
         let _this = this,
             video = _this.els.video,
-            btn = _this.els.btn;
+            btn = _this.els.btn,
+            loading = _this.els.loading;
 
         utils.addEvent(window, 'resize', function () {
             _this.setLrcToTop();
+        });
+
+        utils.addEvent(video, 'loadstart', function () {
+            _this[0].appendChild(loading);
         });
 
         utils.addEvent(video, 'durationchange', function(){
@@ -172,11 +179,14 @@ class Player{
             _this.currentTime = 0;
             _this.els.dur.innerText = '/ ' + utils.timemat(this.duration);
             _this.loadLrc(_this.options.lrc);
-            _this.setLrcToTop();
         });
 
         utils.addEvent(video, 'loadeddata', function () {
-            _this.setLrcToTop();
+            _this[0].removeChild(loading);
+        });
+
+        utils.addEvent(video, 'error', function () {
+            console.log('loadFail');
         });
 
         utils.addEvent(btn, 'click', function(){
@@ -269,7 +279,12 @@ class Player{
                     return Number(a) - Number(b);
                 });
                 _this.lrcLen = _this.lrcKeys.length;
+                _this.setLrcToTop();
+                _this.showLrc(0);
             }
+        };
+        _this.xhr.onerror = function(){
+            console.log('fail to load lrc')
         };
         _this.xhr.send();
     }
@@ -321,11 +336,10 @@ class Player{
     setLrcToTop(){
         switch (this.options.lrcMode){
             case 1:
-                let lrcLines = this.els.lrc.children[0],
+                let lrcLine = this.els.lrc.children[0],
                     lrcLineHeight = 16;
-                if(lrcLines){
-                    lrcLineHeight = lrcLines.offsetHeight + (parseFloat(utils.getCalced(lrcLines, 'marginTop')) || 0);
-                }
+                if(lrcLine)
+                    lrcLineHeight = lrcLine.offsetHeight + (parseFloat(utils.getCalced(lrcLine, 'marginTop')) || 0);
                 this.lrcToTop = this[0].offsetHeight - lrcLineHeight;
                 break;
             default:

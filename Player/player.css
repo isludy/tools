@@ -302,3 +302,50 @@
     border-left-style: solid;
     border-top-style: solid;
 }
+
+.loading{
+    position: absolute;
+    width: 120px;
+    height: 80px;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    background: rgba(0, 0, 0, .5);
+    border-radius: 4px;
+}
+.loading::before,
+.loading::after{
+    content: '';
+    position: absolute;
+    margin: auto;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    animation: rotating 1s infinite;
+}
+.loading::before{
+    width: 36px;
+    height: 36px;
+    border-radius: 100%;
+    border: 4px solid #fff;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+}
+.loading::after{
+    width: 36px;
+    height: 8px;
+    border-left: 4px solid #fff;
+    border-right: 4px solid #fff;
+}
+
+@keyframes rotating {
+    from{
+        transform: rotateZ(0);
+    }
+    to{
+        transform: rotateZ(360deg);
+    }
+}

@@ -127,6 +127,10 @@ module.exports = {
         return lrcCache;
     },
     getCalced(node, attr){
-        return window.getComputedStyle(node, null)[attr];
+        if(node && node.nodeType === 1 && window.getComputedStyle){
+            return window.getComputedStyle(node)[attr];
+        }else{
+            return 0;
+        }
     }
 };
