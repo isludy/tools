@@ -25,6 +25,10 @@ class Player{
                 writable: true,
                 value: 0
             });
+            this.__define__('lrcLineActive', {
+                writable: true,
+                value: 0
+            });
             this.__define__('timer', {
                 writable: true,
                 value: 0
@@ -50,7 +54,7 @@ class Player{
         this.__bindEvent__();
         box.appendChild(this[0]);
 
-        this.setLrcTop();
+        this.setLrcToTop();
     }
     __dom__(){
         this.__check__('__createDom__');
@@ -113,7 +117,8 @@ class Player{
         this.__check__('__ob__');
         let _this = this,
             curtime,
-            volume;
+            volume,
+            lrcMode;
         _this.__define__('currentTime', {
             set(val){
                 if(val !== curtime){
@@ -134,6 +139,23 @@ class Player{
             },
             get(){return volume}
         });
+        if(lrcMode = this.options.lrcMode){
+            Object.defineProperty(this.options, 'lrcMode', {
+                set(val){
+                    if(val !== lrcMode){
+                        lrcMode = val;
+                        _this.lrcKeys.forEach(key=>{
+                            _this.lrcData[key].removeAttribute('style');
+                        });
+                        _this.setLrcToTop();
+                        _this.showLrc(_this.currentTime);
+                    }
+                },
+                get(){
+                    return lrcMode;
+                }
+            });
+        }
     }
     __bindEvent__(){
         this.__check__('bindEvent');
@@ -142,7 +164,7 @@ class Player{
             btn = _this.els.btn;
 
         utils.addEvent(window, 'resize', function () {
-            _this.setLrcTop();
+            _this.setLrcToTop();
         });
 
         utils.addEvent(video, 'durationchange', function(){
@@ -150,10 +172,11 @@ class Player{
             _this.currentTime = 0;
             _this.els.dur.innerText = '/ ' + utils.timemat(this.duration);
             _this.loadLrc(_this.options.lrc);
+            _this.setLrcToTop();
         });
 
         utils.addEvent(video, 'loadeddata', function () {
-            _this.setLrcTop();
+            _this.setLrcToTop();
         });
 
         utils.addEvent(btn, 'click', function(){
@@ -246,7 +269,6 @@ class Player{
                     return Number(a) - Number(b);
                 });
                 _this.lrcLen = _this.lrcKeys.length;
-                _this.showLrc(0);
             }
         };
         _this.xhr.send();
@@ -255,20 +277,29 @@ class Player{
         for(let i=0, delta; i<this.lrcLen; i++){
             delta = (1 - Math.abs(this.lrcKeys[i] - curtime)/10);
             if(delta > .96){
-                this.els.lrc.style.top = this.lrcTop-this.lrcData[this.lrcKeys[i]].offsetTop + 'px';
-                for(let j=0, idx=0, opc=0; j<9; j++){
-                    idx = i+j-4;
-                    if(idx <= i){
-                        opc += 25;
-                    }else{
-                        opc -= 25;
-                    }
-                    if(this.lrcKeys[idx]){
-                        this.lrcData[this.lrcKeys[idx]].style.opacity = (opc-25)/100;
-                        utils.removeClass(this.lrcData[this.lrcKeys[idx]], 'player-lrc-line-active');
-                        utils.addClass(this.lrcData[this.lrcKeys[i]], 'player-lrc-line-active');
-                    }
+                this.els.lrc.style.top = this.lrcToTop-this.lrcData[this.lrcKeys[i]].offsetTop + 'px';
+                if(this.lrcLineActive){
+                    this.lrcLineActive.style.opacity = 0;
+                    utils.removeClass(this.lrcLineActive, 'player-lrc-line-active');
                 }
+                if(this.options.lrcMode === 1){
+                    this.lrcLineActive =  this.lrcData[this.lrcKeys[i]];
+                    this.lrcLineActive.style.opacity = 1;
+                }else{
+                    for(let j=0, idx=0, opc=0; j<9; j++){
+                        idx = i+j-4;
+                        if(idx <= i){
+                            opc += 25;
+                        }else{
+                            opc -= 25;
+                        }
+                        if(this.lrcKeys[idx]){
+                            this.lrcData[this.lrcKeys[idx]].style.opacity = (opc-25)/100;
+                        }
+                    }
+                    this.lrcLineActive = this.lrcData[this.lrcKeys[i]];
+                }
+                utils.addClass(this.lrcData[this.lrcKeys[i]], 'player-lrc-line-active');
             }
         }
     }
@@ -287,18 +318,18 @@ class Player{
             this.loadLrc(o.lrc);
         this.els.video.poster = o.poster || '';
     }
-    setLrcTop(){
-        let lrcLineHeight = this.options.lrcSize,
-            lrcLines = this.els.lrc.children;
-        if(lrcLines[0]){
-            lrcLineHeight = lrcLines[0].offsetHeight;
-        }
+    setLrcToTop(){
         switch (this.options.lrcMode){
             case 1:
-                this.lrcTop = this[0].offsetHeight - lrcLineHeight;
+                let lrcLines = this.els.lrc.children[0],
+                    lrcLineHeight = 16;
+                if(lrcLines){
+                    lrcLineHeight = lrcLines.offsetHeight + (parseFloat(utils.getCalced(lrcLines, 'marginTop')) || 0);
+                }
+                this.lrcToTop = this[0].offsetHeight - lrcLineHeight;
                 break;
             default:
-                this.lrcTop = this[0].offsetHeight/2;
+                this.lrcToTop = this[0].offsetHeight/2;
         }
     }
     __check__(name){

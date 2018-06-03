@@ -125,5 +125,8 @@ module.exports = {
             }
         });
         return lrcCache;
+    },
+    getCalced(node, attr){
+        return window.getComputedStyle(node, null)[attr];
     }
 };

@@ -24,14 +24,11 @@
     height: 100%;
     text-align: center;
     color: #fff;
-    font-size: 14px;
+    font-size: 32px;
     z-index: 1;
 }
 .player-lrc-show{
     display: block;
-}
-.player-lrc-subtitle{
-    font-size: 28px;
 }
 .player-lrc-line{
     opacity: 0;

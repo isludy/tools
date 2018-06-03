@@ -15,18 +15,20 @@
 <script>
 	var option = {
         container: document.getElementById('box'),
-        // src: 'http://localhost/music/lanlianhua.mp3',
-        // lrc: 'http://localhost/music/lanlianhua.lrc',
+        src: 'http://localhost/music/lanlianhua.mp3',
+        lrc: 'http://localhost/music/lanlianhua.lrc',
         // src: 'http://localhost/music/yuanzougaofei.mp3',
         // lrc: 'http://localhost/music/yuanzougaofei.lrc',
         lrcMode: 1,
-        src: 'http://localhost/music/b.mp4',
-        poster: 'http://image.wenweipo.com/2018/05/26/20180526ls0016.png'
+        // src: 'http://localhost/music/b.mp4',
+        // poster: 'http://image.wenweipo.com/2018/05/26/20180526ls0016.png'
     };
 	var player = new Player('#box', option);
 	btn.onclick = function () {
-		option.src = 'http://localhost/music/yuanzougaofei.mp3';
-		option.lrc = 'http://localhost/music/yuanzougaofei.lrc';
+		option.src = 'http://localhost/music/lanlianhua.mp3';
+		option.lrc = 'http://localhost/music/lanlianhua.lrc';
+        // option.src = 'http://localhost/music/yuanzougaofei.mp3';
+        // option.lrc = 'http://localhost/music/yuanzougaofei.lrc';
 		option.poster = '';
 		player.update();
     }
