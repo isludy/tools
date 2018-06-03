@@ -50,7 +50,7 @@ class Player{
         this.__bindEvent__();
         box.appendChild(this[0]);
 
-        this.lrcTop = this[0].offsetHeight/2;
+        this.setLrcTop();
     }
     __dom__(){
         this.__check__('__createDom__');
@@ -142,7 +142,7 @@ class Player{
             btn = _this.els.btn;
 
         utils.addEvent(window, 'resize', function () {
-            _this.lrcTop = _this[0].offsetHeight/2;
+            _this.setLrcTop();
         });
 
         utils.addEvent(video, 'durationchange', function(){
@@ -153,7 +153,7 @@ class Player{
         });
 
         utils.addEvent(video, 'loadeddata', function () {
-            _this.lrcTop = _this[0].offsetHeight/2;
+            _this.setLrcTop();
         });
 
         utils.addEvent(btn, 'click', function(){
@@ -286,6 +286,16 @@ class Player{
         if(o.lrc)
             this.loadLrc(o.lrc);
         this.els.video.poster = o.poster || '';
+    }
+    setLrcTop(){
+        let lrcLineHeight = windo
+        switch (this.options.lrcMode){
+            case 1:
+                this.lrcTop = this[0].offsetHeight - (this.options.lrcSize >= 0 ? this.options.lrcSize : 28);
+                break;
+            default:
+                this.lrcTop = this[0].offsetHeight/2;
+        }
     }
     __check__(name){
         if(this.private === 0) throw TypeError((name||'__check__')+'是私有方法，不可调用');
