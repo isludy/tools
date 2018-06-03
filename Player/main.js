@@ -288,10 +288,14 @@ class Player{
         this.els.video.poster = o.poster || '';
     }
     setLrcTop(){
-        let lrcLineHeight = windo
+        let lrcLineHeight = this.options.lrcSize,
+            lrcLines = this.els.lrc.children;
+        if(lrcLines[0]){
+            lrcLineHeight = lrcLines[0].offsetHeight;
+        }
         switch (this.options.lrcMode){
             case 1:
-                this.lrcTop = this[0].offsetHeight - (this.options.lrcSize >= 0 ? this.options.lrcSize : 28);
+                this.lrcTop = this[0].offsetHeight - lrcLineHeight;
                 break;
             default:
                 this.lrcTop = this[0].offsetHeight/2;
