@@ -10,24 +10,56 @@ class Player{
             if(typeof opt === 'object'){
                 this.options = opt;
             }
-            this.init(document.querySelector(id));
+            this.__define__('xhr', {
+                value: new XMLHttpRequest()
+            });
+            this.__define__('lrcData',{
+                writable: true,
+                value: null
+            });
+            this.__define__('lrcKeys', {
+                writable: true,
+                value: null
+            });
+            this.__define__('lrcLen', {
+                writable: true,
+                value: 0
+            });
+            this.__define__('timer', {
+                writable: true,
+                value: 0
+            });
+
+            this.__init__(document.querySelector(id));
+
+            this.__define__('private', {
+                value: 0
+            });
         }
 
     }
-    init(box){
+    __init__(box){
+        this.__check__('init');
+        this.__dom__();
+        this.__ob__();
+
         this.currentTime = 0;
-        this.duration = 0;
         this.volume = .5;
-        this.createDom();
-        this.defineProps();
+        this.duration = 0;
+
+        this.__bindEvent__();
         box.appendChild(this[0]);
+
+        this.lrcTop = this[0].offsetHeight/2;
     }
-    createDom(){
+    __dom__(){
+        this.__check__('__createDom__');
         this[0] = document.createElement('div');
         this[0].className = 'player';
         this[0].innerHTML = `
-        <video data-name="video" class="player-video"></video>
+        <video data-name="video"${this.options.src ? ' src="'+this.options.src+'"':''} poster="${this.options.poster||''}" class="player-video"></video>
         <div data-name="lrc" class="player-lrc"></div>
+        
         <div data-name="ctrls" class="player-controls">
             <div class="player-slider">
                 <div data-name="buf" class="player-slider-buf"></div>
@@ -73,11 +105,16 @@ class Player{
             els[i].removeAttribute('data-name');
         }
     }
-    defineProps(){
+    __define__(name, obj){
+        this.__check__('__define__');
+        Object.defineProperty(this, name, obj);
+    }
+    __ob__(){
+        this.__check__('__ob__');
         let _this = this,
-            curtime = this.currentTime,
-            volume = this.volume;
-        Object.defineProperty(this, 'currentTime', {
+            curtime,
+            volume;
+        _this.__define__('currentTime', {
             set(val){
                 if(val !== curtime){
                     curtime = val;
@@ -85,11 +122,9 @@ class Player{
                     _this.els.thumb.style.width = (curtime / _this.duration) * 100 + '%';
                 }
             },
-            get(){
-                return curtime;
-            }
+            get(){return curtime;}
         });
-        Object.defineProperty(this, 'volume', {
+        _this.__define__('volume', {
             set(val){
                 if(val !== volume){
                     volume = val;
@@ -97,21 +132,30 @@ class Player{
                     _this.els.vthumb.style.width = volume * 100 + '%';
                 }
             },
-            get(){
-                return volume
-            }
+            get(){return volume}
         });
     }
-    bindEvent(){
+    __bindEvent__(){
+        this.__check__('bindEvent');
         let _this = this,
             video = _this.els.video,
-            btn = _this.els.btn,
-            timer;
+            btn = _this.els.btn;
+
+        utils.addEvent(window, 'resize', function () {
+            _this.lrcTop = _this[0].offsetHeight/2;
+        });
+
         utils.addEvent(video, 'durationchange', function(){
             _this.duration = this.duration;
+            _this.currentTime = 0;
             _this.els.dur.innerText = '/ ' + utils.timemat(this.duration);
-            _this.showLrc(0);
+            _this.loadLrc(_this.options.lrc);
         });
+
+        utils.addEvent(video, 'loadeddata', function () {
+            _this.lrcTop = _this[0].offsetHeight/2;
+        });
+
         utils.addEvent(btn, 'click', function(){
             if(video.paused){
                 video.play();
@@ -156,21 +200,98 @@ class Player{
                 utils.removeClass(_this[0], 'player-muted');
             }
         });
-        //TODO================
-        // utils.addEvent(_this[0], 'mousemove', function(e){
-        //     if(timer) clearTimeout(timer);
-        //     if(e.target === video || lrcData){
-        //         player.style.cursor = 'default';
-        //         utils.addClass(controls, 'player-controls-show');
-        //         timer = setTimeout(hideMouse, 2000);
-        //     }
-        // });
-        // utils.addEvent(player, 'mouseleave', function () {
-        //     hideMouse();
-        // });
+
+        utils.addEvent(_this[0], 'mousemove', function(e){
+            if(_this.timer) clearTimeout(_this.timer);
+
+            if(!_this.els.ctrls.contains(e.target)){
+                _this.showMouse();
+                _this.timer = setTimeout(()=>{_this.hideMouse()}, 2000);
+            }
+        });
+        utils.addEvent(_this[0], 'mouseleave', ()=>{_this.hideMouse()});
+    }
+    showMouse(){
+        clearTimeout(this.timer);
+        this[0].style.cursor = 'default';
+        utils.addClass(this.els.ctrls, 'player-controls-show');
+    }
+    hideMouse(){
+        clearTimeout(this.timer);
+        this[0].style.cursor = 'none';
+        utils.removeClass(this.els.ctrls, 'player-controls-show');
+    }
+    loadLrc(src){
+        let _this = this;
+        if(!src) return;
+        this.xhr.open('get', src, true);
+        _this.xhr.onreadystatechange = function () {
+            if(_this.xhr.readyState === 4 && _this.xhr.status === 200){
+                _this.lrcData = utils.readLyric(_this.xhr.responseText);
+                let frag = document.createDocumentFragment(),
+                    lrcLine = document.createElement('p'),
+                    dataObj = {};
+                lrcLine.className = 'player-lrc-line';
+                for(let k in _this.lrcData){
+                    lrcLine = lrcLine.cloneNode(true);
+                    lrcLine.innerText = _this.lrcData[k];
+                    dataObj[utils.time(k)] = lrcLine;
+                    frag.appendChild(lrcLine);
+                }
+                _this.els.lrc.appendChild(frag);
+                utils.addClass(_this.els.lrc, 'player-lrc-show');
+                _this.lrcData = dataObj;
+                _this.lrcKeys = Object.keys(_this.lrcData);
+                _this.lrcKeys.sort(function(a, b){
+                    return Number(a) - Number(b);
+                });
+                _this.lrcLen = _this.lrcKeys.length;
+                _this.showLrc(0);
+            }
+        };
+        _this.xhr.send();
     }
     showLrc(curtime){
-
+        for(let i=0, delta; i<this.lrcLen; i++){
+            delta = (1 - Math.abs(this.lrcKeys[i] - curtime)/10);
+            if(delta > .96){
+                this.els.lrc.style.top = this.lrcTop-this.lrcData[this.lrcKeys[i]].offsetTop + 'px';
+                for(let j=0, idx=0, opc=0; j<9; j++){
+                    idx = i+j-4;
+                    if(idx <= i){
+                        opc += 25;
+                    }else{
+                        opc -= 25;
+                    }
+                    if(this.lrcKeys[idx]){
+                        this.lrcData[this.lrcKeys[idx]].style.opacity = (opc-25)/100;
+                        utils.removeClass(this.lrcData[this.lrcKeys[idx]], 'player-lrc-line-active');
+                        utils.addClass(this.lrcData[this.lrcKeys[i]], 'player-lrc-line-active');
+                    }
+                }
+            }
+        }
+    }
+    hideLrc(){
+        utils.removeClass(this.els.lrc, 'player-lrc-show');
+    }
+    update(){
+        let o = this.options;
+        this.currentTime = 0;
+        this.duration = this.lrcLen = 0;
+        this.lrcKeys = this.lrcData = null;
+        this.hideLrc();
+        if(o.src)
+            this.els.video.src = o.src;
+        if(o.lrc)
+            this.loadLrc(o.lrc);
+        this.els.video.poster = o.poster || '';
+    }
+    __check__(name){
+        if(this.private === 0) throw TypeError((name||'__check__')+'是私有方法，不可调用');
+    }
+    static toString(){
+        return '{ [ class Player ] }';
     }
 }
 export default Player;
