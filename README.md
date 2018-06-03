@@ -36,7 +36,6 @@
     
     -> 3) tools.config.js 这是tools的配置文件
     
-        ```
         module.exports = {
             group: {                     // group 是你需要加入tools的组件/工具
                 PageSlide: {             // key 名一定要与文件夹对应
@@ -53,7 +52,7 @@
                 path: './dist'           // path 合并输出的目录，默认为tools下的dist
             },
             mount: 'window'              // mount 设定挂载对象名称，默认window，注意：必须是字符串。
-                                         // 挂载到window时，引入Tools.min.js到html，组件/工具会这样的形式:
+        };                               // 挂载到window时，引入Tools.min.js到html，组件/工具会这样的形式:
                                          // window.PageSlide、window.Player...
                                          // 也可以挂载到自定义的一个变量中，如:window.Tools，但必须注意的是
                                          // 如果挂载的对像不存在，要在加载Tools.min.js前，做这样的定义： 
@@ -64,8 +63,7 @@
                                          //    Player: [object xxx]
                                          //    ...
                                          // }
-        };
-        ```
+        
 
 #### 后续
 
