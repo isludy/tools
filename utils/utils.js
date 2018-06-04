@@ -117,15 +117,6 @@ module.exports = {
     isFullscreen() {
         return document.fullscreen || document.webkitIsFullScreen || document.mozFullScreen || false;
     },
-    readLyric(lrc){
-        let lrcCache = {};
-        lrc.split(/\n+/).join('#').replace(/\[([\d:.\[\]]+)\]([\s\S]*?)#/ig, function($0, $1, $2){
-            for(let keys = $1.split(/\]\s*\[/), len = keys.length, i = 0; i<len; i++){
-                lrcCache[keys[i]] = $2;
-            }
-        });
-        return lrcCache;
-    },
     getCalced(node, attr){
         if(node && node.nodeType === 1 && window.getComputedStyle){
             return window.getComputedStyle(node)[attr];

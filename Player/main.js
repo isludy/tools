@@ -33,6 +33,10 @@ class Player{
                 writable: true,
                 value: 0
             });
+            this.__define__('lrcTopBase', {
+                writable: true,
+                value: 0
+            });
 
             this.__init__(document.querySelector(id));
 
@@ -100,7 +104,7 @@ class Player{
             loading: document.createElement('div')
         };
 
-        this.els.loading.className = 'loading';
+        this.els.loading.className = 'r-loading';
 
         for(let els = this[0].querySelectorAll('[data-name]'),
                 len=els.length,
@@ -118,8 +122,7 @@ class Player{
         this.__check__('__ob__');
         let _this = this,
             curtime,
-            volume,
-            lrcMode;
+            volume;
         _this.__define__('currentTime', {
             set(val){
                 if(val !== curtime){
@@ -140,23 +143,6 @@ class Player{
             },
             get(){return volume}
         });
-        if(lrcMode = this.options.lrcMode){
-            Object.defineProperty(this.options, 'lrcMode', {
-                set(val){
-                    if(val !== lrcMode){
-                        lrcMode = val;
-                        _this.lrcKeys.forEach(key=>{
-                            _this.lrcData[key].removeAttribute('style');
-                        });
-                        _this.setLrcToTop();
-                        _this.showLrc(_this.currentTime);
-                    }
-                },
-                get(){
-                    return lrcMode;
-                }
-            });
-        }
     }
 
     __bindEvent__(){
@@ -167,7 +153,7 @@ class Player{
             loading = _this.els.loading;
 
         utils.addEvent(window, 'resize', function () {
-            _this.setLrcToTop();
+            _this.updateLrcTopBase();
         });
 
         utils.addEvent(video, 'loadstart', function () {
@@ -186,7 +172,9 @@ class Player{
         });
 
         utils.addEvent(video, 'error', function () {
-            console.log('loadFail');
+            loading.innerHTML = 'fail';
+            utils.addClass(loading, 'r-loadend');
+            utils.removeClass(loading, 'r-loading');
         });
 
         utils.addEvent(btn, 'click', function(){
@@ -198,13 +186,14 @@ class Player{
                 utils.removeClass(btn, 'player-btn-playing');
             }
         });
+
         utils.addEvent(video, 'timeupdate', function () {
             try{
                 _this.els.buf.style.width = (video.buffered.end(video.buffered.length-1) / this.duration) * 100 + '%';
             }catch (err){}
 
             _this.currentTime = this.currentTime;
-            _this.showLrc(this.currentTime);
+            _this.lrcUpdating(this.currentTime);
         });
 
         utils.addEvent(_this.els.thumb.parentNode, 'click', function(e){
@@ -214,9 +203,11 @@ class Player{
                 video.currentTime = Math.round(percent * video.duration);
             }
         });
+
         utils.addEvent(_this.els.vthumb.parentNode, 'click',function(e){
             _this.volume = e.offsetX / this.offsetWidth;
         });
+
         utils.addEvent(_this.els.fscreen, 'click', function(){
             if(utils.isFullscreen()){
                 utils.exitFullscreen();
@@ -226,6 +217,7 @@ class Player{
                 utils.addClass(_this.els.fscreen, 'player-fullscreen-on');
             }
         });
+
         utils.addEvent(_this.els.vswitch, 'click', function () {
             if(video.muted = !video.muted){
                 utils.addClass(_this[0], 'player-muted');
@@ -242,6 +234,7 @@ class Player{
                 _this.timer = setTimeout(()=>{_this.hideMouse()}, 2000);
             }
         });
+
         utils.addEvent(_this[0], 'mouseleave', ()=>{_this.hideMouse()});
     }
     showMouse(){
@@ -258,68 +251,137 @@ class Player{
         let _this = this;
         if(!src) return;
         this.xhr.open('get', src, true);
-        _this.xhr.onreadystatechange = function () {
-            if(_this.xhr.readyState === 4 && _this.xhr.status === 200){
-                _this.lrcData = utils.readLyric(_this.xhr.responseText);
-                let frag = document.createDocumentFragment(),
-                    lrcLine = document.createElement('p'),
-                    dataObj = {};
-                lrcLine.className = 'player-lrc-line';
-                for(let k in _this.lrcData){
-                    lrcLine = lrcLine.cloneNode(true);
-                    lrcLine.innerText = _this.lrcData[k];
-                    dataObj[utils.time(k)] = lrcLine;
-                    frag.appendChild(lrcLine);
+        _this.xhr.onreadystatechange = function(){
+            if(_this.xhr.readyState === 4){
+                if(_this.xhr.status === 200) {
+                    _this.els.lrc.appendChild(_this.readLrc(_this.xhr.responseText));
+                }else{
+                    _this.els.lrc.appendChild(_this.readLrc('[00:00.00]找不到歌词/字幕'));
                 }
-                _this.els.lrc.appendChild(frag);
-                utils.addClass(_this.els.lrc, 'player-lrc-show');
-                _this.lrcData = dataObj;
-                _this.lrcKeys = Object.keys(_this.lrcData);
-                _this.lrcKeys.sort(function(a, b){
-                    return Number(a) - Number(b);
-                });
-                _this.lrcLen = _this.lrcKeys.length;
-                _this.setLrcToTop();
-                _this.showLrc(0);
+                _this.showLrc();
+                _this.updateLrcTopBase();
+                _this.lrcUpdating(0);
             }
-        };
-        _this.xhr.onerror = function(){
-            console.log('fail to load lrc')
         };
         _this.xhr.send();
     }
-    showLrc(curtime){
-        for(let i=0, delta; i<this.lrcLen; i++){
-            delta = (1 - Math.abs(this.lrcKeys[i] - curtime)/10);
+    readLrc(lrcText){
+        let _this = this,
+            frag = document.createDocumentFragment(),
+            lines;
+
+        if(!lrcText) return frag;
+
+        lines = lrcText.split(/\n+/);
+        _this.lrcData = {};
+
+        lines.forEach(line=>{
+            line.replace(/\[([0-9:.\[\]]+)\]/ig, function(txt,$1){
+                txt = line.slice(line.lastIndexOf(']')+1).replace(/\s+/g,'');
+                if(txt){
+                    for(let keys = $1.split(/\]\s*\[/), len = keys.length, i = 0; i<len; i++){
+                        let key = utils.time(keys[i]);
+                        if(_this.lrcData[key]){
+                            _this.lrcData[key].innerHTML += '<br>'+txt;
+                        }else{
+                            let line = document.createElement('div');
+                            line.className = 'player-lrc-line';
+                            line.innerHTML = txt;
+                            _this.lrcData[key] = line;
+                        }
+                    }
+                }
+            });
+        });
+        lrcText = null;
+        lines = null;
+        _this.lrcKeys = Object.keys(_this.lrcData);
+        _this.lrcKeys.sort(function(a, b){
+            return Number(a) - Number(b);
+        });
+        _this.lrcKeys.forEach(key=>{
+            frag.appendChild(_this.lrcData[key]);
+        });
+        _this.lrcLen = _this.lrcKeys.length;
+        _this.lrcLineActive = _this.lrcData[_this.lrcKeys[0]];
+        return frag;
+    }
+    updateLrcTopBase(){
+        let line = this.els.lrc.children[0],
+            lh = 32,
+            lrcTop;
+
+        if(line)
+            lh = line.offsetHeight*2;
+        switch (this.options.lrcMode){
+            case 1:
+                lrcTop = this[0].offsetHeight - lh;
+                break;
+            default:
+                lrcTop = this[0].offsetHeight/2 - lh/2;
+        }
+        this.lrcTopBase = lrcTop;
+        this.setLrcTop();
+    }
+    setLrcTop(){
+        if(this.lrcLineActive)
+            this.els.lrc.style.top = this.lrcTopBase - this.lrcLineActive.offsetTop + 'px';
+    }
+    lrcUpdating(curtime){
+        for(let i=0; i<this.lrcLen; i++){
+            let delta = (1 - Math.abs(this.lrcKeys[i] - curtime)/10);
             if(delta > .96){
-                this.els.lrc.style.top = this.lrcToTop-this.lrcData[this.lrcKeys[i]].offsetTop + 'px';
                 if(this.lrcLineActive){
                     this.lrcLineActive.style.opacity = 0;
                     utils.removeClass(this.lrcLineActive, 'player-lrc-line-active');
                 }
-                if(this.options.lrcMode === 1){
-                    this.lrcLineActive =  this.lrcData[this.lrcKeys[i]];
-                    this.lrcLineActive.style.opacity = 1;
-                }else{
-                    for(let j=0, idx=0, opc=0; j<9; j++){
-                        idx = i+j-4;
-                        if(idx <= i){
-                            opc += 25;
-                        }else{
-                            opc -= 25;
-                        }
-                        if(this.lrcKeys[idx]){
-                            this.lrcData[this.lrcKeys[idx]].style.opacity = (opc-25)/100;
-                        }
-                    }
-                    this.lrcLineActive = this.lrcData[this.lrcKeys[i]];
-                }
-                utils.addClass(this.lrcData[this.lrcKeys[i]], 'player-lrc-line-active');
+                this.lrcLineActive =  this.lrcData[this.lrcKeys[i]];
+                this.switchLrcStyle(i);
+                this.setLrcTop();
+                utils.addClass(this.lrcLineActive, 'player-lrc-line-active');
             }
         }
     }
+    showLrc(){
+        utils.addClass(this.els.lrc, 'player-lrc-show');
+    }
     hideLrc(){
         utils.removeClass(this.els.lrc, 'player-lrc-show');
+    }
+    switchLrcStyle(activeIndex){
+        if(this.options.lrcMode === 1){
+            this.lrcLineActive.style.opacity = 1;
+        }else{
+            for(let j=0, idx=0, opc=0; j<9; j++){
+                idx = activeIndex+j-4;
+                if(idx <= activeIndex){
+                    opc += 25;
+                }else{
+                    opc -= 25;
+                }
+                if(this.lrcKeys[idx]){
+                    this.lrcData[this.lrcKeys[idx]].style.opacity = (opc-25)/100;
+                }
+            }
+        }
+    }
+    switchLrcMode(lrcMode){
+        if(typeof lrcMode !== 'number') return;
+        let _this = this;
+
+        _this.options.lrcMode = lrcMode;
+        if(_this.lrcKeys)
+            _this.lrcKeys.forEach(key => {
+                if(_this.lrcData[key] !== _this.lrcLineActive)
+                    _this.lrcData[key].removeAttribute('style');
+            });
+        _this.updateLrcTopBase();
+        for(let i=0; i<_this.lrcLen; i++){
+            if(_this.lrcData[_this.lrcKeys[i]] === _this.lrcLineActive){
+                _this.switchLrcStyle(i);
+                break;
+            }
+        }
     }
     update(){
         let o = this.options;
@@ -332,19 +394,6 @@ class Player{
         if(o.lrc)
             this.loadLrc(o.lrc);
         this.els.video.poster = o.poster || '';
-    }
-    setLrcToTop(){
-        switch (this.options.lrcMode){
-            case 1:
-                let lrcLine = this.els.lrc.children[0],
-                    lrcLineHeight = 16;
-                if(lrcLine)
-                    lrcLineHeight = lrcLine.offsetHeight + (parseFloat(utils.getCalced(lrcLine, 'marginTop')) || 0);
-                this.lrcToTop = this[0].offsetHeight - lrcLineHeight;
-                break;
-            default:
-                this.lrcToTop = this[0].offsetHeight/2;
-        }
     }
     __check__(name){
         if(this.private === 0) throw TypeError((name||'__check__')+'是私有方法，不可调用');
