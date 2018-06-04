@@ -61,7 +61,7 @@ class Player{
     __dom__(){
         this.__check__('__createDom__');
         this[0] = document.createElement('div');
-        this[0].className = 'player';
+        this[0].className = 'player player-1';
         this[0].innerHTML = `
         <video data-name="video"${this.options.src ? ' src="'+this.options.src+'"':''} poster="${this.options.poster||''}" class="player-video"></video>
         <div data-name="lrc" class="player-lrc"></div>
@@ -129,6 +129,7 @@ class Player{
                     curtime = val;
                     _this.els.cur.innerText = utils.timemat(curtime);
                     _this.els.thumb.style.width = (curtime / _this.duration) * 100 + '%';
+                    _this.lrcUpdating(curtime);
                 }
             },
             get(){return curtime;}
@@ -191,13 +192,14 @@ class Player{
             try{
                 _this.els.buf.style.width = (video.buffered.end(video.buffered.length-1) / this.duration) * 100 + '%';
             }catch (err){}
-
             _this.currentTime = this.currentTime;
-            _this.lrcUpdating(this.currentTime);
         });
 
         utils.addEvent(_this.els.thumb.parentNode, 'click', function(e){
             if(video.duration > 0){
+                _this.lrcKeys.forEach(key => {
+                    _this.lrcData[key].removeAttribute('style');
+                });
                 let percent = e.offsetX / this.offsetWidth;
                 _this.currentTime = percent * video.duration;
                 video.currentTime = Math.round(percent * video.duration);
@@ -249,6 +251,7 @@ class Player{
     }
     loadLrc(src){
         let _this = this;
+        _this.els.lrc.innerHTML = '';
         if(!src) return;
         this.xhr.open('get', src, true);
         _this.xhr.onreadystatechange = function(){
@@ -391,8 +394,6 @@ class Player{
         this.hideLrc();
         if(o.src)
             this.els.video.src = o.src;
-        if(o.lrc)
-            this.loadLrc(o.lrc);
         this.els.video.poster = o.poster || '';
     }
     __check__(name){
