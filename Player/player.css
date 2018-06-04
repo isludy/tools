@@ -7,6 +7,7 @@
     box-sizing: border-box;
     width: 100%;
     overflow: hidden;
+    background-color: #111;
 }
 .player-video{
     width: 100%;
@@ -33,6 +34,7 @@
 }
 .player-lrc-line-active{
     color: #ff862a;
+    opacity: 1;
 }
 .player-table{
     display: block;
@@ -354,11 +356,3 @@
     }
 }
 
-
-.player-1{
-    background-color: #111;
-    border: 1px solid #eee;
-}
-/*.player-style-1{*/
-
-/*}*/

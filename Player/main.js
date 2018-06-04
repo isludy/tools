@@ -25,15 +25,7 @@ class Player{
                 writable: true,
                 value: 0
             });
-            this.__define__('lrcLineActive', {
-                writable: true,
-                value: 0
-            });
             this.__define__('timer', {
-                writable: true,
-                value: 0
-            });
-            this.__define__('lrcTopBase', {
                 writable: true,
                 value: 0
             });
@@ -122,14 +114,15 @@ class Player{
         this.__check__('__ob__');
         let _this = this,
             curtime,
-            volume;
+            volume,
+            activeIndex;
         _this.__define__('currentTime', {
             set(val){
                 if(val !== curtime){
                     curtime = val;
                     _this.els.cur.innerText = utils.timemat(curtime);
                     _this.els.thumb.style.width = (curtime / _this.duration) * 100 + '%';
-                    _this.lrcUpdating(curtime);
+                    _this.getLrcActive(curtime);
                 }
             },
             get(){return curtime;}
@@ -142,7 +135,16 @@ class Player{
                     _this.els.vthumb.style.width = volume * 100 + '%';
                 }
             },
-            get(){return volume}
+            get(){return volume;}
+        });
+        _this.__define__('activeIndex', {
+            set(val){
+                if(val !== activeIndex){
+                    activeIndex = val;
+                    _this.renderLrc();
+                }
+            },
+            get(){return activeIndex;}
         });
     }
 
@@ -154,7 +156,7 @@ class Player{
             loading = _this.els.loading;
 
         utils.addEvent(window, 'resize', function () {
-            _this.updateLrcTopBase();
+            _this.setLrcMode();
         });
 
         utils.addEvent(video, 'loadstart', function () {
@@ -181,9 +183,11 @@ class Player{
         utils.addEvent(btn, 'click', function(){
             if(video.paused){
                 video.play();
+                video.autoplay = true;
                 utils.addClass(btn, 'player-btn-playing');
             }else{
                 video.pause();
+                video.autoplay = false;
                 utils.removeClass(btn, 'player-btn-playing');
             }
         });
@@ -197,9 +201,6 @@ class Player{
 
         utils.addEvent(_this.els.thumb.parentNode, 'click', function(e){
             if(video.duration > 0){
-                _this.lrcKeys.forEach(key => {
-                    _this.lrcData[key].removeAttribute('style');
-                });
                 let percent = e.offsetX / this.offsetWidth;
                 _this.currentTime = percent * video.duration;
                 video.currentTime = Math.round(percent * video.duration);
@@ -256,24 +257,22 @@ class Player{
         this.xhr.open('get', src, true);
         _this.xhr.onreadystatechange = function(){
             if(_this.xhr.readyState === 4){
+                let txt = '[00:00.00]找不到歌词/字幕';
                 if(_this.xhr.status === 200) {
-                    _this.els.lrc.appendChild(_this.readLrc(_this.xhr.responseText));
-                }else{
-                    _this.els.lrc.appendChild(_this.readLrc('[00:00.00]找不到歌词/字幕'));
+                    txt = _this.xhr.responseText;
                 }
+                _this.readLrc(txt);
                 _this.showLrc();
-                _this.updateLrcTopBase();
-                _this.lrcUpdating(0);
+                _this.setLrcMode();
             }
         };
         _this.xhr.send();
     }
     readLrc(lrcText){
         let _this = this,
-            frag = document.createDocumentFragment(),
             lines;
 
-        if(!lrcText) return frag;
+        if(!lrcText) return;
 
         lines = lrcText.split(/\n+/);
         _this.lrcData = {};
@@ -285,12 +284,9 @@ class Player{
                     for(let keys = $1.split(/\]\s*\[/), len = keys.length, i = 0; i<len; i++){
                         let key = utils.time(keys[i]);
                         if(_this.lrcData[key]){
-                            _this.lrcData[key].innerHTML += '<br>'+txt;
+                            _this.lrcData[key] += '<br>'+txt;
                         }else{
-                            let line = document.createElement('div');
-                            line.className = 'player-lrc-line';
-                            line.innerHTML = txt;
-                            _this.lrcData[key] = line;
+                            _this.lrcData[key] = txt;
                         }
                     }
                 }
@@ -302,46 +298,16 @@ class Player{
         _this.lrcKeys.sort(function(a, b){
             return Number(a) - Number(b);
         });
-        _this.lrcKeys.forEach(key=>{
-            frag.appendChild(_this.lrcData[key]);
-        });
         _this.lrcLen = _this.lrcKeys.length;
-        _this.lrcLineActive = _this.lrcData[_this.lrcKeys[0]];
-        return frag;
+        _this.activeIndex = 0;
     }
-    updateLrcTopBase(){
-        let line = this.els.lrc.children[0],
-            lh = 32,
-            lrcTop;
-
-        if(line)
-            lh = line.offsetHeight*2;
-        switch (this.options.lrcMode){
-            case 1:
-                lrcTop = this[0].offsetHeight - lh;
-                break;
-            default:
-                lrcTop = this[0].offsetHeight/2 - lh/2;
-        }
-        this.lrcTopBase = lrcTop;
-        this.setLrcTop();
-    }
-    setLrcTop(){
-        if(this.lrcLineActive)
-            this.els.lrc.style.top = this.lrcTopBase - this.lrcLineActive.offsetTop + 'px';
-    }
-    lrcUpdating(curtime){
+    getLrcActive(curtime){
         for(let i=0; i<this.lrcLen; i++){
-            let delta = (1 - Math.abs(this.lrcKeys[i] - curtime)/10);
-            if(delta > .96){
-                if(this.lrcLineActive){
-                    this.lrcLineActive.style.opacity = 0;
-                    utils.removeClass(this.lrcLineActive, 'player-lrc-line-active');
-                }
-                this.lrcLineActive =  this.lrcData[this.lrcKeys[i]];
-                this.switchLrcStyle(i);
-                this.setLrcTop();
-                utils.addClass(this.lrcLineActive, 'player-lrc-line-active');
+            let delta = parseFloat(this.lrcKeys[i]) - curtime;
+            if(delta >= 0){
+                if(this.lrcKeys[i-1])
+                    this.activeIndex = i-1;
+                break;
             }
         }
     }
@@ -351,40 +317,42 @@ class Player{
     hideLrc(){
         utils.removeClass(this.els.lrc, 'player-lrc-show');
     }
-    switchLrcStyle(activeIndex){
+    renderLrc(){
         if(this.options.lrcMode === 1){
-            this.lrcLineActive.style.opacity = 1;
+            this.els.lrc.innerHTML = '<div class="player-lrc-line player-lrc-line-active">'+this.lrcData[this.lrcKeys[this.activeIndex]]+'</div>';
         }else{
+            this.els.lrc.innerHTML = '';
             for(let j=0, idx=0, opc=0; j<9; j++){
-                idx = activeIndex+j-4;
-                if(idx <= activeIndex){
+                idx = this.activeIndex+j-4;
+                if(idx <= this.activeIndex){
                     opc += 25;
                 }else{
                     opc -= 25;
                 }
                 if(this.lrcKeys[idx]){
-                    this.lrcData[this.lrcKeys[idx]].style.opacity = (opc-25)/100;
+                    this.els.lrc.innerHTML += '<div class="player-lrc-line'+(idx === this.activeIndex ? ' player-lrc-line-active' : '')+'" style="opacity: '+(opc-25)/100+';">'+this.lrcData[this.lrcKeys[idx]]+'</div>';
                 }
             }
         }
     }
-    switchLrcMode(lrcMode){
-        if(typeof lrcMode !== 'number') return;
-        let _this = this;
-
-        _this.options.lrcMode = lrcMode;
-        if(_this.lrcKeys)
-            _this.lrcKeys.forEach(key => {
-                if(_this.lrcData[key] !== _this.lrcLineActive)
-                    _this.lrcData[key].removeAttribute('style');
-            });
-        _this.updateLrcTopBase();
-        for(let i=0; i<_this.lrcLen; i++){
-            if(_this.lrcData[_this.lrcKeys[i]] === _this.lrcLineActive){
-                _this.switchLrcStyle(i);
-                break;
-            }
+    setLrcMode(lrcMode){
+        if(typeof lrcMode === 'number'){
+            this.options.lrcMode = lrcMode;
         }
+        this.renderLrc();
+        let lrcLine = this.els.lrc.children[0],
+            lh = 32,
+            lrcTop;
+        if(lrcLine){
+            lh = lrcLine.offsetHeight + (Number(utils.getCalced(lrcLine,'lineHeight')) || 0);
+        }
+        if(this.options.lrcMode === 1){
+            lrcTop = this[0].offsetHeight - lh*2;
+        }else{
+            lrcTop = (this[0].offsetHeight - lh*9)/2;
+        }
+
+        utils.setTransformY(this.els.lrc, lrcTop, true);
     }
     update(){
         let o = this.options;

@@ -61,8 +61,8 @@ module.exports = {
                     el.style.oTransition =
                         el.style.transition = v;
     },
-    setTransform(el, v, bool){
-        if('transform' in document.documentElement){
+    setTransformY(el, v, bool){
+        if('transform' in document.documentElement.style){
             el.style.webkitTransform =
                 el.style.mozTransform =
                     el.style.msTransform =

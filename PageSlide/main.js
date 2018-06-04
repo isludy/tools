@@ -68,7 +68,7 @@ function PageSlide(options){
             delta = (isTouch ? e.touches[0].clientY : e.clientY) - start;
             if(!scrollEl || (delta<0 &&  utils.toBottom(scrollEl, o.deviation)) || (delta>0 &&  utils.toTop(scrollEl, o.deviation))){
                 if(!o.fireDistance || Math.abs(delta) > o.fireDistance){
-                    utils.setTransform(wrapper, delta-page*viewH, true);
+                    utils.setTransformY(wrapper, delta-page*viewH, true);
                     allowTurn = true;
                 }else{
                     allowTurn = false;
@@ -93,7 +93,7 @@ function PageSlide(options){
                     if(o.afterSlide) o.afterSlide(page, slides);
                 }, o.duration);
             }
-            utils.setTransform(wrapper, page);
+            utils.setTransformY(wrapper, page);
             scrollEl = null;
         }
     }
