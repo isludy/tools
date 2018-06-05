@@ -11,7 +11,6 @@
 <div id="box" style="max-width: 1280px; margin: 0 auto;"></div>
 <p id="pppp"><button id="btn">更新</button><button id="sss">切换歌词模式</button></p>
 <script type="text/javascript" src="dist/Player.min.js"></script>
-<!--<script src="main.js"></script>-->
 <script>
 	var basePath = 'http://localhost/music/';
 	var player = new Player('#box');
@@ -21,7 +20,7 @@
     player.poster = 'http://image.wenweipo.com/2018/06/04/20180604lml0025.jpg';
 	btn.onclick = function () {
         player.src = basePath+'yuanzougaofei.mp3';
-        player.lrc = basePath+'yuanzougaofei.lrc';
+        player.lrc = basePath+'yuanzougaofei1.lrc';
 		player.poster = '';
     };
     sss.onclick = function(){

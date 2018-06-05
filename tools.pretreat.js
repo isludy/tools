@@ -14,6 +14,11 @@ const defaults = {
 const defaultMount = toolsConfig.mount || 'window';
 const tempFiles = new Map();
 
+const regImport = /(import\s+utils\s+from\s+\S+\s+)|((let|const|var)\s+utils\s*=\s*require\([^)]*?\)\s*[;]*\s+)/g;
+const regExport = /export\s+default\s+/g;
+const regModule = /(?:module\.)*exports\s*=\s*/g;
+const regUtils = /utils\.\w+/g;
+
 const config = {
     entry: {},
     mode: argv[2] || 'production',
@@ -30,13 +35,15 @@ const config = {
 };
 
 function findUtils(data){
-    let fns = data.toString().match(/utils\.\w+/g);
-    fns.forEach(v=>{
-        let name = v.slice(6);
-        if(utils[name]){
-            fnMap.set(name, utils[name]);
-        }
-    });
+    let fns = data.toString().match(regUtils);
+    if(Array.isArray(fns))
+        fns.forEach(v=>{
+            let name = v.slice(6);
+            if(utils[name]){
+                fnMap.set(name, utils[name]);
+                findUtils(utils[name]);
+            }
+        });
 }
 
 function writeEntryFile(folder, merge=false){
@@ -46,13 +53,13 @@ function writeEntryFile(folder, merge=false){
             item = toolsConfig.group[folder],
             name = item.name || folder,
             data = fs.readFileSync(path.join(__dirname, folder, item.entry+'.js')),
-            sourceCode = data.toString().replace(/(import\s+utils\s+from\s+\S+\s+)|((let|const|var)\s+utils\s*=\s*require\([^)]*?\)\s*[;]*\s+)/g,'');
+            sourceCode = data.toString().replace(regImport,'');
 
-        sourceCode = sourceCode.replace(/(?:module\.)*exports\s*=\s*/g, function($0){
+        sourceCode = sourceCode.replace(regModule, function(){
             return defaultMount+'.' + name + '=';
         });
 
-        sourceCode = sourceCode.replace(/export\s+default\s+/g, function($0){
+        sourceCode = sourceCode.replace(regExport, function(){
             return defaultMount+'.' + name + '=';
         });
 

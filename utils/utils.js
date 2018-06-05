@@ -1,10 +1,23 @@
 module.exports = {
+    indexOf(arr, item){
+        if(arr.indexOf){
+            return arr.indexOf(item);
+        }else{
+            for(let i=0, l=arr.length; i<l; i++)
+                if(arr[i] === item) return i;
+            return -1;
+        }
+    },
+    isTouch(){
+        return 'ontouchstart' in document;
+    },
     addClass(el, cls){
         if(el.classList){
             el.classList.add(cls);
         }else{
-            let list = el.className.split(/\s+/);
-            if(list.indexOf(cls) === -1){
+            let utils = this,
+                list = el.className.split(/\s+/);
+            if(utils.indexOf(list, cls) === -1){
                 list.push(cls);
             }
             el.className = list.join(' ');
@@ -14,9 +27,10 @@ module.exports = {
         if(el.classList){
             el.classList.remove(cls);
         }else{
-            let list = el.className.split(/\s+/),
+            let utils = this,
+                list = el.className.split(/\s+/),
                 index;
-            if((index = list.indexOf(cls)) !== -1){
+            if((index = utils.indexOf(list, cls)) !== -1){
                 list.splice(index, 1);
             }
             el.className = list.join(' ');
@@ -26,8 +40,9 @@ module.exports = {
         if(el.classList){
             return el.classList.contains(cls);
         }else{
-            let list = el.className.split(/\s+/);
-            return list.indexOf(cls) !== -1;
+            let utils = this,
+                list = el.className.split(/\s+/);
+            return utils.indexOf(list, cls) !== -1;
         }
     },
     addEvent(el, evt, fn, capture=false){
@@ -117,11 +132,44 @@ module.exports = {
     isFullscreen() {
         return document.fullscreen || document.webkitIsFullScreen || document.mozFullScreen || false;
     },
-    getCalced(node, attr){
+    calced(node, attr){
         if(node && node.nodeType === 1 && window.getComputedStyle){
             return window.getComputedStyle(node)[attr];
         }else{
             return 0;
+        }
+    },
+    parent(el, cls, context = document.documentElement){
+        while (el !== context){
+            if(!el) return false;
+            if(el.className && (el.className.split(/\s+/).indexOf(cls) !== -1)){
+                return el;
+            }else{
+                el = el.parentNode;
+            }
+        }
+    },
+    eventGroup(els, fn1, fn2, fn3){
+        let utils = this,
+            events = utils.isTouch() ? ['touchstart','touchmove','touchend'] : ['mousedown','mousemove','mouseup'],
+            el1, el2, el3;
+        if(!els || !fn1 || !fn2 || !fn3) return;
+        el1 = els[0];
+        el2 = els[1] || el1 || document;
+        el3 = els[2] || document;
+        utils.addEvent(el1, events[0], startFn);
+        function startFn(e){
+            fn1.call(this, e);
+            utils.addEvent(el2, events[1], moveFn);
+            utils.addEvent(el3, events[2], endFn);
+        }
+        function moveFn(e){
+            fn2.call(this, e);
+        }
+        function endFn(e){
+            utils.removeEvent(el2, events[1], moveFn);
+            utils.removeEvent(el3, events[2], endFn);
+            fn3.call(this, e);
         }
     }
 };

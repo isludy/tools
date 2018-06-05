@@ -2,14 +2,6 @@ import utils from '../utils/utils';
 
 const lrcModeReg = /player-lrc-mode-[0-9]+/g;
 
-
-function PrivateCheck(code, name){
-    if(code === 1) throw TypeError(name+'是私有方法，不可调用');
-}
-PrivateCheck.toString = ()=>{
-    return '{ [ class PrivateCheck] }';
-};
-
 class Player{
     constructor(id){
         let box = document.querySelector(id);
@@ -40,7 +32,7 @@ class Player{
 
     }
     __dom__(){
-        PrivateCheck(this.private, '__dom__');
+        Player.__check__(this.private, '__dom__');
         this[0] = document.createElement('div');
         this[0].className = 'player player-1';
         this[0].innerHTML = `
@@ -99,11 +91,11 @@ class Player{
         }
     }
     __define__(name, obj){
-        PrivateCheck(this.private, '__define__');
+        Player.__check__(this.private, '__define__');
         Object.defineProperty(this, name, obj);
     }
     __ob__(attr, fn){
-        PrivateCheck(this.private, '__ob__');
+        Player.__check__(this.private, '__ob__');
         let oval;
         this.__define__(attr, {
             set(val){
@@ -116,7 +108,7 @@ class Player{
         });
     }
     __obs__(){
-        PrivateCheck(this.private, '__obs__');
+        Player.__check__(this.private, '__obs__');
         let _this = this;
 
         _this.__ob__('src', val=>{
@@ -152,7 +144,7 @@ class Player{
         });
     }
     __events__(){
-        PrivateCheck(this.private, '__events__');
+        Player.__check__(this.private, '__events__');
         let _this = this,
             video = _this.els.video,
             btn = _this.els.btn,
@@ -370,7 +362,7 @@ class Player{
             lh = 32,
             lrcTop;
         if(lrcLine){
-            lh = lrcLine.offsetHeight + (Number(utils.getCalced(lrcLine,'lineHeight')) || 0);
+            lh = lrcLine.offsetHeight + (Number(utils.calced(lrcLine,'lineHeight')) || 0);
         }
         if(this.lrcMode === 1){
             lrcTop = (this[0].offsetHeight - lh*this.showLrcLines)/2;
@@ -384,6 +376,9 @@ class Player{
             this.showLrcLines = num;
             if(this.lrcMode === 1) this.setLrcMode();
         }
+    }
+    static __check__(code, name){
+        if(code === 1) throw TypeError(name+'是私有方法，不可调用');
     }
     static toString(){
         return '{ [ class Player ] }';
