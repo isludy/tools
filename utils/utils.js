@@ -30,11 +30,11 @@ module.exports = {
             return list.indexOf(cls) !== -1;
         }
     },
-    addEvent(el, evt, fn){
+    addEvent(el, evt, fn, capture=false){
         if(window.addEventListener){
-            el.addEventListener(evt, fn);
+            el.addEventListener(evt, fn, capture);
         }else if(window.attachEvent){
-            el.addEventListener('on'+evt, fn);
+            el.attachEvent('on'+evt, fn);
         }
     },
     removeEvent(el, evt, fn){

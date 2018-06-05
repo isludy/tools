@@ -1,95 +1,85 @@
 import utils from '../utils/utils';
 
 const lrcModeReg = /player-lrc-mode-[0-9]+/g;
+
+
+function PrivateCheck(code, name){
+    if(code === 1) throw TypeError(name+'是私有方法，不可调用');
+}
+PrivateCheck.toString = ()=>{
+    return '{ [ class PrivateCheck] }';
+};
+
 class Player{
-    constructor(id, opt=''){
-        if(typeof id === 'object'){
-            opt = id;
-            id = opt.selector;
-        }
-        if(typeof id === 'string'){
-            if(typeof opt === 'object'){
-                this.options = opt;
-            }
+    constructor(id){
+        let box = document.querySelector(id);
+        if(box){
+            this.lrcData = null;
+            this.lrcKeys = null;
+            this.lrcLen = 0;
+            this.showLrcLines = 7;
+
             this.__define__('xhr', {
                 value: new XMLHttpRequest()
-            });
-            this.__define__('lrcData',{
-                writable: true,
-                value: null
-            });
-            this.__define__('lrcKeys', {
-                writable: true,
-                value: null
-            });
-            this.__define__('lrcLen', {
-                writable: true,
-                value: 0
             });
             this.__define__('timer', {
                 writable: true,
                 value: 0
             });
+            this.__dom__();
+            this.__obs__();
 
-            this.__init__(document.querySelector(id));
+            box.appendChild(this[0]);
+            this.__events__();
+            this.volume = .5;
 
             this.__define__('private', {
-                value: 0
+                value: 1
             });
         }
 
     }
-    __init__(box){
-        this.__check__('init');
-        this.__dom__();
-        this.__ob__();
-
-        this.currentTime = 0;
-        this.volume = .5;
-        this.duration = 0;
-        if(!this.options.showLrcLines) this.options.showLrcLines = 7;
-
-        this.__bindEvent__();
-        box.appendChild(this[0]);
-    }
     __dom__(){
-        this.__check__('__createDom__');
+        PrivateCheck(this.private, '__dom__');
         this[0] = document.createElement('div');
         this[0].className = 'player player-1';
         this[0].innerHTML = `
-        <video data-name="video"${this.options.src ? ' src="'+this.options.src+'"':''} poster="${this.options.poster||''}" class="player-video"></video>
+        <video data-name="video" class="player-video"></video>
         <div data-name="lrc" class="player-lrc"></div>
         <div data-name="ctrls" class="player-controls">
-            <div class="player-slider">
+            <div class="player-slider" title="播放时间滑块">
                 <div data-name="buf" class="player-slider-buf"></div>
                 <div data-name="thumb" class="player-slider-thumb"></div>
             </div>
             <div class="player-toolbar">
                 <div class="player-toolbar-left">
-                    <span data-name="btn" class="player-btn"></span>
-                    <span data-name="cur" class="player-current-time">--:--</span>
-                    <span data-name="dur" class="player-duration">/ --:--</span>
+                    <div data-name="btn" class="player-btn" title="播放/暂时"></div>
+                    <div data-name="cur" class="player-current-time">--:--</div>
+                    <div data-name="dur" class="player-duration">/ --:--</div>
                 </div>
                 <div class="player-toolbar-right">
-                    <span data-name="vswitch" class="player-volume-switch">
-                        <i class="player-volume-switch-rect"></i>
-                        <i class="player-volume-switch-tri"></i>
-                        <i class="player-volume-switch-stat">
-                            <i class="player-volume-switch-dot1"></i>
-                            <i class="player-volume-switch-dot2"></i>
-                            <i class="player-volume-switch-dot3"></i>
-                            <i class="player-volume-switch-mute">&times;</i>
+                    <div data-name="vbtn" class="player-vol-btn" title="音量">
+                        <i class="player-vol-rect"></i>
+                        <i class="player-vol-tri"></i>
+                        <i class="player-vol-stat">
+                            <i class="player-vol-dot1"></i>
+                            <i class="player-vol-dot2"></i>
+                            <i class="player-vol-dot3"></i>
+                            <i class="player-vol-mute">&times;</i>
                         </i>
-                    </span>
-                    <span class="player-volume-slider">
-                        <i data-name="vthumb" class="player-volume-slider-thumb"></i>
-                    </span>
-                    <span data-name="fscreen" class="player-fullscreen">
+                        <div class="player-vol-slidebar">
+                            <div class="player-vol-slide-track">
+                                <div data-name="vslider" class="player-vol-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div data-name="rate" class="player-rate" title="播放速率">1x</div>
+                    <div data-name="fscreen" class="player-fullscreen" title="全屏切换">
                         <i class="player-fullscreen-tl"></i>
                         <i class="player-fullscreen-tr"></i>
                         <i class="player-fullscreen-bl"></i>
                         <i class="player-fullscreen-br"></i>
-                    </span>
+                    </div>
                 </div>
             </div>
         </div>`;
@@ -109,49 +99,60 @@ class Player{
         }
     }
     __define__(name, obj){
-        this.__check__('__define__');
+        PrivateCheck(this.private, '__define__');
         Object.defineProperty(this, name, obj);
     }
-    __ob__(){
-        this.__check__('__ob__');
-        let _this = this,
-            curtime,
-            volume,
-            activeIndex;
-        _this.__define__('currentTime', {
+    __ob__(attr, fn){
+        PrivateCheck(this.private, '__ob__');
+        let oval;
+        this.__define__(attr, {
             set(val){
-                if(val !== curtime){
-                    curtime = val;
-                    _this.els.cur.innerText = utils.timemat(curtime);
-                    _this.els.thumb.style.width = (curtime / _this.duration) * 100 + '%';
-                    _this.getLrcActive(curtime);
+                if(val !== oval){
+                    oval = val;
+                    fn(val);
                 }
             },
-            get(){return curtime;}
-        });
-        _this.__define__('volume', {
-            set(val){
-                if(val !== volume){
-                    volume = val;
-                    _this.els.video.volume = volume;
-                    _this.els.vthumb.style.width = volume * 100 + '%';
-                }
-            },
-            get(){return volume;}
-        });
-        _this.__define__('activeIndex', {
-            set(val){
-                if(val !== activeIndex){
-                    activeIndex = val;
-                    _this.renderLrc();
-                }
-            },
-            get(){return activeIndex;}
+            get(){return oval;}
         });
     }
+    __obs__(){
+        PrivateCheck(this.private, '__obs__');
+        let _this = this;
 
-    __bindEvent__(){
-        this.__check__('bindEvent');
+        _this.__ob__('src', val=>{
+            _this.lrc = '';
+            _this.lrcData = null;
+            _this.lrcKeys = null;
+            _this.lrcLen = 0;
+            _this.poster = '';
+            _this.els.video.src = val;
+        });
+
+        _this.__ob__('poster',val=>{
+            if(!val){
+                _this.els.video.removeAttribute('poster');
+            }else{
+                _this.els.video.poster = val;
+            }
+        });
+
+        _this.__ob__('currentTime', val=>{
+            _this.els.cur.innerText = utils.timemat(val);
+            _this.els.thumb.style.width = (val / _this.duration) * 100 + '%';
+            _this.getLrcActive(val);
+        });
+
+        _this.__ob__('volume', val=>{
+            _this.els.video.volume = val;
+            _this.els.vslider.style.height = val * 100 + '%';
+        });
+
+        _this.__ob__('activeIndex', ()=>{
+            _this.renderLrc();
+        });
+    }
+    __events__(){
+        PrivateCheck(this.private, '__events__');
         let _this = this,
             video = _this.els.video,
             btn = _this.els.btn,
@@ -169,7 +170,8 @@ class Player{
             _this.duration = this.duration;
             _this.currentTime = 0;
             _this.els.dur.innerText = '/ ' + utils.timemat(this.duration);
-            _this.loadLrc(_this.options.lrc);
+            _this.els.video.playbackRate = parseFloat(_this.els.rate.innerText);
+            _this.loadLrc();
         });
 
         utils.addEvent(video, 'loadeddata', function () {
@@ -177,7 +179,7 @@ class Player{
         });
 
         utils.addEvent(video, 'error', function () {
-            loading.innerHTML = 'fail';
+            loading.innerHTML = '加载失败';
             utils.addClass(loading, 'r-loadend');
             utils.removeClass(loading, 'r-loading');
         });
@@ -209,8 +211,27 @@ class Player{
             }
         });
 
-        utils.addEvent(_this.els.vthumb.parentNode, 'click',function(e){
-            _this.volume = e.offsetX / this.offsetWidth;
+        utils.addEvent(_this.els.vslider.parentNode, 'click',function(e){
+            let info = this.getBoundingClientRect();
+            _this.volume = (info.bottom - e.clientY)/info.height;
+        });
+
+        utils.addEvent(_this.els.vbtn, 'click', function (e) {
+            if(!_this.els.vslider.parentNode.parentNode.contains(e.target)){
+                if(video.muted = !video.muted){
+                    utils.addClass(_this[0], 'player-muted');
+                }else{
+                    utils.removeClass(_this[0], 'player-muted');
+                }
+            }
+        },true);
+
+        utils.addEvent(_this.els.rate, 'click', function(){
+            let rate = parseFloat(this.innerText);
+            rate += .25;
+            if(rate > 2) rate = .25;
+            _this.els.video.playbackRate = rate;
+            this.innerText = rate+'x';
         });
 
         utils.addEvent(_this.els.fscreen, 'click', function(){
@@ -220,14 +241,6 @@ class Player{
             }else{
                 utils.fullscreen(_this[0]);
                 utils.addClass(_this.els.fscreen, 'player-fullscreen-on');
-            }
-        });
-
-        utils.addEvent(_this.els.vswitch, 'click', function () {
-            if(video.muted = !video.muted){
-                utils.addClass(_this[0], 'player-muted');
-            }else{
-                utils.removeClass(_this[0], 'player-muted');
             }
         });
 
@@ -252,11 +265,11 @@ class Player{
         this[0].style.cursor = 'none';
         utils.removeClass(this.els.ctrls, 'player-controls-show');
     }
-    loadLrc(src){
+    loadLrc(){
         let _this = this;
         _this.els.lrc.innerHTML = '';
-        if(!src) return;
-        this.xhr.open('get', src, true);
+        if(!this.lrc) return;
+        this.xhr.open('get', this.lrc, true);
         _this.xhr.onreadystatechange = function(){
             if(_this.xhr.readyState === 4){
                 let txt = '[00:00.00]找不到歌词/字幕';
@@ -320,9 +333,9 @@ class Player{
         utils.removeClass(this.els.lrc, 'player-lrc-show');
     }
     renderLrc(){
-        if(this.options.lrcMode === 1){
+        if(this.lrcMode === 1){
             this.els.lrc.innerHTML = '';
-            let lines = this.options.showLrcLines,
+            let lines = this.showLrcLines,
                 half = Math.floor(lines/2),
                 delta = Math.round(100/(half+1));
 
@@ -343,14 +356,14 @@ class Player{
     }
     setLrcMode(lrcMode){
         if(typeof lrcMode === 'number'){
-            this.options.lrcMode = lrcMode;
+            this.lrcMode = lrcMode;
         }
-        this.renderLrc();
+        if(this.lrcKeys) this.renderLrc();
 
         if(lrcModeReg.test(this.els.lrc.className)){
-            this.els.lrc.className = this.els.lrc.className.replace(lrcModeReg, 'player-lrc-mode-'+(this.options.lrcMode || 0));
+            this.els.lrc.className = this.els.lrc.className.replace(lrcModeReg, 'player-lrc-mode-'+(this.lrcMode || 0));
         }else{
-            this.els.lrc.className += ' player-lrc-mode-'+(this.options.lrcMode || 0);
+            this.els.lrc.className += ' player-lrc-mode-'+(this.lrcMode || 0);
         }
 
         let lrcLine = this.els.lrc.children[0],
@@ -359,8 +372,8 @@ class Player{
         if(lrcLine){
             lh = lrcLine.offsetHeight + (Number(utils.getCalced(lrcLine,'lineHeight')) || 0);
         }
-        if(this.options.lrcMode === 1){
-            lrcTop = (this[0].offsetHeight - lh*9)/2;
+        if(this.lrcMode === 1){
+            lrcTop = (this[0].offsetHeight - lh*this.showLrcLines)/2;
         }else{
             lrcTop = this[0].offsetHeight - lh*2;
         }
@@ -368,31 +381,13 @@ class Player{
     }
     setLrcLines(num){
         if(typeof num === 'number'){
-            this.options.showLrcLines = num;
-            if(this.options.lrcMode === 1) this.setLrcMode();
+            this.showLrcLines = num;
+            if(this.lrcMode === 1) this.setLrcMode();
         }
-    }
-    next(o){
-        if(typeof o === 'object'){
-            for(let k in o)
-                this.options[k] = o[k];
-        }else{
-            o = this.options;
-        }
-        this.currentTime = 0;
-        this.duration = this.lrcLen = 0;
-        this.lrcKeys = this.lrcData = null;
-        this.hideLrc();
-        
-        if(o.src)
-            this.els.video.src = o.src;
-        this.els.video.poster = o.poster || '';
-    }
-    __check__(name){
-        if(this.private === 0) throw TypeError((name||'__check__')+'是私有方法，不可调用');
     }
     static toString(){
         return '{ [ class Player ] }';
     }
 }
+
 export default Player;
