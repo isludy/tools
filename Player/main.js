@@ -1,5 +1,6 @@
 import utils from '../utils/utils';
 
+const lrcModeReg = /player-lrc-mode-[0-9]+/g;
 class Player{
     constructor(id, opt=''){
         if(typeof id === 'object'){
@@ -46,6 +47,7 @@ class Player{
         this.currentTime = 0;
         this.volume = .5;
         this.duration = 0;
+        if(!this.options.showLrcLines) this.options.showLrcLines = 7;
 
         this.__bindEvent__();
         box.appendChild(this[0]);
@@ -319,20 +321,24 @@ class Player{
     }
     renderLrc(){
         if(this.options.lrcMode === 1){
-            this.els.lrc.innerHTML = '<div class="player-lrc-line player-lrc-line-active">'+this.lrcData[this.lrcKeys[this.activeIndex]]+'</div>';
-        }else{
             this.els.lrc.innerHTML = '';
-            for(let j=0, idx=0, opc=0; j<9; j++){
-                idx = this.activeIndex+j-4;
+            let lines = this.options.showLrcLines,
+                half = Math.floor(lines/2),
+                delta = Math.round(100/(half+1));
+
+            for(let j=0, idx=0, opc=delta; j<lines; j++){
+                idx = this.activeIndex+j-half;
                 if(idx <= this.activeIndex){
-                    opc += 25;
+                    opc += delta;
                 }else{
-                    opc -= 25;
+                    opc -= delta;
                 }
                 if(this.lrcKeys[idx]){
-                    this.els.lrc.innerHTML += '<div class="player-lrc-line'+(idx === this.activeIndex ? ' player-lrc-line-active' : '')+'" style="opacity: '+(opc-25)/100+';">'+this.lrcData[this.lrcKeys[idx]]+'</div>';
+                    this.els.lrc.innerHTML += '<div class="player-lrc-line'+(idx === this.activeIndex ? ' player-lrc-line-active' : '')+'" style="opacity: '+(opc-delta)/100+';">'+this.lrcData[this.lrcKeys[idx]]+'</div>';
                 }
             }
+        }else{
+            this.els.lrc.innerHTML = '<div class="player-lrc-line player-lrc-line-active">'+this.lrcData[this.lrcKeys[this.activeIndex]]+'</div>';
         }
     }
     setLrcMode(lrcMode){
@@ -340,6 +346,13 @@ class Player{
             this.options.lrcMode = lrcMode;
         }
         this.renderLrc();
+
+        if(lrcModeReg.test(this.els.lrc.className)){
+            this.els.lrc.className = this.els.lrc.className.replace(lrcModeReg, 'player-lrc-mode-'+(this.options.lrcMode || 0));
+        }else{
+            this.els.lrc.className += ' player-lrc-mode-'+(this.options.lrcMode || 0);
+        }
+
         let lrcLine = this.els.lrc.children[0],
             lh = 32,
             lrcTop;
@@ -347,19 +360,30 @@ class Player{
             lh = lrcLine.offsetHeight + (Number(utils.getCalced(lrcLine,'lineHeight')) || 0);
         }
         if(this.options.lrcMode === 1){
-            lrcTop = this[0].offsetHeight - lh*2;
-        }else{
             lrcTop = (this[0].offsetHeight - lh*9)/2;
+        }else{
+            lrcTop = this[0].offsetHeight - lh*2;
         }
-
         utils.setTransformY(this.els.lrc, lrcTop, true);
     }
-    update(){
-        let o = this.options;
+    setLrcLines(num){
+        if(typeof num === 'number'){
+            this.options.showLrcLines = num;
+            if(this.options.lrcMode === 1) this.setLrcMode();
+        }
+    }
+    next(o){
+        if(typeof o === 'object'){
+            for(let k in o)
+                this.options[k] = o[k];
+        }else{
+            o = this.options;
+        }
         this.currentTime = 0;
         this.duration = this.lrcLen = 0;
         this.lrcKeys = this.lrcData = null;
         this.hideLrc();
+        
         if(o.src)
             this.els.video.src = o.src;
         this.els.video.poster = o.poster || '';

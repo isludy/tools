@@ -29,6 +29,10 @@
 .player-lrc-show{
     display: block;
 }
+.player-lrc-mode-1{
+    font-size: 16px;
+    line-height: 1.8;
+}
 .player-lrc-line{
     opacity: 0;
 }
