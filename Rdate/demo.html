@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>扩展Date用于日历</title>
-	<script src="Rdate.js"></script>
+	<!--<script src="Rdate.js"></script>-->
 	<style type="text/css">
 		.list{
 			list-style: none;
@@ -35,18 +35,22 @@
 	<ul id="date-list" class="list"></ul>
 	<button id="prev">-</button><button id="next">+</button>
 	<input id="curdate" type="text" name="">
+	<script src="dist/Rdate.min.js"></script>
 	<script>
 		var date = new Date(),
 			dlist = document.getElementById('date-list'),
-			year = 2018,
-			month = 4,
+			year = date.getFullYear(),
+			month = date.getMonth()+1,
 			options = {mode: 1, limitRow: true, format: 'd'},
-			dates = date.dateTable(year, month, options),
+			dates = Rdate.dateTable(year, month, options),
+			today = date.getDate(),
 			next = document.getElementById('next'),
 			prev= document.getElementById('prev'),
 			curdate = document.getElementById('curdate'),
 			html;
-			console.log(dates);
+
+        console.log(dates);
+
 		function render(){
 			html = '';
 			dates.weeks.forEach(item=>{
@@ -55,8 +59,8 @@
 			dates.prevDates.forEach(item=>{
 				html += '<li class="list-item list-prev">'+item+'</li>';
 			});
-			dates.dates.forEach(item=>{
-				html += '<li class="list-item'+(item === dates.today ? ' today' : '')+'">'+item+'</li>';
+			dates.dates.forEach((item, index)=>{
+				html += '<li class="list-item'+(today-1 === index ? ' today' : '')+'">'+item+'</li>';
 			});
 			dates.nextDates.forEach(item=>{
 				html += '<li class="list-item list-next">'+item+'</li>';
@@ -71,22 +75,23 @@
 				month = 1;
 				year++;
 			}
-			dates = date.dateTable(year,month, options);
+			dates = Rdate.dateTable(year,month, options);
 			render();
-		}
+		};
 		prev.onclick = function(){
 			month--;
 			if(month < 1){
 				month = 12;
 				year--;
 			}
-			dates = date.dateTable(year, month, options);
+			dates = Rdate.dateTable(year, month, options);
 			render();
-		}
+		};
 
-		console.log(date.dateBetween(3,'2018/4/15'))
-		console.log(date.dateBetween('2018/4/15',5))
-		console.log(date.dateBetween('2018/4/25','2018/5'))
+		console.log(Rdate.dateBetween(3,'2018/4/15'));
+		console.log(Rdate.dateBetween('2018/4/15',5));
+		console.log(Rdate.dateBetween('2018/4/25','2018/5'));
+
 	</script>
 </body>
 </html>

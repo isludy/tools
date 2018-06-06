@@ -1,11 +1,19 @@
 module.exports = {
     group: {
+        Player: {
+            name: 'Player',
+            entry: 'main'
+        },
         PageSlide: {
             name: 'PageSlide',
             entry: 'main'
         },
-        Player: {
-            name: 'Player',
+        Rdate: {
+            name: 'Rdate',
+            entry: 'main'
+        },
+        Calendar: {
+            name: 'Calendar',
             entry: 'main'
         }
     },

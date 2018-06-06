@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendar</title>
+    <style>
+        .calendar-weeker{
+            background: #888;
+            color: #fff;
+        }
+        .calendar-weeker-item,
+        .calendar-dater-item{
+            display: inline-block;
+            width: 14.28%;
+            text-align: center;
+        }
+        .calendar-dater{
+            background: #eee;
+        }
+        .calendar-dater-prev,
+        .calendar-dater-next{
+            color: #888;
+            background: #ddd;
+        }
+        .calendar-weeker-active,
+        .calendar-dater-active{
+            background: #b00;
+        }
+    </style>
+</head>
+<body>
+<div id="box"></div>
+<script src="dist/Calendar.min.js"></script>
+<script>
+    var box = document.getElementById('box');
+    var cld = new Calendar(2018, 7, {mode: 1, format: 'd'});
+    box.innerHTML = cld.getWeeker({activeMode: 1})+cld.getDater();
+console.log(cld);
+</script>
+</body>
+</html>

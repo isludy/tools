@@ -105,9 +105,14 @@ function writeEntryFiles(directive, callback){
             break;
         case 'current':
             if(argv[4]){
-                let arr = writeEntryFile(argv[4]);
-                config.entry[arr[0]] = arr[1];
-                tempFiles.set(arr[0], arr[1]);
+                if(toolsConfig.group[argv[4]]){
+                    let arr = writeEntryFile(argv[4]);
+                    config.entry[arr[0]] = arr[1];
+                    tempFiles.set(arr[0], arr[1]);
+                }else{
+                    console.error('\x1B[31m%s\x1b[0m', '\tERROR：在配置中未找到名为“'+argv[4]+'”的组件。');
+                    return;
+                }
             }else{
                 let modestr = config.mode === 'development' ? 'dev-c' : 'build-c';
                 console.error('\x1B[31m%s\x1b[0m', '\tERROR：命令 “npm run '+modestr+'” 后必须传入要处理的文件夹名作为参数！例如：npm run '+modestr+' Player');

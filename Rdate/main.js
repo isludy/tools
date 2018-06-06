@@ -1,27 +1,33 @@
-const regNum = /^\d+$/g;
-const weeks = ['日','一','二','三','四','五','六'];
-
-class Rdate{
-    constructor(){
-
-    }
+let todayDate = new Date();
+export default {
+    todayDate,
+    year: todayDate.getFullYear(),
+    month: todayDate.getMonth()+1,
+    date: todayDate.getDate(),
+    day: todayDate.getDay(),
+    time: todayDate.getTime(),
+    hour: todayDate.getHours(),
+    minute: todayDate.getMinutes(),
+    second: todayDate.getSeconds(),
+    ms: todayDate.getMilliseconds(),
+    weeks: ['日','一','二','三','四','五','六'],
     /**
      * 格式化时间
-     * @param format {String} 可选，格式字符串，ymdhisc几个字母，大写表示不满10（毫秒1000）时前位填充0。 字符任意组合与排序，中间也可以放任意符号。
-     例如：
-     普通 => "Y/M/D H:I:S.C"
-     文艺 => "Y-M-D H:I:S.C" 或 "Y-m-d h:i:s"
-     二狗 => "i/d-h*y-m-Y" 或 "YYYYDDDDDDDmmm" 或 "Y-/#$@M***m H"....
-     @param time {number} 时间戳，可选参数，如果不传入参数，则会输出当天日期
+     * @param format 格式字符串，ymdhisc几个字母，大写表示不满10（毫秒1000）时前位填充0。 字符任意组合与排序，中间也可以放任意符号。
+     * @param time 时间戳
+     * @return {string}
      */
-    format(format, time){
-        if(regNum.test(format)){
-            time = format;
-            format = null;
-        }
+    format(format = 'Y/M/D H:I:S.C', time = -1){
         let date = new Date();
-        time = time || date.getTime();
-        date.setTime(time);
+
+        if(typeof format === 'number'){
+            time = format;
+            format = 'Y/M/D H:I:S.C';
+        }
+
+        if(time !== -1)
+            date.setTime(time);
+
         let o = {
             Y: date.getFullYear(),
             m: date.getMonth()+1,
@@ -38,69 +44,82 @@ class Rdate{
         o.I = (o.i+100+'').slice(1);
         o.S = (o.s+100+'').slice(1);
         o.C = (o.c+1000+'').slice(1);
-        if(typeof format === 'string'){
-            format = format.split('');
-            for(let len=format.length; len--;){
-                let k = format[len];
-                if(o[k]) format[len] = o[k];
-            }
-            return format.join('');
+
+        format = format.split('');
+        for(let len=format.length; len--;){
+            let k = format[len];
+            if(o[k]) format[len] = o[k];
         }
-        return o.Y + '/' + o.M + '/' + o.D + ' ' + o.H + ':' + o.I + ':' + o.S + ':' + o.C;
-    }
+        return format.join('');
+    },
     /**
      * 获取某个月的最后一天的日期，这是为了方便获取当月的天数
-     * @param year {number} 年，可选，不输入时默认当前年份
-     * @param month {number} 月，可选，不输入时默认当前月份
+     * @param year 年
+     * @param month 月
+     * @return {number}
      */
-    lastDate(year, month) {
+    lastDate(year = -1, month = -1) {
         let date = new Date();
-        if(typeof year === 'number' && year > 0)
-            date.setFullYear(year);
-        if(typeof month === 'number' && month <= 12 && month > 0)
-            date.setMonth(month);
-        else
-            date.setMonth(date.getMonth()+1);
+
+        switch (arguments.length) {
+            case 1:
+                if(year > 0 && year <= 12)
+                    date.setMonth(year);
+                break;
+            case 2:
+                if(year >= 0)
+                    date.setFullYear(year);
+                if(month > 0 && month <= 12)
+                    date.setMonth(month);
+                break;
+            default:
+                date.setMonth(date.getMonth()+1);
+        }
+
         date.setDate(0);
+
         return date.getDate();
-    }
+    },
     /**
      * 获取某个月的日期，以数组形式返回
-     * @param year {number,Object} 年份，如果输入为number时当作年份，但输入object时，则取当前年份和月份
-     * @param month {number} 月份，如果第一个参数输入是object，此参数被忽略
-     * @param o {Object} 可选参数，用于配置一些模式。格式如：
-     *    {
-	      mode: {number}  默认0，即周日在首，周六在末。 为1时，周一在首，周日在末
-          format: {String} 规定输出的日期格式，默认"Y/M/D"
-          limitRow: {boolean} 日期布局，默认false, 即不保持7x6格布局，例如2月份天数少，可能只有5行，即输出7x5天的日期。 为true时, 保持7x6格布局，如2月份如果不满6行，则会取前一个月或后一个月的天数来补齐整行
- *    }
+     * @param year 年份，如果输入为number时当作年份，但输入object时，则取当前年份和月份
+     * @param month 月份，如果第一个参数输入是object，此参数被忽略
+     * @param o 可选参数，用于配置一些模式。格式如：
+     *  {
+	 *      mode: {number}  默认0，即周日在首，周六在末。 为1时，周一在首，周日在末
+     *      format: {String} 规定输出的日期格式，默认"Y/M/D"
+     *      limitRow: {boolean} 日期布局，默认false, 即不保持7x6格布局，例如2月份天数少，可能只有5行，即输出7x5天的日期。 为true时, 保持7x6格布局，如2月份如果不满6行，则会取前一个月或后一个月的天数来补齐整行
+     *  }
+     * @return {object}
      */
-    dateTable(year, month, o) {
+    dateTable(year=-1, month=-1, o={
+        format: 'Y/M/D',
+        mode: 0,
+        limitRow: false
+    }) {
         let date = new Date(),
-            today = date.getTime(),
             last,
             beforeDays,
             afterDays,
             startTime,
             total,
             table;
-        if(typeof year === 'object')
+
+        if(typeof year === 'object'){
             o = year;
-        else if(typeof year === 'number' && year > 0 && typeof month === 'number' && month <= 12 && month > 0){
-            date.setFullYear(year);
-            date.setMonth(month-1);
-        }else
-            date.setTime(date.getTime());
+        }else{
+            if(year !== -1)
+                date.setFullYear(year);
+            if(month !== -1)
+                date.setMonth(month-1);
+        }
 
         last = this.lastDate(date.getFullYear(), date.getMonth()+1);
-        o.format = o.format || 'Y/M/D';
 
         table = {
             year: date.getFullYear(),
             month: date.getMonth()+1,
-            date: date.getDate(),
-            today: this.format(o.format, today),
-            weeks: weeks.slice(0),
+            weeks: this.weeks.slice(0),
             dates: [],
             prevDates: [],
             nextDates: []
@@ -168,15 +187,15 @@ class Rdate{
         table.prevDates = table.dates.splice(0, beforeDays);
         table.nextDates = table.dates.splice(-afterDays, afterDays);
         return table;
-    }
+    },
     /**
      * 用于获取两个时间之间的日期，用于移动端竖向列表。比如滚动列表，不断加载新的日期会用到
-     * @param start {number,String} 起始时间或向前天数。 比如基于第二个参数的时期向前取5天，则输入5即可
-     * @param end {number,String} 终点时间或向后天数，同上。
-     * @param format {String} 可选参数，规定时间格式。默认'Y/M/D'
+     * @param start 起始时间或向前天数。 比如基于第二个参数的时期向前取5天，则输入5即可
+     * @param end 终点时间或向后天数，同上。
+     * @param format 可选参数，规定时间格式。默认'Y/M/D'
      */
-    dateBetween(start, end, format){
-        var list = [];
+    dateBetween(start, end, format='Y/M/D'){
+        let list = [];
         if(typeof start === 'string' && typeof end === 'string'){
             start = new Date(start).getTime();
             end = new Date(end).getTime()+86400000;
@@ -190,8 +209,8 @@ class Rdate{
             return list;
         }
         for(; start < end; start += 86400000){
-            list.push(this.format((format || 'Y/M/D'),start));
+            list.push(this.format(format,start));
         }
         return list;
     }
-}
+};
