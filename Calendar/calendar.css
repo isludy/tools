@@ -1,0 +1,39 @@
+.calendar{
+    max-width: 320px;
+    margin: 0 auto;
+}
+.calendar-weeker{
+    background: #82b1ea;
+    color: #fff;
+    font-weight: bolder;
+}
+.calendar-weeker-item,
+.calendar-dater-item{
+    display: inline-block;
+    width: 12.2857%;
+    text-align: center;
+    line-height: 1;
+    font-size: 16px;
+    padding: 3%;
+    margin: 1%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+.calendar-dater{
+    background: #e8e8e8;
+}
+.calendar-dater-item{
+    background: #fff;
+    border-radius: 4px;
+    color: #333;
+}
+.calendar-dater-prev,
+.calendar-dater-next{
+    color: #fff;
+    background: #d2d2d2;
+}
+.calendar-dater-active{
+    background: #fb0;
+    color: #fff;
+}

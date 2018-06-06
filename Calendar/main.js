@@ -49,7 +49,11 @@ class Calendar{
             if(activeIndex < 0)
                 activeIndex = 6;
         }
-        if(o.activeMode === 1 && Rdate.year === this.dateTable.year && Rdate.month === this.dateTable.month){
+
+        if(o.activeMode === 1){
+            if(Rdate.year === this.dateTable.year && Rdate.month === this.dateTable.month)
+                strictActive = true;
+        }else{
             strictActive = true;
         }
 
@@ -76,7 +80,6 @@ class Calendar{
             itemNextClass: 'calendar-dater-next',
             activeClass: 'calendar-dater-active',
             activeMode: 1,
-            format: 'd',
             returnType: 0
         };
         for(let k in options)
@@ -84,7 +87,7 @@ class Calendar{
         options = null;
 
         let dates = this.dateTable,
-            today = Rdate.format(o.format),
+            isCur = dates.year === Rdate.year && dates.month === Rdate.month,
             active = '',
             html = '',
             box;
@@ -92,11 +95,12 @@ class Calendar{
         dates.prevDates.forEach(item=>{
             html += '<'+o.item+' class="'+o.itemClass+' '+o.itemPrevClass+'">'+item+'</'+o.item+'>';
         });
-        dates.dates.forEach(item=>{
-            if(o.activeMode === 0){
-                if(item === today) active = ' '+o.activeClass;
+        dates.dates.forEach((item, index)=>{
+            index++;
+            if( (o.activeMode === 0 && index === Rdate.date) || (isCur && index === Rdate.date)){
+                active = ' '+o.activeClass;
             }else{
-                if(item === dates.today) active = ' '+o.activeClass;
+                active = '';
             }
             html += '<'+o.item+' class="'+o.itemClass+active+'">'+item+'</'+o.item+'>';
         });
@@ -112,6 +116,39 @@ class Calendar{
             box = '<'+o.container+' class="'+o.className+'">'+html+'</'+o.container+'>';
         }
 
+        return box;
+    }
+    getSelector(options){
+        let o = {
+            name: 'year',
+            container: 'select',
+            className: 'calendar-selector',
+            item: 'option',
+            itemClass: 'calendar-selector-item',
+            returnType: 0,
+            from: 1970,
+            to: Rdate.year+10
+        };
+        for(let k in options)
+            o[k] = options[k];
+        options = null;
+
+        if(o.name === 'month'){
+            o.from = 1;
+            o.to = 13;
+        }
+        let html = '',
+            box;
+        for(let i = o.from; i<o.to; i++){
+            html += '<'+o.item+' class="'+o.itemClass+'"'+(i===this.dateTable[o.name] ? 'selected' : '')+'>'+i+'</'+o.item+'>';
+        }
+        if(o.returnType === 1){
+            box = document.createElement(o.container);
+            box.className = o.className;
+            box.innerHTML = html;
+        }else{
+            box = '<'+o.container+' class="'+o.className+'">'+html+'</'+o.container+'>';
+        }
         return box;
     }
     static toString(){
