@@ -121,10 +121,15 @@ class Calendar{
     getSelector(options){
         let o = {
             name: 'year',
-            container: 'select',
+            container: 'div',
+            item: 'div',
+            list: 'div',
+            current: 'div',
+            currentClass: 'calendar-selector-current',
             className: 'calendar-selector',
-            item: 'option',
             itemClass: 'calendar-selector-item',
+            listClass: 'calendar-selector-list',
+            selectedClass: 'calendar-selector-selected',
             returnType: 0,
             from: 1970,
             to: Rdate.year+10
@@ -140,8 +145,9 @@ class Calendar{
         let html = '',
             box;
         for(let i = o.from; i<o.to; i++){
-            html += '<'+o.item+' class="'+o.itemClass+'"'+(i===this.dateTable[o.name] ? 'selected' : '')+'>'+i+'</'+o.item+'>';
+            html += '<'+o.item+' class="'+o.itemClass+'"'+(i===this.dateTable[o.name] ? ' ' + o.selectedClass : '')+'>'+i+'</'+o.item+'>';
         }
+        html = '<'+o.current+' class="'+o.currentClass+'">'+this.dateTable[o.name]+'</'+o.current+'><'+o.list+' class="'+o.listClass+'">'+html+'</'+o.list+'>';
         if(o.returnType === 1){
             box = document.createElement(o.container);
             box.className = o.className;
