@@ -11,7 +11,14 @@
 <script>
     var box = document.getElementById('box');
     var cld = new Calendar({mode: 1, limitRow: true, format: 'd'});
-    box.innerHTML = cld.getWeeker()+cld.getSelector()+cld.getSelector({name:'month'})+cld.getDater({activeMode: 1});
+    var weeker = cld.weeker();
+    var pickery = cld.picker();
+    var pickerm = cld.picker({name:'month'});
+    var dater = cld.dater({activeMode:1});
+    var ctrls = cld.controller(pickery);
+    box.appendChild(weeker);
+    box.appendChild(ctrls);
+    box.appendChild(dater);
 </script>
 </body>
 </html>

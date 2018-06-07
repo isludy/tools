@@ -171,5 +171,14 @@ module.exports = {
             utils.removeEvent(el3, events[2], endFn);
             fn3.call(this, e);
         }
+    },
+    options(target, source, bool = true){
+        for(let k in source)
+            if(source.hasOwnProperty(k)) {
+                if ((bool && target.hasOwnProperty(k)) || !bool) {
+                    target[k] = source[k];
+                }
+            }
+        return target;
     }
 };
