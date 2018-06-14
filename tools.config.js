@@ -15,6 +15,10 @@ module.exports = {
         Calendar: {
             name: 'Calendar',
             entry: 'main'
+        },
+        ScaleControl: {
+            name: 'ScaleControl',
+            entry: 'main'
         }
     },
     merge: {
