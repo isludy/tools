@@ -180,5 +180,22 @@ module.exports = {
                 }
             }
         return target;
+    },
+    contains(target, context){
+        if(context.contains){
+            return context.contains(target);
+        }else{
+            if(target === context){
+                return true;
+            }else{
+                let children = context.getElementsByTagName('*'),
+                    len = children.length,
+                    i = 0;
+                for(; i<len; i++){
+                    if(target === children[i]) return true;
+                }
+            }
+        }
+        return false;
     }
 };

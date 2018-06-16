@@ -30,33 +30,34 @@ class ScaleControl {
         this.el = null;
         ScaleControl.bindEvent(this);
     }
-    bind(el, context = document.body){
+    bind(el){
         if(el && el.nodeType === 1){
-            let info = el.getBoundingClientRect();
-
-            this.matrix[0] = info.left;
-            this.matrix[1] = info.top;
-            this.matrix[2] = info.width;
-            this.matrix[3] = info.height;
+            this.matrix[0] = el.offsetLeft;
+            this.matrix[1] = el.offsetTop;
+            this.matrix[2] = el.offsetWidth;
+            this.matrix[3] = el.offsetHeight;
             if(this.el !== el){
-                this.matrix[4] = info.width;
-                this.matrix[5] = info.height;
+                this.matrix[4] = el.offsetWidth;
+                this.matrix[5] = el.offsetHeight;
             }
             this.el = el;
-            context.appendChild(this[0]);
+            el.parentNode.appendChild(this[0]);
             ScaleControl.fixToEl(el, this[0]);
         }
     }
     unbind(){
         this.matrix[0] = this.matrix[1] = this.matrix[2] = this.matrix[3] = this.matrix[4] = this.matrix[5] = 0;
-        this[0].parentNode.removeChild(this[0]);
+        if(this[0].parentNode)
+            this[0].parentNode.removeChild(this[0]);
+    }
+    contains(target){
+        return utils.contains(target, this[0]);
     }
     static fixToEl(el, box){
-        let elInfo = el.getBoundingClientRect();
-        box.style.top = elInfo.top + 'px';
-        box.style.left = elInfo.left + 'px';
-        box.style.width = elInfo.width + 'px';
-        box.style.height = elInfo.height + 'px';
+        box.style.top = el.offsetTop + 'px';
+        box.style.left = el.offsetLeft + 'px';
+        box.style.width = el.offsetWidth + 'px';
+        box.style.height = el.offsetHeight + 'px';
     }
     static bindEvent(_this){
         let w, h, pX, pY, startX, startY, endX, endY, isX, isY, isMove, isLeft, isTop,

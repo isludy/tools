@@ -5,33 +5,46 @@
     <title>尺寸控制器</title>
     <link rel="stylesheet" href="./ScaleControl.css">
     <style>
+        .container{
+            position: relative;
+            margin: 300px 0 0 150px;
+        }
         .box{
             width: 300px;
             height: 300px;
             background: #2aa126;
         }
-        img{
+        .img{
             position: absolute;
+            width: 240px;
+            height: 180px;
+            background: #ea8f23;
         }
 
     </style>
 </head>
 <body>
-<div id="box" class="box"></div>
-<img id="img" src="http://assets.wenweipo.com/image/2018/06/12/adolf_956bc58ac9d2e8869de6a7162dc1afe3.jpg" alt="">
+<div class="container">
+    <div class="box">代表相对定位的元素</div>
+    <div class="img">代表绝对定位的图片</div>
+</div>
 
 <script src="./dist/ScaleControl.min.js"></script>
 <script>
-    var box = document.getElementById('box'),
-        img = document.getElementById('img');
 
-    var sc = new ScaleControl();
-    box.onclick = function(){
-        sc.bind(box);
-    };
-    img.onclick = function(){
-        sc.bind(img);
-    };
+    var ctrls = new ScaleControl();
+    var box = document.querySelector('.box');
+    var img = document.querySelector('.img');
+
+    document.onclick = function(e){
+        if(e.target === box || e.target === img){
+            ctrls.bind(e.target);
+        }else{
+            if(!ctrls.contains(e.target)) {
+                ctrls.unbind();
+            }
+        }
+    }
 </script>
 </body>
 </html>

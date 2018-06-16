@@ -84,35 +84,44 @@ export default {
      * 获取某个月的日期，以数组形式返回
      * @param year 年份，如果输入为number时当作年份，但输入object时，则取当前年份和月份
      * @param month 月份，如果第一个参数输入是object，此参数被忽略
-     * @param o 可选参数，用于配置一些模式。格式如：
+     * @param opt 可选参数，用于配置一些模式。格式如：
      *  {
 	 *      mode: {number}  默认0，即周日在首，周六在末。 为1时，周一在首，周日在末
      *      format: {String} 规定输出的日期格式，默认"Y/M/D"
-     *      limitRow: {boolean} 日期布局，默认false, 即不保持7x6格布局，例如2月份天数少，可能只有5行，即输出7x5天的日期。 为true时, 保持7x6格布局，如2月份如果不满6行，则会取前一个月或后一个月的天数来补齐整行
+     *      limitRow: {boolean} 日期布局，默认true, 即保持7x6格布局，如2月份如果不满6行，则会取前一个月或后一个月的天数来补齐整行。为false时，不保持7x6格布局，例如2月份天数少，可能只有5行，即输出7x5天的日期。
      *  }
      * @return {object}
      */
-    dateTable(year=-1, month=-1, o={
-        format: 'Y/M/D',
-        mode: 0,
-        limitRow: false
-    }) {
+    dateTable(year=-1, month=-1, opt) {
         let date = new Date(),
             last,
             beforeDays,
             afterDays,
             startTime,
             total,
-            table;
+            table,
+            o = {
+                format: 'Y/M/D',
+                mode: 0,
+                limitRow: true
+            };
 
         if(typeof year === 'object'){
-            o = year;
+            opt = year;
         }else{
             if(year !== -1)
                 date.setFullYear(year);
             if(month !== -1)
                 date.setMonth(month-1);
         }
+        if(typeof opt === 'object'){
+            for(let k in opt){
+                if(o.hasOwnProperty(k)){
+                    o[k] = opt[k];
+                }
+            }
+        }
+        opt = null;
 
         last = this.lastDate(date.getFullYear(), date.getMonth()+1);
 
@@ -161,8 +170,8 @@ export default {
             table.weeks.splice(0, 1);
             table.weeks.push(this.weeks[0]);
         }
-        //limitRow: 默认false, 不保持7x6格布局
-        //limitRow: true, 保持7x6格布局
+        //limitRow: 默认true, 保持7x6格布局
+        //limitRow: false, 不保持7x6格布局
         if(o.limitRow && total < 42){
             //如果天数只有四行，比如2月份有可能，则分别添加到前、后各一行
             if(42 - total >= 14){

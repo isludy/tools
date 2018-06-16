@@ -10,15 +10,9 @@
 <script src="dist/Calendar.min.js"></script>
 <script>
     var box = document.getElementById('box');
-    var cld = new Calendar({mode: 1, limitRow: true, format: 'd'});
-    var weeker = cld.weeker();
-    var pickery = cld.picker();
-    var pickerm = cld.picker({name:'month'});
-    var dater = cld.dater({activeMode:1});
-    var ctrls = cld.controller(pickery);
-    box.appendChild(weeker);
-    box.appendChild(ctrls);
-    box.appendChild(dater);
+    var cld = new Calendar({mode: 1, format: 'd'});
+    box.appendChild(cld.weeker());
+    box.appendChild(cld.dater({activeMode:1}));
 </script>
 </body>
 </html>
