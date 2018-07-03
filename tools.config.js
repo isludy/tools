@@ -19,6 +19,10 @@ module.exports = {
         ScaleControl: {
             name: 'ScaleControl',
             entry: 'main'
+        },
+        Rnav: {
+            name: 'Rnav',
+            entry: 'main'
         }
     },
     merge: {
