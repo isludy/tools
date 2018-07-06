@@ -16,6 +16,11 @@ class Rscrollbar {
             x: null
         };
 
+        this.events = ['mousedown', 'mousemove', 'mouseup'];
+        if(utils.isTouch()){
+            this.events = ['touchstart', 'touchmove', 'touchend'];
+        }
+
         if(this.scrollbar.y){
             this.thumb.y = this.scrollbar.y.querySelector('.rscroll-thumb');
             Rscrollbar.createScroll(this, 'y', 'offsetHeight', 'offsetTop', 'height','top', 'scrollHeight', 'scrollTop', 'clientY', 'offsetY', 'maxY', 'spaceY');
@@ -29,7 +34,8 @@ class Rscrollbar {
         }
     }
     static createScroll(_, y, offsetHeight, offsetTop, height, top, scrollHeight, scrollTop, clientY, offsetY, maxY, spaceY){
-        let oh, sh, th;
+        let oh, sh, th, isTouch = utils.isTouch();
+
         oh = _.content[offsetHeight];
         sh = _.content[scrollHeight];
 
@@ -55,42 +61,55 @@ class Rscrollbar {
             _.thumb[y].style[top] = ((this[scrollTop]/_[maxY])*_[spaceY]) + 'px';
             _[scrollTop] = this[scrollTop];
         });
-        _.scrollbar[y].addEventListener('mousedown', function (e) {
-            if(e.button > 0 || _.thumb[y].contains(e.target)) return false;
+        _.scrollbar[y].addEventListener(_.events[0], function (e) {
+            if(e.button > 0 || utils.contains(e.target, _.thumb[y])) return false;
+            e = isTouch ? e.targetTouches[0] : e;
             _.content[scrollTop] = e[offsetY]/this[offsetHeight] * _[maxY];
         });
-        _.thumb[y].addEventListener('mousedown', function (e1) {
-            let start = e1[clientY],
-                end = start,
-                cur = _.thumb[y][offsetTop],
-                prev = start,
-                result = 0;
-            utils.addClass(document.body, 'rscroll-unselect');
-            document.addEventListener('mousemove', moveFn);
-            document.addEventListener('mouseup', endFn);
-            function moveFn(e2){
-                end = e2[clientY];
-                result = end - start + cur;
 
-                if(_.content[scrollTop] <= 0 && end - prev < 0){
-                    start = end;
-                    cur = _.thumb[y][scrollTop];
-                    result = 0;
-                }else if(_.content[scrollTop] >= _[maxY] && end - prev > 0){
-                    start = end;
-                    cur = _.thumb[y][offsetTop];
-                    result = _[spaceY];
-                }
-                _.thumb[y].style[top] = result + 'px';
-                _[scrollTop] = (result / _[spaceY])*_[maxY];
-                prev = end;
+        let start = 0, end = 0, cur = 0, prev = 0, result = 0;
+
+        _.thumb[y].addEventListener(_.events[0], startFn);
+
+        if(isTouch){
+            _.content.addEventListener('touchstart', startFn);
+        }
+
+        function startFn(e1) {
+            console.log(e1);
+            e1 = isTouch ? e1.targetTouches[0] : e1;
+            start = e1[clientY];
+            end = prev = start;
+            cur = _.thumb[y][offsetTop];
+            result = 0;
+            utils.addClass(document.body, 'rscroll-unselect');
+            document.addEventListener(_.events[1], moveFn);
+            document.addEventListener(_.events[2], endFn);
+        }
+        function moveFn(e2){
+            e2 = isTouch ? e2.targetTouches[0] : e2;
+            end = e2[clientY];
+            result = end - start + cur;
+
+            if(_.content[scrollTop] <= 0 && end - prev < 0){
+                start = end;
+                cur = _.thumb[y][scrollTop];
+                result = 0;
+            }else if(_.content[scrollTop] >= _[maxY] && end - prev > 0){
+                start = end;
+                cur = _.thumb[y][offsetTop];
+                result = _[spaceY];
             }
-            function endFn(){
-                document.removeEventListener('mousemove', moveFn);
-                document.removeEventListener('mouseup', endFn);
-                utils.removeClass(document.body, 'rscroll-unselect');
-            }
-        });
+            _.thumb[y].style[top] = result + 'px';
+            _[scrollTop] = (result / _[spaceY])*_[maxY];
+            prev = end;
+        }
+        function endFn(){
+            document.removeEventListener(_.events[1], moveFn);
+            document.removeEventListener(_.events[2], endFn);
+            utils.removeClass(document.body, 'rscroll-unselect');
+        }
+
     }
 }
 export default Rscrollbar;
