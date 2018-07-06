@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>自定义滚动条</title>
+    <script src="dist/Rscrollbar.min.js"></script>
+    <link rel="stylesheet" href="Rscrollbar.css">
+    <style>
+        #yscroll,
+        #xscroll,
+        #xyscroll{
+            width: 640px;
+            height: 300px;
+            border: 1px solid #ddd;
+            margin: 10px auto;
+            overflow: hidden;
+            position: relative;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        .rscroll-content{
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+<div id="yscroll">
+    <div class="rscroll-bar rscroll-y">
+        <div class="rscroll-thumb"></div>
+    </div>
+    <div class="rscroll-content">
+        <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+        <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+        <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+        <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+        <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+        <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+        <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+        <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+        <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+        <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+        <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+        <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+    </div>
+</div>
+
+<div id="xscroll">
+    <div class="rscroll-bar rscroll-x">
+        <div class="rscroll-thumb"></div>
+    </div>
+    <div class="rscroll-content">
+        text content text content text content text content text content text content text content text content
+        text content text content text content text content text content text content text content text content
+    </div>
+</div>
+
+<div id="xyscroll">
+    <div class="rscroll-bar rscroll-x">
+        <div class="rscroll-thumb"></div>
+    </div>
+    <div class="rscroll-bar rscroll-y">
+        <div class="rscroll-thumb"></div>
+    </div>
+    <div class="rscroll-content">
+        <p>text content text content text content text content text content text content text content text content
+        text content text content text content text content text content text content text content text content</p>
+        <p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p>
+        <p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p>
+        <p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p>
+        <p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p>
+        <p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p>
+        <p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p>
+        <p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p>
+        <p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p>
+        <p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p><p>text content text content text content text content text content text content text content text content
+        text content text content text content text content text content text content text content text content</p>
+        <p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p>
+        <p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p>
+        <p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p>
+        <p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p>
+        <p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p>
+    </div>
+</div>
+
+<script>
+    let rsy = new Rscrollbar('yscroll');
+    console.log(rsy);
+    let rsx = new Rscrollbar('xscroll');
+    console.log(rsx);
+    let rsxy = new Rscrollbar('xyscroll');
+    console.log(rsxy);
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+.rscroll-bar{
+    position: absolute;
+    background: #888;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    z-index: 1;
+}
+.rscroll-y{
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 100%;
+}
+.rscroll-x{
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 10px;
+}
+.rscroll-thumb{
+    position: relative;
+    background: #ddd;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+.rscroll-y .rscroll-thumb{
+    height: 0;
+    width: 8px;
+    margin: 0 1px;
+}
+.rscroll-x .rscroll-thumb{
+    width: 0;
+    height: 8px;
+    margin: 1px 0;
+}
+.rscroll-content{
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+.rscroll-unselect{
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+}
