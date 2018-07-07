@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
     <title>自定义滚动条</title>
     <script src="dist/Rscrollbar.min.js"></script>
     <link rel="stylesheet" href="Rscrollbar.css">
@@ -25,6 +26,7 @@
     </style>
 </head>
 <body>
+<h1>Y方向</h1>
 <div id="yscroll">
     <div class="rscroll-bar rscroll-y">
         <div class="rscroll-thumb"></div>
@@ -44,7 +46,7 @@
         <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
     </div>
 </div>
-
+<h1>X方向</h1>
 <div id="xscroll">
     <div class="rscroll-bar rscroll-x">
         <div class="rscroll-thumb"></div>
@@ -54,7 +56,7 @@
         text content text content text content text content text content text content text content text content
     </div>
 </div>
-
+<h1>YX方向</h1>
 <div id="xyscroll">
     <div class="rscroll-bar rscroll-x">
         <div class="rscroll-thumb"></div>
@@ -98,11 +100,11 @@
 </div>
 
 <script>
-    let rsy = new Rscrollbar('yscroll');
+    var rsy = new Rscrollbar('yscroll');
     console.log(rsy);
-    let rsx = new Rscrollbar('xscroll');
+    var rsx = new Rscrollbar('xscroll');
     console.log(rsx);
-    let rsxy = new Rscrollbar('xyscroll');
+    var rsxy = new Rscrollbar('xyscroll');
     console.log(rsxy);
 </script>
 </body>

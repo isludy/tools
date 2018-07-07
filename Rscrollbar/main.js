@@ -1,7 +1,12 @@
 import utils from '../utils/utils';
 
 class Rscrollbar {
+    /**
+     * 必须的id
+     * @param id
+     */
     constructor(id){
+        let isTouch = utils.isTouch();
         this.body = document.getElementById(id);
         if(!this.body)
             throw new Error('Element is not found by id "'+id+'"');
@@ -17,24 +22,46 @@ class Rscrollbar {
         };
 
         this.events = ['mousedown', 'mousemove', 'mouseup'];
-        if(utils.isTouch()){
+        if(isTouch){
             this.events = ['touchstart', 'touchmove', 'touchend'];
+            if(this.scrollbar.y)
+                Rscrollbar.touchSscroll(this, 'scrollTop','clientY', 'maxY');
+            if(this.scrollbar.x)
+                Rscrollbar.touchSscroll(this, 'scrollLeft','clientX', 'maxX');
         }
 
         if(this.scrollbar.y){
             this.thumb.y = this.scrollbar.y.querySelector('.rscroll-thumb');
             Rscrollbar.createScroll(this, 'y', 'offsetHeight', 'offsetTop', 'height','top', 'scrollHeight', 'scrollTop', 'clientY', 'offsetY', 'maxY', 'spaceY');
             utils.wheel(this.content, function (e) {
+                e.preventDefault();
                 this.scrollTop += e.deltaY;
-            });
+            },{passive: false});
         }
         if(this.scrollbar.x){
             this.thumb.x = this.scrollbar.x.querySelector('.rscroll-thumb');
             Rscrollbar.createScroll(this, 'x', 'offsetWidth', 'offsetLeft', 'width','left', 'scrollWidth', 'scrollLeft', 'clientX', 'offsetX', 'maxX', 'spaceX');
         }
     }
+    /**
+     * 创建属性和绑定事件，拖拽滚动条产生的动作。
+     * 不应在外部定义或调用此方法
+     * @param _
+     * @param y
+     * @param offsetHeight
+     * @param offsetTop
+     * @param height
+     * @param top
+     * @param scrollHeight
+     * @param scrollTop
+     * @param clientY
+     * @param offsetY
+     * @param maxY
+     * @param spaceY
+     * @returns {*}
+     */
     static createScroll(_, y, offsetHeight, offsetTop, height, top, scrollHeight, scrollTop, clientY, offsetY, maxY, spaceY){
-        let oh, sh, th, isTouch = utils.isTouch();
+        let oh, sh, th, isTouch = utils.isTouch(), start = 0, end = 0, cur = 0, prev = 0, result = 0, dir = 0, prevent = {passive: false};
 
         oh = _.content[offsetHeight];
         sh = _.content[scrollHeight];
@@ -67,35 +94,34 @@ class Rscrollbar {
             _.content[scrollTop] = e[offsetY]/this[offsetHeight] * _[maxY];
         });
 
-        let start = 0, end = 0, cur = 0, prev = 0, result = 0;
+        _.thumb[y].addEventListener(_.events[0], startFn, prevent);
 
-        _.thumb[y].addEventListener(_.events[0], startFn);
-
-        if(isTouch){
-            _.content.addEventListener('touchstart', startFn);
-        }
-
-        function startFn(e1) {
-            console.log(e1);
-            e1 = isTouch ? e1.targetTouches[0] : e1;
-            start = e1[clientY];
+        function startFn(e) {
+            e.preventDefault();
+            e = isTouch ? e.targetTouches[0] : e;
+            start = e[clientY];
             end = prev = start;
             cur = _.thumb[y][offsetTop];
             result = 0;
+
             utils.addClass(document.body, 'rscroll-unselect');
-            document.addEventListener(_.events[1], moveFn);
+
+            document.addEventListener(_.events[1], moveFn, prevent);
             document.addEventListener(_.events[2], endFn);
         }
-        function moveFn(e2){
-            e2 = isTouch ? e2.targetTouches[0] : e2;
-            end = e2[clientY];
+        function moveFn(e){
+            e.preventDefault();
+            e = isTouch ? e.targetTouches[0] : e;
+            end = e[clientY];
+            dir = end - prev < 0 ? -1 : 1;
+
             result = end - start + cur;
 
-            if(_.content[scrollTop] <= 0 && end - prev < 0){
+            if(_.content[scrollTop] <= 2 && dir < 0){
                 start = end;
                 cur = _.thumb[y][scrollTop];
                 result = 0;
-            }else if(_.content[scrollTop] >= _[maxY] && end - prev > 0){
+            }else if(_.content[scrollTop] >= _[maxY]-2 &&  dir > 0){
                 start = end;
                 cur = _.thumb[y][offsetTop];
                 result = _[spaceY];
@@ -105,11 +131,74 @@ class Rscrollbar {
             prev = end;
         }
         function endFn(){
-            document.removeEventListener(_.events[1], moveFn);
+            document.removeEventListener(_.events[1], moveFn, prevent);
             document.removeEventListener(_.events[2], endFn);
             utils.removeClass(document.body, 'rscroll-unselect');
         }
 
+    }
+
+    /**
+     * 移动端拖拽内容时
+     * 不应在外部定义或调用此方法
+     * @param _
+     * @param scrollTop
+     * @param clientY
+     * @param maxY
+     */
+    static touchSscroll(_, scrollTop, clientY, maxY){
+        let touchY = 0, end = 0, startTop = 0, prev = 0, speed = 0, prevent = {passive: false}, timer;
+        _.content.addEventListener('touchstart', function(e){
+            e.preventDefault();
+
+            touchY = e.targetTouches[0][clientY];
+            startTop = _.content[scrollTop];
+            prev = touchY;
+            document.addEventListener('touchmove', moveFn, prevent);
+            document.addEventListener('touchend', endFn);
+        }, prevent);
+
+        function moveFn(e) {
+            e.preventDefault();
+            end = e.targetTouches[0][clientY];
+            speed = end - prev;
+            prev = end;
+            _.content[scrollTop] = startTop + (touchY - end);
+        }
+
+        function endFn() {
+            let d = Math.abs(speed), dis = end-touchY, dir = dis < 0 ? 1 : -1;
+            document.removeEventListener('touchmove', moveFn, prevent);
+            document.removeEventListener('touchend', endFn);
+
+            //缓冲
+            if(Math.abs(dis) > 5){
+                if(timer) clearInterval(timer);
+                timer = setInterval(function () {
+                    d *= .8;
+                    if(d < 1) clearInterval(timer);
+                    _.content[scrollTop] += d*dir;
+                }, 16.6);
+            }
+        }
+    }
+
+    /**
+     * 隐藏滚动条。在移动端可能不需要显示滚动条，故提供此方法
+     * @param which
+     */
+    hide(which){
+        if(this.scrollbar[which].parentNode === this.body)
+            this.body.removeChild(this.scrollbar[which]);
+    }
+
+    /**
+     * 显示滚动条
+     * @param which
+     */
+    show(which){
+        if(this.scrollbar[which].parentNode !== this.body)
+            this.body.appendChild(this.scrollbar[which]);
     }
 }
 export default Rscrollbar;
