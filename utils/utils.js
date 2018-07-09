@@ -255,5 +255,23 @@ module.exports = {
             }
         }
         return false;
+    },
+    each(obj, fn){
+        let len = obj.length, callback;
+        if(len){
+            for(let i=0; i<len; i++){
+                callback = fn.call(obj[i], obj[i], i);
+                if(callback === 'continue') continue;
+                if(callback !== undefined) return callback;
+                if(callback === 'break') break;
+            }
+        }else{
+            for(let i in obj){
+                callback = fn.call(obj[i], obj[i], i);
+                if(callback === 'continue') continue;
+                if(callback !== undefined) return callback;
+                if(callback === 'break') break;
+            }
+        }
     }
 };
