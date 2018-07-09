@@ -18,12 +18,13 @@ module.exports = {
         },
         ScaleControl: {
             name: 'ScaleControl',
-            entry: 'main'
+            entry: 'main',
+            css: 'ScaleControl'
         },
         Scrollbar: {
             name: 'Scrollbar',
             entry: 'main',
-            css: './Scrollbar'
+            css: 'Scrollbar'
         },
         Rnav: {
             name: 'Rnav',

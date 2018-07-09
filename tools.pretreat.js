@@ -34,6 +34,11 @@ const config = {
     }
 };
 
+const cssCallbackMsg = {
+    input: [],
+    output: []
+};
+
 function findUtils(data){
     let fns = data.toString().match(regUtils);
     if(Array.isArray(fns))
@@ -76,9 +81,11 @@ function writeEntryFile(folder, merge=false){
             fs.writeFileSync(writePath, 'const utils = {\n\t'+Array.from(fnMap.values()).join(',\n\t')+'\n};\n'+sourceCode);
             backArr[0] = path.join('/'+folder, 'dist', name);
             backArr[1] = writePath;
+
+            // writeCssFile(folder, path.join(__dirname, folder, 'dist'));
         }
     }catch (err){
-        throw new Error(err.message);
+        throw err;
     }
     return backArr;
 }
@@ -101,6 +108,7 @@ function writeEntryFiles(directive, callback){
                 let arr = writeEntryFile(folder);
                 config.entry[arr[0]] = arr[1];
                 tempFiles.set(arr[0], arr[1]);
+                writeCssFiles(folder)
             }
             break;
         case 'current':
@@ -109,6 +117,7 @@ function writeEntryFiles(directive, callback){
                     let arr = writeEntryFile(argv[4]);
                     config.entry[arr[0]] = arr[1];
                     tempFiles.set(arr[0], arr[1]);
+                    writeCssFiles(argv[4]);
                 }else{
                     console.error('\x1B[31m%s\x1b[0m', '\tERROR：在配置中未找到名为“'+argv[4]+'”的组件。');
                     return;
@@ -129,9 +138,61 @@ function writeEntryFiles(directive, callback){
             config.output.filename = defaults.name+'.js';
             config.output.path = path.join(__dirname, defaults.path);
             tempFiles.set('temputils', temputils);
+            writeCssFiles(null, true);
             break;
     }
     callback();
+}
+
+
+function cssFileData(folder){
+    let entryArr = [];
+    let item = toolsConfig.group[folder],
+        css = item.css,
+        data = '';
+    if(!css) return data;
+    if(typeof css === 'string'){
+        entryArr.push(path.join(__dirname, folder, css+'.css'));
+    }else if(Array.isArray(css)){
+        for(let i=0, len=css.length; i<len; i++){
+            entryArr.push(path.join(__dirname, folder, css[i]+'.css'));
+        }
+    }
+    try{
+        for(let i=0, len=entryArr.length; i<len; i++){
+            data += fs.readFileSync(entryArr[i]);
+            cssCallbackMsg.input.push(entryArr[i]);
+        }
+    }catch (err) {
+        throw err;
+    }
+
+    return data;
+}
+
+function writeCssFiles(folder, merge=false){
+    let name = '',
+        outpath = '',
+        data = '';
+
+    if(merge){
+        name = toolsConfig.merge.name || defaults.name;
+        outpath = path.join(__dirname, 'dist', name+'.css');
+        for(let folder in toolsConfig.group) {
+            data += cssFileData(folder);
+        }
+    }else{
+        name = toolsConfig.group[folder].name || folder;
+        outpath = path.join(__dirname, folder, 'dist', name+'.min.css');
+        data = cssFileData(folder);
+    }
+    if(config.mode === 'production'){
+        data = data.replace(/[\n\r\t]+/g,'').replace(/([{:;])\s+([-#.\w])/g,'$1$2').replace(/\/\*[\s\S]*?\*\//g,'');
+    }
+    if(data){
+        cssCallbackMsg.output.push(outpath);
+        fs.writeFileSync(outpath, data);
+    }
 }
 
 function deleteTemp(){
@@ -156,6 +217,7 @@ function webpackCallback(err){
     if(err){
         console.log('\x1B[31m%s\x1b[0m', err.message);
     }else{
+        console.log('js output: ');
         if(argv[3] === 'merge'){
             console.log(
                 '\x1B[33m--| %s\x1b[0m => \x1B[32m%s\x1b[0m',
@@ -165,6 +227,12 @@ function webpackCallback(err){
             for(let key in config.entry){
                 console.log('\x1B[33m--| %s\x1b[0m => \x1B[32m%s\x1b[0m', config.entry[key].replace(/[^\\\/]*?$/g,'')+'main.js', path.join(__dirname, key+'.min.js'));
             }
+        }
+        if(cssCallbackMsg.input.length){
+            console.log('\ncss output: ');
+            console.log('\x1B[33m [ %s ] \x1b[0m =>\n\x1B[32m [ %s ]\x1b[0m',
+                cssCallbackMsg.input.join(' , \n '),
+                cssCallbackMsg.output.join(' , \n '));
         }
     }
     deleteTemp();
