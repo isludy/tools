@@ -2,7 +2,8 @@ module.exports = {
     group: {
         Player: {
             name: 'Player',
-            entry: 'main'
+            entry: 'main',
+            css: 'Player'
         },
         PageSlide: {
             name: 'PageSlide',
@@ -14,7 +15,8 @@ module.exports = {
         },
         Calendar: {
             name: 'Calendar',
-            entry: 'main'
+            entry: 'main',
+            css: 'Calendar'
         },
         ScaleControl: {
             name: 'ScaleControl',

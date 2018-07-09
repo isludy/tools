@@ -18,6 +18,7 @@ const regImport = /(import\s+utils\s+from\s+\S+\s+)|((let|const|var)\s+utils\s*=
 const regExport = /export\s+default\s+/g;
 const regModule = /(?:module\.)*exports\s*=\s*/g;
 const regUtils = /utils\.\w+/g;
+const regComment = /\/\*[\s\S]*?\*\//g;
 
 const config = {
     entry: {},
@@ -81,8 +82,6 @@ function writeEntryFile(folder, merge=false){
             fs.writeFileSync(writePath, 'const utils = {\n\t'+Array.from(fnMap.values()).join(',\n\t')+'\n};\n'+sourceCode);
             backArr[0] = path.join('/'+folder, 'dist', name);
             backArr[1] = writePath;
-
-            // writeCssFile(folder, path.join(__dirname, folder, 'dist'));
         }
     }catch (err){
         throw err;
@@ -187,11 +186,11 @@ function writeCssFiles(folder, merge=false){
         data = cssFileData(folder);
     }
     if(config.mode === 'production'){
-        data = data.replace(/[\n\r\t]+/g,'').replace(/([{:;])\s+([-#.\w])/g,'$1$2').replace(/\/\*[\s\S]*?\*\//g,'');
+        data = data.replace(/[\n\r\t]+/g,'').replace(/([{:;])\s+([-#.\w])/g,'$1$2').replace(regComment,'');
     }
     if(data){
-        cssCallbackMsg.output.push(outpath);
         fs.writeFileSync(outpath, data);
+        cssCallbackMsg.output.push(outpath);
     }
 }
 
