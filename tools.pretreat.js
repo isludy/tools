@@ -152,7 +152,7 @@ function deleteTemp(){
     });
 }
 
-function webpackCalback(err){
+function webpackCallback(err){
     if(err){
         console.log('\x1B[31m%s\x1b[0m', err.message);
     }else{
@@ -169,6 +169,7 @@ function webpackCalback(err){
     }
     deleteTemp();
 }
+
 writeEntryFiles(argv[3], ()=>{
-    webpack(config, webpackCalback);
+    webpack(config, webpackCallback);
 });

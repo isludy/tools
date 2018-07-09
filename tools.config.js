@@ -20,9 +20,10 @@ module.exports = {
             name: 'ScaleControl',
             entry: 'main'
         },
-        Rscrollbar: {
-            name: 'Rscrollbar',
-            entry: 'main'
+        Scrollbar: {
+            name: 'Scrollbar',
+            entry: 'main',
+            css: './Scrollbar'
         },
         Rnav: {
             name: 'Rnav',

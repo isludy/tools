@@ -1,6 +1,6 @@
 import utils from '../utils/utils';
 
-class Rscrollbar {
+class Scrollbar {
     /**
      * 必须的id
      * @param id
@@ -11,10 +11,10 @@ class Rscrollbar {
         if(!this.body)
             throw new Error('Element is not found by id "'+id+'"');
 
-        this.content = this.body.querySelector('.rscroll-content');
+        this.content = this.body.querySelector('.scroll-content');
         this.scrollbar = {
-            y: this.body.querySelector('.rscroll-y'),
-            x: this.body.querySelector('.rscroll-x')
+            y: this.body.querySelector('.scroll-y'),
+            x: this.body.querySelector('.scroll-x')
         };
         this.thumb = {
             y: null,
@@ -25,22 +25,22 @@ class Rscrollbar {
         if(isTouch){
             this.events = ['touchstart', 'touchmove', 'touchend'];
             if(this.scrollbar.y)
-                Rscrollbar.touchSscroll(this, 'scrollTop','clientY', 'maxY');
+                Scrollbar.touchSscroll(this, 'scrollTop','clientY', 'maxY');
             if(this.scrollbar.x)
-                Rscrollbar.touchSscroll(this, 'scrollLeft','clientX', 'maxX');
+                Scrollbar.touchSscroll(this, 'scrollLeft','clientX', 'maxX');
         }
 
         if(this.scrollbar.y){
-            this.thumb.y = this.scrollbar.y.querySelector('.rscroll-thumb');
-            Rscrollbar.createScroll(this, 'y', 'offsetHeight', 'offsetTop', 'height','top', 'scrollHeight', 'scrollTop', 'clientY', 'offsetY', 'maxY', 'spaceY');
+            this.thumb.y = this.scrollbar.y.querySelector('.scroll-thumb');
+            Scrollbar.createScroll(this, 'y', 'offsetHeight', 'offsetTop', 'height','top', 'scrollHeight', 'scrollTop', 'clientY', 'offsetY', 'maxY', 'spaceY');
             utils.wheel(this.content, function (e) {
                 e.preventDefault();
                 this.scrollTop += e.deltaY;
             },{passive: false});
         }
         if(this.scrollbar.x){
-            this.thumb.x = this.scrollbar.x.querySelector('.rscroll-thumb');
-            Rscrollbar.createScroll(this, 'x', 'offsetWidth', 'offsetLeft', 'width','left', 'scrollWidth', 'scrollLeft', 'clientX', 'offsetX', 'maxX', 'spaceX');
+            this.thumb.x = this.scrollbar.x.querySelector('.scroll-thumb');
+            Scrollbar.createScroll(this, 'x', 'offsetWidth', 'offsetLeft', 'width','left', 'scrollWidth', 'scrollLeft', 'clientX', 'offsetX', 'maxX', 'spaceX');
         }
     }
     /**
@@ -104,7 +104,7 @@ class Rscrollbar {
             cur = _.thumb[y][offsetTop];
             result = 0;
 
-            utils.addClass(document.body, 'rscroll-unselect');
+            utils.addClass(document.body, 'scroll-unselect');
 
             document.addEventListener(_.events[1], moveFn, prevent);
             document.addEventListener(_.events[2], endFn);
@@ -133,7 +133,7 @@ class Rscrollbar {
         function endFn(){
             document.removeEventListener(_.events[1], moveFn, prevent);
             document.removeEventListener(_.events[2], endFn);
-            utils.removeClass(document.body, 'rscroll-unselect');
+            utils.removeClass(document.body, 'scroll-unselect');
         }
 
     }
@@ -201,4 +201,4 @@ class Rscrollbar {
             this.body.appendChild(this.scrollbar[which]);
     }
 }
-export default Rscrollbar;
+export default Scrollbar;

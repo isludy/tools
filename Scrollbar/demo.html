@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
     <title>自定义滚动条</title>
-    <script src="dist/Rscrollbar.min.js"></script>
-    <link rel="stylesheet" href="Rscrollbar.css">
+    <link rel="stylesheet" href="Scrollbar.css">
     <style>
         #yscroll,
         #xscroll,
         #xyscroll{
-            width: 640px;
+            max-width: 640px;
             height: 300px;
             border: 1px solid #ddd;
             margin: 10px auto;
@@ -20,7 +19,7 @@
             -moz-box-sizing: border-box;
             box-sizing: border-box;
         }
-        .rscroll-content{
+        .scroll-content{
             white-space: nowrap;
         }
     </style>
@@ -28,10 +27,10 @@
 <body>
 <h1>Y方向</h1>
 <div id="yscroll">
-    <div class="rscroll-bar rscroll-y">
-        <div class="rscroll-thumb"></div>
+    <div class="scroll-bar scroll-y">
+        <div class="scroll-thumb"></div>
     </div>
-    <div class="rscroll-content">
+    <div class="scroll-content">
         <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
         <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
         <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
@@ -48,23 +47,23 @@
 </div>
 <h1>X方向</h1>
 <div id="xscroll">
-    <div class="rscroll-bar rscroll-x">
-        <div class="rscroll-thumb"></div>
+    <div class="scroll-bar scroll-x">
+        <div class="scroll-thumb"></div>
     </div>
-    <div class="rscroll-content">
+    <div class="scroll-content">
         text content text content text content text content text content text content text content text content
         text content text content text content text content text content text content text content text content
     </div>
 </div>
 <h1>YX方向</h1>
 <div id="xyscroll">
-    <div class="rscroll-bar rscroll-x">
-        <div class="rscroll-thumb"></div>
+    <div class="scroll-bar scroll-x">
+        <div class="scroll-thumb"></div>
     </div>
-    <div class="rscroll-bar rscroll-y">
-        <div class="rscroll-thumb"></div>
+    <div class="scroll-bar scroll-y">
+        <div class="scroll-thumb"></div>
     </div>
-    <div class="rscroll-content">
+    <div class="scroll-content">
         <p>text content text content text content text content text content text content text content text content
         text content text content text content text content text content text content text content text content</p>
         <p>text content text content text content text content text content text content text content text content
@@ -98,13 +97,13 @@
             text content text content text content text content text content text content text content text content</p>
     </div>
 </div>
-
+<script src="dist/Scrollbar.min.js"></script>
 <script>
-    var rsy = new Rscrollbar('yscroll');
+    var rsy = new Scrollbar('yscroll');
     console.log(rsy);
-    var rsx = new Rscrollbar('xscroll');
+    var rsx = new Scrollbar('xscroll');
     console.log(rsx);
-    var rsxy = new Rscrollbar('xyscroll');
+    var rsxy = new Scrollbar('xyscroll');
     console.log(rsxy);
 </script>
 </body>
