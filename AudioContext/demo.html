@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+<button id="button">有节奏地点我</button>
+
+<script type="text/javascript">
+    var 
+	eleButton = document.getElementById('button'),
+	audioCtx = new AudioContext(),
+	//261.63,293.66,329.63,349.23,392.00,440.00,493.88
+	arrFrequency = [
+	261.63,293.66,329.63,261.63,
+	261.63,293.66,329.63,261.63,
+	329.63,349.23,392.00,
+	329.63,349.23,392.00,
+	392.00,440.00,392.00,349.23,329.63,261.63,
+	392.00,440.00,392.00,349.23,329.63,261.63,
+	293.66,196.00,261.63,
+	293.66,196.00,261.63],
+	len = arrFrequency.length,
+    i = 0;
+
+    eleButton.onclick = function () {
+		if(i >=  len) i = 0;
+        var
+		frequency = arrFrequency[i++],
+		oscillator = audioCtx.createOscillator(),
+		gainNode = audioCtx.createGain();
+		
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = 'square';
+        oscillator.frequency.value = frequency;
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 0.01);
+        oscillator.start(audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2);
+        oscillator.stop(audioCtx.currentTime + 1);
+    }
+</script>
+</body>
+</html>
