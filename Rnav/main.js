@@ -1,3 +1,5 @@
 class Rnav {
-    
+    constructor(id){
+
+    }
 }
