@@ -8,6 +8,27 @@ module.exports = {
             return -1;
         }
     },
+    elsByClass(cls, context){
+        context = context || document;
+       if(context.getElementsByClassName){
+           return context.getElementsByClassName(cls);
+       }else if(context.querySelector){
+           return context.querySelectorAll('.'+cls);
+       }else{
+           let utils = this,
+               els = context.getElementsByTagName('*'),
+               len = els.length,
+               i = 0,
+               doms = [];
+
+           for(; i<len; i++){
+               if(utils.hasClass(els[i], cls)){
+                   doms.push(els[i]);
+               }
+           }
+           return doms;
+       }
+    },
     isTouch(){
         return 'ontouchstart' in document;
     },
@@ -45,6 +66,22 @@ module.exports = {
             return utils.indexOf(list, cls) !== -1;
         }
     },
+    toggleClass(el, cls){
+        if(el.classList){
+            el.classList.toggle(cls);
+        }else{
+            let utils = this,
+                list = el.className.split(/\s+/),
+                index;
+
+            if((index = utils.indexOf(list, cls)) !== -1){
+                list.splice(index, 1);
+            }else{
+                list.push(cls);
+            }
+            el.className = list.join(' ');
+        }
+    },
     addEvent(el, evt, fn, capture=false){
         if(window.addEventListener){
             el.addEventListener(evt, fn, capture);
@@ -60,7 +97,7 @@ module.exports = {
         }
     },
     wheel(elem, callback, useCapture){
-        let prefix = "", _addEventListener, onwheel, support;
+        let prefix = "", _addEventListener, support;
         // detect event model
         if ( window.addEventListener ) {
             _addEventListener = "addEventListener";
@@ -231,12 +268,14 @@ module.exports = {
         }
     },
     options(target, source, bool = true){
-        for(let k in source)
-            if(source.hasOwnProperty(k)) {
+        for(let k in source) {
+            if (source.hasOwnProperty(k)) {
                 if ((bool && target.hasOwnProperty(k)) || !bool) {
                     target[k] = source[k];
                 }
             }
+        }
+        source = null;
         return target;
     },
     contains(target, context){

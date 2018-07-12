@@ -3,98 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>导航系列</title>
+    <link rel="stylesheet" href="dist/Rnav.min.css">
     <script src="dist/Rnav.min.js"></script>
-    <style>
-        .navbar{
-            width: 100%;
-            text-align: center;
-            -webkit-box-sizing: border-box;
-            -moz-box-sizing: border-box;
-            box-sizing: border-box;
-        }
-        .nav{
-            background: #a00;
-            font-size: 18px;
-            line-height: 1;
-            font-weight: bold;
-            height: 2em;
-            overflow: hidden;
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
-            -webkit-box-sizing: border-box;
-            -moz-box-sizing: border-box;
-            box-sizing: border-box;
-        }
-        .nav-item,
-        .nav-more{
-            display: inline-block;
-            color: #fff;
-            text-decoration: none;
-            padding: .5em 1em;
-            -webkit-box-sizing: border-box;
-            -moz-box-sizing: border-box;
-            box-sizing: border-box;
-        }
-        .nav-more{
-            display: none;
-        }
-    </style>
 </head>
 <body>
-<div id="navbar" class="navbar">
-    <nav class="nav">
-        <a class="nav-item nav-active" href="#">首頁</a>
-        <a class="nav-item" href="#">今日文匯</a>
-        <a class="nav-item" href="#">快訊</a>
-        <a class="nav-item" href="#">視頻</a>
-        <a class="nav-item" href="#">圖輯</a>
-        <a class="nav-item" href="#">調查</a>
-        <a class="nav-item" href="#">討論區</a>
-        <a class="nav-item" href="#">專題</a>
-        <a class="nav-item" href="#">消費指南</a>
-        <a class="nav-item" href="#">招商專區</a>
-        <a class="nav-more" href="#">...</a>
-    </nav>
-</div>
+<nav id="nav" class="nav">
+    <a class="nav-item nav-active" href="#">首頁</a>
+    <a class="nav-item" href="#">今日文匯</a>
+    <a class="nav-item" href="#">快訊</a>
+    <a class="nav-item" href="#">視頻</a>
+    <a class="nav-item" href="#">圖輯</a>
+    <a class="nav-item" href="#">調查</a>
+    <a class="nav-item" href="#">討論區</a>
+    <a class="nav-item" href="#">專題</a>
+    <a class="nav-item" href="#">消費指南</a>
+    <a class="nav-item" href="#">招商專區</a>
+    <a class="nav-more" href="#">...</a>
+</nav>
 <script>
-    function navbar(el){
-        var nav = el.querySelector('.nav'),
-            items = nav.querySelectorAll('.nav-item'),
-            more = nav.querySelector('.nav-more'),
-            height = nav.offsetHeight,
-            len = items.length,
-            itemsWidth = 0,
-            count = 0,
-            i = 0,
-            show = false;
 
-        for(; i<len; i++){
-            itemsWidth += items[i].offsetWidth;
-            if(items[i].offsetTop >= height){
-                nav.insertBefore(more,items[i]);
-                more.style.display = 'inline-block';
-                break;
-            }
-        }
-        function recycle(){
-            if(more.offsetTop >= height){
-                nav.insertBefore(more,more.previousSibling);
-                if(more.offsetTop > 0 && count < len){
-                    recycle();
-                    count++;
-                }
-            }
-        }
-        recycle();
 
-        more.onclick = function () {
-            nav.style.height = (show = !show) ? 'auto' : height+'px';
-        }
-    }
-
-    navbar(document.getElementById('navbar'));
-
+// var rnav = new Rnav('nav');
+// window.onresize = function(){
+//     rnav.update();
+// }
 </script>
 </body>
 </html>

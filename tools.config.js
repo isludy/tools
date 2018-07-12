@@ -30,7 +30,8 @@ module.exports = {
         },
         Rnav: {
             name: 'Rnav',
-            entry: 'main'
+            entry: 'main',
+            css: 'Rnav'
         }
     },
     merge: {
