@@ -1,4 +1,4 @@
-import utils from 'utils/utils.js';
+const utils = require('../utils/utils.js');
 class Rnav {
     constructor(nav, options) {
         let _ = this,
@@ -69,4 +69,4 @@ class Rnav {
         })();
     }
 }
-export default Rnav;
+module.exports = Rnav;
