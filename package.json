@@ -21,9 +21,7 @@
   },
   "homepage": "https://github.com/Rudyhub/tools#readme",
   "babel": {
-    "presets": [
-      "es2015"
-    ]
+    "presets": ["es2015"]
   },
   "author": "令狐长老",
   "license": "ISC",
