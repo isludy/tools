@@ -1,5 +1,5 @@
 let todayDate = new Date();
-export default {
+module.exports = {
     todayDate,
     year: todayDate.getFullYear(),
     month: todayDate.getMonth()+1,

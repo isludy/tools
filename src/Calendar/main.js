@@ -1,5 +1,18 @@
-import utils from '../utils/utils';
-import Rdate from '../Rdate/main';
+import utils from '../../utils/utils';
+
+const todayDate = new Date();
+const Rdate = {
+    todayDate,
+    year: todayDate.getFullYear(),
+    month: todayDate.getMonth()+1,
+    date: todayDate.getDate(),
+    day: todayDate.getDay(),
+    time: todayDate.getTime(),
+    hour: todayDate.getHours(),
+    minute: todayDate.getMinutes(),
+    second: todayDate.getSeconds(),
+    ms: todayDate.getMilliseconds()
+};
 
 class Calendar{
     constructor(year, month, options){
@@ -21,7 +34,7 @@ class Calendar{
             }
         }
 
-        this.dateTable = Rdate.dateTable(year, month, options);
+        this.dateTable = utils.dateTable(year, month, options);
     }
     weeker(options){
         let o = {
@@ -105,6 +118,9 @@ class Calendar{
         box.innerHTML = html;
 
         return box;
+    }
+    static abc(){
+        return 'abc';
     }
     static toString(){
         return '{ [ class Calendar] }';

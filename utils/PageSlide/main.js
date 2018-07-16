@@ -5,7 +5,7 @@ export default options=>{
         view: '.page-view',
         wrapper: '.page-wrapper',
         slide: '.page-slide',
-        scrollbar: 'page-scrollbar',
+        scrollbar: 'page-scroll',
         deviation: 5,
         distance: 100,
         fireDistance: 0,
