@@ -6,13 +6,17 @@
     <link rel="stylesheet" href="Calendar.css">
 </head>
 <body>
-<div id="box" class="calendar"></div>
-<script src="dist/Calendar.min.js"></script>
+<!--[-->
+<div id="calendar" class="calendar"></div>
+<!--]-->
+<script src="Calendar.js"></script>
+<!--[-->
 <script>
-    var box = document.getElementById('box');
+    var box = document.getElementById('calendar');
     var cld = new Calendar({mode: 1, format: 'd'});
     box.appendChild(cld.weeker());
     box.appendChild(cld.dater({activeMode:1}));
 </script>
+<!--]-->
 </body>
 </html>

@@ -146,6 +146,23 @@ function matchPair(str, start, end){
     return arr;
 }
 
+let pagePath = path.join(__dirname, 'index.html'),
+    templateReg = /<!--\[-->([\s\S]*?)<!--]-->/g,
+    templates = [];
+function createDemo(demo){
+    if(fs.existsSync(demo)){
+        let demoCode = fs.readFileSync(demo).toString(),
+            demoHtml = '',
+            arr;
+
+        while(arr = templateReg.exec(demoCode)){
+            demoHtml += arr[1];
+        }
+
+        templates.push(demoHtml.replace(/new (\w+\([^)]*?\))/, 'new Tools.$1'));
+
+    }
+}
 /**
  * 合成js
  */
@@ -155,8 +172,13 @@ function mergeJs(){
             output = path.resolve(config.output) || path.join(__dirname, 'dist', 'tools.js'),
             outputCss = path.resolve(config.outputCss) || path.join(__dirname, 'dist', 'tools.css'),
             outPath = path.dirname(output),
+            pageCode = fs.readFileSync(pagePath).toString(),
             input,
-            code;
+            code,
+            inputCss,
+            cssCode,
+            commentStart,
+            commentEnd;
 
         if(!fs.existsSync(outPath)){
             childProcess.execSync('md '+outPath);
@@ -167,24 +189,35 @@ function mergeJs(){
 
         config.tools.forEach(tool=>{
             input = path.join(__dirname, 'src', tool, tool+'.js');
-            code = fs.readFileSync(input).toString();
-            findUtilsFun(code);
-            fs.appendFileSync(output, '/**----------- '+tool+' start line -------*/\n(function(){\n'+
-                babel(code).replace(importReg,'').replace(exportReg, mount + '.' + tool + '=')+
-                '\n})();\n/**----------- '+tool+' start line -------*/\n\n');
+            inputCss = path.join(__dirname, 'src', tool, tool+'.css');
+            commentStart = '/**----------- '+tool+' start line -------*/\n';
+            commentEnd = '\n/**----------- '+tool+' end line -------*/\n\n';
+            if(fs.existsSync(input)){
+                code = fs.readFileSync(input).toString();
+                findUtilsFun(code);
+                fs.appendFileSync(output,
+                    commentStart+
+                    '(function(){\n'+ babel(code).replace(importReg,'').replace(exportReg, mount + '.' + tool + '=')+'\n})();\n'+
+                    commentEnd);
+            }
+            if(fs.existsSync(inputCss)){
+                cssCode = fs.readFileSync(inputCss).toString();
+                fs.appendFileSync(outputCss, commentStart+cssCode+commentEnd);
+            }
+
+            createDemo(path.join(__dirname, 'src', tool, 'demo.html'));
         });
 
         code = babel('var utils={\n    '+Array.from(map.values()).join(',\n    ')+'\n};\n') + fs.readFileSync(output).toString();
 
         fs.writeFileSync(output, code);
+
+        pageCode = pageCode.replace(/(<body[^>]*?>)[\s\S]*?(<\/body>)/g, '$1\n'+templates.join('\n')+'$2');
+        fs.writeFileSync(pagePath, pageCode);
     }
 }
 
 mergeJs();
-
-function mergeCss(){
-
-}
 
 
 

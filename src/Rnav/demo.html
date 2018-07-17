@@ -3,28 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>导航系列</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="dist/main.js"></script>
+    <link rel="stylesheet" href="Rnav.css">
+    <script src="Rnav.js"></script>
 </head>
 <body>
-<nav id="nav" class="nav">
-    <a class="nav-item nav-active" href="#">首頁</a>
-    <a class="nav-item" href="#">今日文匯</a>
-    <a class="nav-item" href="#">快訊</a>
-    <a class="nav-item" href="#">視頻</a>
-    <a class="nav-item" href="#">圖輯</a>
-    <a class="nav-item" href="#">調查</a>
-    <a class="nav-item" href="#">討論區</a>
-    <a class="nav-item" href="#">專題</a>
-    <a class="nav-item" href="#">消費指南</a>
-    <a class="nav-item" href="#">招商專區</a>
-    <a class="nav-more" href="#">...</a>
-</nav>
-<script>
-var rnav = new Rnav('nav');
-window.onresize = function(){
-    rnav.update();
-}
-</script>
+<!--[-->
+    <nav id="nav" class="nav">
+        <a class="nav-item nav-active" href="#">首頁</a>
+        <a class="nav-item" href="#">今日文匯</a>
+        <a class="nav-item" href="#">快訊</a>
+        <a class="nav-item" href="#">視頻</a>
+        <a class="nav-item" href="#">圖輯</a>
+        <a class="nav-item" href="#">調查</a>
+        <a class="nav-item" href="#">討論區</a>
+        <a class="nav-item" href="#">專題</a>
+        <a class="nav-item" href="#">消費指南</a>
+        <a class="nav-item" href="#">招商專區</a>
+        <a class="nav-more" href="#">...</a>
+    </nav>
+    <script>
+        var rnav = new Rnav('nav');
+        window.onresize = function(){
+            rnav.update();
+        }
+    </script>
+<!--]-->
 </body>
 </html>
