@@ -810,7 +810,8 @@ Player.prototype = {
 
 Tools.Player=Player;
 })();
-/**----------- Player start line -------*/
+
+/**----------- Player end line -------*/
 
 /**----------- Calendar start line -------*/
 (function(){
@@ -945,7 +946,8 @@ var abc = {};
 
 Tools.Calendar=Calendar;
 })();
-/**----------- Calendar start line -------*/
+
+/**----------- Calendar end line -------*/
 
 /**----------- ScaleControl start line -------*/
 (function(){
@@ -1103,7 +1105,8 @@ ScaleControl.prototype = {
 
 Tools.ScaleControl=ScaleControl;
 })();
-/**----------- ScaleControl start line -------*/
+
+/**----------- ScaleControl end line -------*/
 
 /**----------- Scrollbar start line -------*/
 (function(){
@@ -1271,7 +1274,8 @@ Scrollbar.prototype = {
 
 Tools.Scrollbar=Scrollbar;
 })();
-/**----------- Scrollbar start line -------*/
+
+/**----------- Scrollbar end line -------*/
 
 /**----------- Rnav start line -------*/
 (function(){
@@ -1348,5 +1352,6 @@ Rnav.prototype = {
 
 Tools.Rnav= Rnav;
 })();
-/**----------- Rnav start line -------*/
+
+/**----------- Rnav end line -------*/
 
