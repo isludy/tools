@@ -6,7 +6,7 @@ const utils = require('./utils/utils');
 const config = require('./tools.config');
 
 const importReg = /import([\s\S]+?)from[\s\n\r]+['"]([^'"]+?)['"][;\s\r\n]*|(?:const|let|var)([\s\S]+?)=\s*require\s*\(\s*['"]([^'"]*?)['"]\s*\)[;\s\r\n]*/g;
-const exportReg = /export\s+default\s+/g;
+const exportReg = /export\s+default\s+|(module\.)*exports\s*=/g;
 const utilsReg = /utils\.([\w\d_$]+)/g;
 
 const warnings = [];
@@ -146,10 +146,14 @@ function matchPair(str, start, end){
     return arr;
 }
 
-
+/**
+ * 合成js
+ */
 function mergeJs(){
     if(Array.isArray(config.tools)){
-        let output = path.resolve(config.output) || path.join(__dirname, 'dist', 'tools.js'),
+        let mount = config.mount || 'Tools',
+            output = path.resolve(config.output) || path.join(__dirname, 'dist', 'tools.js'),
+            outputCss = path.resolve(config.outputCss) || path.join(__dirname, 'dist', 'tools.css'),
             outPath = path.dirname(output),
             input,
             code;
@@ -158,20 +162,29 @@ function mergeJs(){
             childProcess.execSync('md '+outPath);
         }
 
-        fs.writeFileSync(output,'');
+        fs.writeFileSync(output,'var Tools={};\n');
+        fs.writeFileSync(outputCss, '');
 
         config.tools.forEach(tool=>{
             input = path.join(__dirname, 'src', tool, tool+'.js');
             code = fs.readFileSync(input).toString();
             findUtilsFun(code);
-            fs.appendFileSync(output, '/**----------- '+tool+' start line -------*/\n(function(){\n'+babel(code)+'\n})();\n/**----------- '+tool+' start line -------*/\n\n');
+            fs.appendFileSync(output, '/**----------- '+tool+' start line -------*/\n(function(){\n'+
+                babel(code).replace(importReg,'').replace(exportReg, mount + '.' + tool + '=')+
+                '\n})();\n/**----------- '+tool+' start line -------*/\n\n');
         });
-        fs.writeFileSync(path.join(outPath,'.utils'), babel('var utils={\n    '+Array.from(map.values()).join(',\n    ')+'\n};'));
+
+        code = babel('var utils={\n    '+Array.from(map.values()).join(',\n    ')+'\n};\n') + fs.readFileSync(output).toString();
+
+        fs.writeFileSync(output, code);
     }
 }
 
 mergeJs();
 
+function mergeCss(){
+
+}
 
 
 
