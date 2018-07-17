@@ -127,4 +127,6 @@ class Calendar{
     }
 }
 
+var abc = {};
+
 export default Calendar;

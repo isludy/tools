@@ -1,4 +1,5 @@
-const utils = require('../../utils/utils.js');
+import utils from '../../utils/utils';
+
 class Rnav {
     constructor(nav, options) {
         let _ = this,

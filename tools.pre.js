@@ -1,7 +1,9 @@
 const fs = require('fs');
 const path = require('path');
-const basePath = path.join(__dirname, 'src');
+const childProcess = require('child_process');
+
 const utils = require('./utils/utils');
+const config = require('./tools.config');
 
 const importReg = /import([\s\S]+?)from[\s\n\r]+['"]([^'"]+?)['"][;\s\r\n]*|(?:const|let|var)([\s\S]+?)=\s*require\s*\(\s*['"]([^'"]*?)['"]\s*\)[;\s\r\n]*/g;
 const exportReg = /export\s+default\s+/g;
@@ -10,6 +12,10 @@ const utilsReg = /utils\.([\w\d_$]+)/g;
 const warnings = [];
 const map = new Map();
 
+/**
+ * 把用到的utils添加到map中
+ * @param code
+ */
 function findUtilsFun(code){
     let arr, name;
     arr = code.match(utilsReg);
@@ -32,17 +38,16 @@ function findUtilsFun(code){
     }
 }
 
-function babel(code, input) {
+/**
+ * 简单的把ES6转为ES5
+ * @param code
+ * @return {string}
+ */
+function babel(code) {
         //转换声明的关键字
     return code.replace(/(const|let)\s+/g,'var ')
         //转换箭头函数
-        .replace(/(\(?)\s*(\(\s*[^)]*?\s*\)|[\w\d_$]+?)\s*=>\s*{/g,function ($0,$mark,$1) {
-            if($1){
-                return ($mark || '')+'function'+(/[()]/.test($1) ? $1 : '('+$1+')')+'{';
-            }else{
-                return ($mark || '')+'function(){';
-            }
-        })
+        .replace(/(\(\s*[^()]*?\s*\))\s*=>\s*{/g,'function$1{').replace(/([\w\d_$]+?)\s*=>\s*{/g,'function($1){')
         //转换代默认值的参数
         .replace(/function\s*\(\s*([^)]+?)\s*\)\s*{/g, function ($0,$1) {
             if($1){
@@ -55,12 +60,31 @@ function babel(code, input) {
 
                 return 'function('+$1+'){'+(vars.length ? ('\n        var '+vars.join(',\n            ')+';') : '');
             }
+        })
+        //转换class构建类
+        .replace(/class\s+([^{]+?)\s*({[\s\S]+})/g,function ($0, $1, $2) {
+            let len1 = $2.length, len2, classMod;
+            $2 = matchPair($2, '{', '}');
+            $2 = $2[0];
+            len2 = $2.length;
+
+            $2 = $2.replace('constructor', '_constructor');
+            classMod = eval('(class '+$1+$2+')');
+            return babelClass(classMod) + (len1 === len2 ? '' : $0.substr(len1, len2));
+        })
+        //转换模板字符
+        .replace(/`([^`]*?)`/g,function ($0, $1) {
+            return '\''+$1.replace(/[\r\n]+/g,'\\\n').replace(/\${([^}])}/g,'\'+$1+\'')+'\'';
         });
 }
 
-function babelClass(filePath, code) {
-    let mod = require(filePath),
-        api = Object.getOwnPropertyNames(mod.prototype),
+/**
+ * 把获取class构建的es5代码（如果class有自定义静态方法toString，必须把constructor构造器替换为普通方法_contructor）
+ * @param mod 类对象
+ * @return {string}
+ */
+function babelClass(mod) {
+    let api = Object.getOwnPropertyNames(mod.prototype),
         staticApi = Object.getOwnPropertyNames(mod),
         classCode;
 
@@ -68,7 +92,7 @@ function babelClass(filePath, code) {
 
     staticApi.forEach(staticFn=>{
         if(!/^(prototype|length|name)$/g.test(staticFn)){
-            classCode += '\n'+mod.name + '.' + staticFn + ' = function' + mod[staticFn].toString().slice(staticFn.length)+';\n   ';
+            classCode += '\n'+mod.name + '.' + staticFn + ' = function' + mod[staticFn].toString().slice(staticFn.length)+';';
         }
     });
 
@@ -78,54 +102,76 @@ function babelClass(filePath, code) {
             classCode += '\n    '+fnName+': function'+mod.prototype[fnName].toString().slice(fnName.length)+',';
         }
     });
-    classCode = classCode.slice(0,-1)+'\n};\n';
-
-    code = code.replace(/class\s+([\w\d_$])[\s\S]+}/g, classCode)
-        .replace(/module\.exports/g,'window.'+mod.name);
-
-    fs.writeFileSync(filePath, code);
+    return  classCode.slice(0,-1)+'\n};\n';
 }
 
-function parseUtils(input, output) {
-    let code = fs.readFileSync(input),
-        outPath = path.dirname(output);
-
-    code = code.toString();
-
-    findUtilsFun(code);
-
-    code = code.replace(importReg, function ($0,$1,$2,$3,$4) {
-            let moduleName = '',modulePath = '';
-            if($1 && $2){
-                moduleName = $1;
-                modulePath = $2;
-            }else if($3 && $4){
-                moduleName = $3;
-                modulePath = $4;
+/**
+ * 查找多层嵌套的成对符号的最外层。
+ * @param str   输入的字符串
+ * @param start 符号左半边
+ * @param end   符号右半边
+ * @return {Array}
+ */
+function matchPair(str, start, end){
+    let reg = new RegExp('['+start+']|['+end+']','g'),
+        wait = true,
+        starts = [],
+        ends = [],
+        n = 0,
+        arr;
+    while (arr = reg.exec(str)){
+        if(wait && arr[0] === end) continue;
+        if(arr[0] === start){
+            wait = false;
+            n++;
+            if(n === 1){
+                starts.push(arr.index);
             }
-            if(moduleName && modulePath){
-                modulePath = path.join(path.dirname(input), modulePath);
-                if(/utils(\.js)?$/.test(modulePath)){
-                    return 'var utils={\n    '+Array.from(map.values()).join(',\n    ')+'\n};\n';
-                }else{
-                    return 'var '+moduleName+' = require("'+modulePath+'")';
-                }
+        }else{
+            n--;
+            if(n === 0){
+                ends.push(arr.index);
             }
-            return '';
-        }).replace(exportReg, 'module.exports = ');
-
-    if(!fs.existsSync(outPath)){
-        fs.mkdirSync(outPath);
+        }
     }
 
-    code = babel(code, input);
+    arr = [];
 
-    fs.writeFileSync(output, code.replace(/constructor/g,'_constructor'));
+    starts.forEach((v, i)=>{
+        if(i < ends.length){
+            arr.push(str.slice(v, ends[i]+end.length));
+        }
+    });
 
-    babelClass(output, code);
+    return arr;
 }
 
-parseUtils(path.join(basePath,'Calendar','main.js'), path.join(__dirname, 'dist', 'tools.js'));
+
+function mergeJs(){
+    if(Array.isArray(config.tools)){
+        let output = path.resolve(config.output) || path.join(__dirname, 'dist', 'tools.js'),
+            outPath = path.dirname(output),
+            input,
+            code;
+
+        if(!fs.existsSync(outPath)){
+            childProcess.execSync('md '+outPath);
+        }
+
+        fs.writeFileSync(output,'');
+
+        config.tools.forEach(tool=>{
+            input = path.join(__dirname, 'src', tool, tool+'.js');
+            code = fs.readFileSync(input).toString();
+            findUtilsFun(code);
+            fs.appendFileSync(output, '/**----------- '+tool+' start line -------*/\n(function(){\n'+babel(code)+'\n})();\n/**----------- '+tool+' start line -------*/\n\n');
+        });
+        fs.writeFileSync(path.join(outPath,'.utils'), babel('var utils={\n    '+Array.from(map.values()).join(',\n    ')+'\n};'));
+    }
+}
+
+mergeJs();
+
 
 
 
