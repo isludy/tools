@@ -4,13 +4,6 @@
   "description": "一些小工具",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev-e": "node tools.pretreat.js development every",
-    "dev-c": "node tools.pretreat.js development current",
-    "dev-m": "node tools.pretreat.js development merge",
-    "build-e": "node tools.pretreat.js production every",
-    "build-c": "node tools.pretreat.js production current",
-    "build-m": "node tools.pretreat.js production merge",
     "dev": "node tools.pre.js",
     "serv": "start /b node tools.server.js"
   },
@@ -31,6 +24,6 @@
   "license": "ISC",
   "devDependencies": {
     "opn": "^5.3.0",
-	"http-server": "^0.11.1"
+    "http-server": "^0.11.1"
   }
 }
