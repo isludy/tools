@@ -1,4 +1,4 @@
-import utils from '../utils/utils';
+import utils from '../../utils/utils';
 
 const lrcModeReg = /player-lrc-mode-[0-9]+/g;
 

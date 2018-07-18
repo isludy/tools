@@ -1,14 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>导航系列</title>
-    <link rel="stylesheet" href="Rnav.css">
-    <script src="Rnav.js"></script>
-</head>
-<body>
-<!--[-->
-    <nav id="nav" class="nav">
+<template>
+    <nav id="rnav" class="nav">
         <a class="nav-item nav-active" href="#">首頁</a>
         <a class="nav-item" href="#">今日文匯</a>
         <a class="nav-item" href="#">快訊</a>
@@ -21,12 +12,12 @@
         <a class="nav-item" href="#">招商專區</a>
         <a class="nav-more" href="#">...</a>
     </nav>
-    <script>
-        var rnav = new Rnav('nav');
+</template>
+<script>
+    (function (Rnav) {
+        var rnav = new Rnav('rnav');
         window.onresize = function(){
             rnav.update();
         }
-    </script>
-<!--]-->
-</body>
-</html>
+    })(this);
+</script>

@@ -1,0 +1,12 @@
+<style></style>
+<template>
+    <div id="calendar" class="calendar"></div>
+</template>
+<script>
+    (function(Calendar){
+        var box = document.getElementById('calendar');
+        var cld = new Calendar({mode: 1, format: 'd'});
+        box.appendChild(cld.weeker());
+        box.appendChild(cld.dater({activeMode:1}));
+    })(this);
+</script>

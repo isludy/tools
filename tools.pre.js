@@ -147,20 +147,26 @@ function matchPair(str, start, end){
 }
 
 let pagePath = path.join(__dirname, 'index.html'),
-    templateReg = /<!--\[-->([\s\S]*?)<!--]-->/g,
-    templates = [];
-function createDemo(demo){
-    if(fs.existsSync(demo)){
-        let demoCode = fs.readFileSync(demo).toString(),
-            demoHtml = '',
+    templateReg = /<template[^>]*?>([\s\S]*?)<\/template>/g,
+    styleReg = /<style[^>]*?>([\s\S]*?)<\/style>/g,
+    scriptReg = /<script[^>]*?>([\s\S]*?)<\/script>/g,
+    templates = [],
+    styles = [],
+    scripts = [];
+function createDemo(input, mount, name){
+    if(fs.existsSync(input)){
+        let code = fs.readFileSync(input).toString(),
             arr;
 
-        while(arr = templateReg.exec(demoCode)){
-            demoHtml += arr[1];
+        while(arr = styleReg.exec(code)){
+            styles.push(arr[1]);
         }
-
-        templates.push(demoHtml.replace(/new (\w+\([^)]*?\))/, 'new Tools.$1'));
-
+        while(arr = templateReg.exec(code)){
+            templates.push(arr[1]);
+        }
+        while(arr = scriptReg.exec(code)){
+            scripts.push(arr[1].replace(/\(\s*this\s*\)/g, '('+mount+'.'+name+')'));
+        }
     }
 }
 /**
@@ -205,14 +211,17 @@ function mergeJs(){
                 fs.appendFileSync(outputCss, commentStart+cssCode+commentEnd);
             }
 
-            createDemo(path.join(__dirname, 'src', tool, 'demo.html'));
+            createDemo(path.join(__dirname, 'src', tool, tool+'.html'), mount, tool);
         });
 
         code = babel('var utils={\n    '+Array.from(map.values()).join(',\n    ')+'\n};\n') + fs.readFileSync(output).toString();
 
         fs.writeFileSync(output, code);
 
-        pageCode = pageCode.replace(/(<body[^>]*?>)[\s\S]*?(<\/body>)/g, '$1\n'+templates.join('\n')+'$2');
+        pageCode = pageCode.replace(/<style>([\s\S]*?)<\/style>/g, '<style>'+styles.join('\n')+'</style>')
+            .replace(/(<body[^>]*?>)[\s\S]*?(<\/body>)/g,
+            '$1\n'+templates.join('\n')+'<script>\n'+
+            scripts.join('\n')+'</script>\n$2');
         fs.writeFileSync(pagePath, pageCode);
     }
 }

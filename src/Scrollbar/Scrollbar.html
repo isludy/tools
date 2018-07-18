@@ -1,31 +1,4 @@
-<!doctype html>
-<html lang="zh-cn">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>常用工具组件</title>
-    <link rel="stylesheet" href="dist/tools.css">
-    <script src="dist/tools.js"></script>
-    <style>
-
-    .container{
-        position: relative;
-        margin: 300px 0 0 150px;
-    }
-    .box{
-        width: 300px;
-        height: 300px;
-        background: #2aa126;
-    }
-    .img{
-        position: absolute;
-        width: 240px;
-        height: 180px;
-        background: #ea8f23;
-    }
-
-
+<style>
     #yscroll,
     #xscroll,
     #xyscroll{
@@ -43,25 +16,8 @@
         white-space: nowrap;
     }
 </style>
-</head>
-<body>
 
-	<div id="player" style="max-width: 1280px; margin: 0 auto;"></div>
-	<p>
-		<button id="btn1">更新</button>
-		<button id="btn2">切换歌词模式</button>
-	</p>
-
-
-    <div id="calendar" class="calendar"></div>
-
-
-    <div class="container">
-        <div class="box">代表相对定位的元素</div>
-        <div class="img">代表绝对定位的图片</div>
-    </div>
-
-
+<template>
     <div id="yscroll">
         <div class="scroll-bar scroll-y">
             <div class="scroll-thumb"></div>
@@ -133,73 +89,8 @@
                 text content text content text content text content text content text content text content text content</p>
         </div>
     </div>
-
-
-    <nav id="rnav" class="nav">
-        <a class="nav-item nav-active" href="#">首頁</a>
-        <a class="nav-item" href="#">今日文匯</a>
-        <a class="nav-item" href="#">快訊</a>
-        <a class="nav-item" href="#">視頻</a>
-        <a class="nav-item" href="#">圖輯</a>
-        <a class="nav-item" href="#">調查</a>
-        <a class="nav-item" href="#">討論區</a>
-        <a class="nav-item" href="#">專題</a>
-        <a class="nav-item" href="#">消費指南</a>
-        <a class="nav-item" href="#">招商專區</a>
-        <a class="nav-more" href="#">...</a>
-    </nav>
+</template>
 <script>
-
-	(function(Player){
-		var basePath = 'http://localhost/music/',
-			player = new Player('#player'),
-			btn1 = document.getElementById('btn1'),
-			btn2 = document.getElementById('btn2');
-
-		player.src = basePath+'lanlianhua.mp3';
-		player.lrc = basePath+'lanlianhua.lrc';
-		player.src = 'http://assets.wenweipo.com/video/mv/2018/06/04/20180604v0.mp4';
-		player.poster = 'http://image.wenweipo.com/2018/06/04/20180604lml0025.jpg';
-		btn1.onclick = function () {
-			player.src = basePath+'yuanzougaofei.mp3';
-			player.lrc = basePath+'yuanzougaofei1.lrc';
-			player.poster = '';
-		};
-		btn2.onclick = function(){
-			if(player.lrcMode === 1){
-				player.setLrcMode(0);
-			}else{
-				player.setLrcMode(1);
-			}
-		};
-    })(Tools.Player);
-
-
-    (function(Calendar){
-        var box = document.getElementById('calendar');
-        var cld = new Calendar({mode: 1, format: 'd'});
-        box.appendChild(cld.weeker());
-        box.appendChild(cld.dater({activeMode:1}));
-    })(Tools.Calendar);
-
-
-    (function(ScaleControl){
-        var ctrls = new ScaleControl();
-        var box = document.querySelector('.box');
-        var img = document.querySelector('.img');
-
-        document.onclick = function(e){
-            if(e.target === box || e.target === img){
-                ctrls.bind(e.target);
-            }else{
-                if(!ctrls.contains(e.target)) {
-                    ctrls.unbind();
-                }
-            }
-        }
-    })(Tools.ScaleControl);
-
-
     (function (Scrollbar) {
         var rsy = new Scrollbar('yscroll');
         console.log(rsy);
@@ -207,15 +98,5 @@
         console.log(rsx);
         var rsxy = new Scrollbar('xyscroll');
         console.log(rsxy);
-    })(Tools.Scrollbar);
-
-
-    (function (Rnav) {
-        var rnav = new Rnav('rnav');
-        window.onresize = function(){
-            rnav.update();
-        }
-    })(Tools.Rnav);
+    })(this);
 </script>
-</body>
-</html>
