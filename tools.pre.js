@@ -143,7 +143,7 @@ function matchPair(str, start, end){
     return arr;
 }
 
-let pagePath = path.join(__dirname, 'index.html'),
+let pagePath = path.join(__dirname, 'dist', 'index.html'),
     templateReg = /<template[^>]*?>([\s\S]*?)<\/template>/g,
     styleReg = /<style[^>]*?>([\s\S]*?)<\/style>/g,
     scriptReg = /<script[^>]*?>([\s\S]*?)<\/script>/g,
