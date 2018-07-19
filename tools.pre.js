@@ -9,7 +9,6 @@ const importReg = /import([\s\S]+?)from[\s\n\r]+['"]([^'"]+?)['"][;\s\r\n]*|(?:c
 const exportReg = /export\s+default\s+|(module\.)*exports\s*=/g;
 const utilsReg = /utils\.([\w\d_$]+)/g;
 
-const warnings = [];
 const map = new Map();
 
 /**
@@ -31,8 +30,6 @@ function findUtilsFun(code){
                 }
                 map.set(name, tmpCode);
                 findUtilsFun(tmpCode);
-            }else{
-                warnings.push('utils.'+name+' is undefined.');
             }
         });
     }
@@ -172,7 +169,7 @@ function createDemo(input, mount, name){
 /**
  * 合成js
  */
-function mergeJs(){
+function mergeJs(callback){
     if(Array.isArray(config.tools)){
         let mount = config.mount || 'Tools',
             output = path.resolve(config.output) || path.join(__dirname, 'dist', 'tools.js'),
@@ -223,10 +220,12 @@ function mergeJs(){
             '$1\n'+templates.join('\n')+'<script>\n'+
             scripts.join('\n')+'</script>\n$2');
         fs.writeFileSync(pagePath, pageCode);
+        callback('ok');
+    }else{
+        callback('config.tools 必须是数组');
     }
 }
 
-mergeJs();
-
-
-
+mergeJs((msg)=>{
+    console.log(msg);
+});
