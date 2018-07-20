@@ -604,5 +604,17 @@ module.exports = {
             list.push(utils.datemat(format,start));
         }
         return list;
-    }
+    },
+	verControl(attr, version, exclude){
+		let oSrc = document.querySelectorAll('['+attr+']'),
+			len = oSrc.length,
+			i = 0,
+			uri;
+		for(; i<len; i++){
+		    uri = oSrc[i].getAttribute(attr);
+		    if(exclude && exclude.test(uri)) continue;
+        	uri = uri.replace(/[?&]v=[^&]+(&|$)/g,'');
+            oSrc[i].setAttribute(attr, /\?/.test(uri) ? uri+'&v='+version : uri+'?v='+version);
+		}
+	}
 };
