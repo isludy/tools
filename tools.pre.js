@@ -55,7 +55,7 @@ function babel(code) {
                     return $11+($13 || '');
                 });
 
-                return 'function('+$1+'){'+(vars.length ? ('\n        var '+vars.join(',\n            ')+';') : '');
+                return 'function('+$1+'){'+(vars.length ? ('\n        '+vars.join(';\n            ')+';') : '');
             }
         })
         //转换class构建类
@@ -166,6 +166,29 @@ function createDemo(input, mount, name){
         }
     }
 }
+
+function makeOne(tool, output, outputCss, mount){
+    let input = path.join(__dirname, 'src', tool, tool+'.js'),
+        inputCss = path.join(__dirname, 'src', tool, tool+'.css'),
+        commentStart = '/**----------- '+tool+' start line -------*/\n',
+        commentEnd = '\n/**----------- '+tool+' end line -------*/\n\n',
+        code,
+        cssCode;
+    if(fs.existsSync(input)){
+        code = fs.readFileSync(input).toString();
+        findUtilsFun(code);
+        fs.appendFileSync(output,
+            commentStart+
+            '(function(){\n'+ babel(code).replace(importReg,'').replace(exportReg, mount + '.' + tool + '=')+'\n})();\n'+
+            commentEnd);
+    }
+    if(fs.existsSync(inputCss)){
+        cssCode = fs.readFileSync(inputCss).toString();
+        fs.appendFileSync(outputCss, commentStart+cssCode+commentEnd);
+    }
+
+    createDemo(path.join(__dirname, 'src', tool, tool+'.html'), mount, tool);
+}
 /**
  * 合成js
  */
@@ -176,12 +199,8 @@ function mergeJs(callback){
             outputCss = path.resolve(config.outputCss) || path.join(__dirname, 'dist', 'tools.css'),
             outPath = path.dirname(output),
             pageCode = fs.readFileSync(pagePath).toString(),
-            input,
-            code,
-            inputCss,
-            cssCode,
-            commentStart,
-            commentEnd;
+            argv2 = process.argv[2],
+            code;
 
         if(!fs.existsSync(outPath)){
             childProcess.execSync('md '+outPath);
@@ -190,26 +209,13 @@ function mergeJs(callback){
         fs.writeFileSync(output,'var Tools={};\n');
         fs.writeFileSync(outputCss, '');
 
-        config.tools.forEach(tool=>{
-            input = path.join(__dirname, 'src', tool, tool+'.js');
-            inputCss = path.join(__dirname, 'src', tool, tool+'.css');
-            commentStart = '/**----------- '+tool+' start line -------*/\n';
-            commentEnd = '\n/**----------- '+tool+' end line -------*/\n\n';
-            if(fs.existsSync(input)){
-                code = fs.readFileSync(input).toString();
-                findUtilsFun(code);
-                fs.appendFileSync(output,
-                    commentStart+
-                    '(function(){\n'+ babel(code).replace(importReg,'').replace(exportReg, mount + '.' + tool + '=')+'\n})();\n'+
-                    commentEnd);
-            }
-            if(fs.existsSync(inputCss)){
-                cssCode = fs.readFileSync(inputCss).toString();
-                fs.appendFileSync(outputCss, commentStart+cssCode+commentEnd);
-            }
-
-            createDemo(path.join(__dirname, 'src', tool, tool+'.html'), mount, tool);
-        });
+        if(argv2 && config.tools.includes(argv2)){
+            makeOne(argv2, output, outputCss, mount);
+        }else{
+            config.tools.forEach(tool=>{
+                makeOne(tool, output, outputCss, mount);
+            });
+        }
 
         code = babel('var utils={\n    '+Array.from(map.values()).join(',\n    ')+'\n};\n') + fs.readFileSync(output).toString();
 

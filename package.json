@@ -15,15 +15,9 @@
     "url": "https://github.com/Rudyhub/tools/issues"
   },
   "homepage": "https://github.com/Rudyhub/tools#readme",
-  "babel": {
-    "presets": [
-      "es2015"
-    ]
-  },
   "author": "令狐长老",
   "license": "ISC",
   "devDependencies": {
-    "opn": "^5.3.0",
     "http-server": "^0.11.1"
   }
 }
