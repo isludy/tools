@@ -3,137 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
     <title>常用工具组件</title>
     <link rel="stylesheet" href="tools.css">
     <script src="tools.js"></script>
-    <style>
-
-    .container{
-        position: relative;
-        margin: 300px 0 0 150px;
-    }
-    .box{
-        width: 300px;
-        height: 300px;
-        background: #2aa126;
-    }
-    .img{
-        position: absolute;
-        width: 240px;
-        height: 180px;
-        background: #ea8f23;
-    }
-
-
-    #yscroll,
-    #xscroll,
-    #xyscroll{
-        max-width: 640px;
-        height: 300px;
-        border: 1px solid #ddd;
-        margin: 10px auto;
-        overflow: hidden;
-        position: relative;
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-    }
-    .scroll-content{
-        white-space: nowrap;
-    }
-</style>
+    <style></style>
 </head>
 <body>
-
-	<div id="player" style="max-width: 1280px; margin: 0 auto;"></div>
-	<p>
-		<button id="btn1">更新</button>
-		<button id="btn2">切换歌词模式</button>
-	</p>
-
-
-    <div id="calendar" class="calendar"></div>
-
-
-    <div class="container">
-        <div class="box">代表相对定位的元素</div>
-        <div class="img">代表绝对定位的图片</div>
-    </div>
-
-
-    <div id="yscroll">
-        <div class="scroll-bar scroll-y">
-            <div class="scroll-thumb"></div>
-        </div>
-        <div class="scroll-content">
-            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
-            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
-            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
-            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
-            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
-            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
-            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
-            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
-            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
-            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
-            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
-            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
-        </div>
-    </div>
-    <h1>X方向</h1>
-    <div id="xscroll">
-        <div class="scroll-bar scroll-x">
-            <div class="scroll-thumb"></div>
-        </div>
-        <div class="scroll-content">
-            text content text content text content text content text content text content text content text content
-            text content text content text content text content text content text content text content text content
-        </div>
-    </div>
-    <h1>YX方向</h1>
-    <div id="xyscroll">
-        <div class="scroll-bar scroll-x">
-            <div class="scroll-thumb"></div>
-        </div>
-        <div class="scroll-bar scroll-y">
-            <div class="scroll-thumb"></div>
-        </div>
-        <div class="scroll-content">
-            <p>text content text content text content text content text content text content text content text content
-            text content text content text content text content text content text content text content text content</p>
-            <p>text content text content text content text content text content text content text content text content
-                text content text content text content text content text content text content text content text content</p>
-            <p>text content text content text content text content text content text content text content text content
-                text content text content text content text content text content text content text content text content</p>
-            <p>text content text content text content text content text content text content text content text content
-                text content text content text content text content text content text content text content text content</p>
-            <p>text content text content text content text content text content text content text content text content
-                text content text content text content text content text content text content text content text content</p>
-            <p>text content text content text content text content text content text content text content text content
-                text content text content text content text content text content text content text content text content</p>
-            <p>text content text content text content text content text content text content text content text content
-                text content text content text content text content text content text content text content text content</p>
-            <p>text content text content text content text content text content text content text content text content
-                text content text content text content text content text content text content text content text content</p>
-            <p>text content text content text content text content text content text content text content text content
-                text content text content text content text content text content text content text content text content</p>
-            <p>text content text content text content text content text content text content text content text content
-                text content text content text content text content text content text content text content text content</p><p>text content text content text content text content text content text content text content text content
-            text content text content text content text content text content text content text content text content</p>
-            <p>text content text content text content text content text content text content text content text content
-                text content text content text content text content text content text content text content text content</p>
-            <p>text content text content text content text content text content text content text content text content
-                text content text content text content text content text content text content text content text content</p>
-            <p>text content text content text content text content text content text content text content text content
-                text content text content text content text content text content text content text content text content</p>
-            <p>text content text content text content text content text content text content text content text content
-                text content text content text content text content text content text content text content text content</p>
-            <p>text content text content text content text content text content text content text content text content
-                text content text content text content text content text content text content text content text content</p>
-        </div>
-    </div>
-
 
     <nav id="rnav" class="nav">
         <a class="nav-item nav-active" href="#">首頁</a>
@@ -149,66 +25,6 @@
         <a class="nav-more" href="#">...</a>
     </nav>
 <script>
-
-	(function(Player){
-		var basePath = 'http://localhost/music/',
-			player = new Player('#player'),
-			btn1 = document.getElementById('btn1'),
-			btn2 = document.getElementById('btn2');
-
-		player.src = basePath+'lanlianhua.mp3';
-		player.lrc = basePath+'lanlianhua.lrc';
-		player.src = 'http://assets.wenweipo.com/video/mv/2018/06/04/20180604v0.mp4';
-		player.poster = 'http://image.wenweipo.com/2018/06/04/20180604lml0025.jpg';
-		btn1.onclick = function () {
-			player.src = basePath+'yuanzougaofei.mp3';
-			player.lrc = basePath+'yuanzougaofei1.lrc';
-			player.poster = '';
-		};
-		btn2.onclick = function(){
-			if(player.lrcMode === 1){
-				player.setLrcMode(0);
-			}else{
-				player.setLrcMode(1);
-			}
-		};
-    })(Tools.Player);
-
-
-    (function(Calendar){
-        var box = document.getElementById('calendar');
-        var cld = new Calendar({mode: 1, format: 'd'});
-        box.appendChild(cld.weeker());
-        box.appendChild(cld.dater({activeMode:1}));
-    })(Tools.Calendar);
-
-
-    (function(ScaleControl){
-        var ctrls = new ScaleControl();
-        var box = document.querySelector('.box');
-        var img = document.querySelector('.img');
-
-        document.onclick = function(e){
-            if(e.target === box || e.target === img){
-                ctrls.bind(e.target);
-            }else{
-                if(!ctrls.contains(e.target)) {
-                    ctrls.unbind();
-                }
-            }
-        }
-    })(Tools.ScaleControl);
-
-
-    (function (Scrollbar) {
-        var rsy = new Scrollbar('yscroll');
-        console.log(rsy);
-        var rsx = new Scrollbar('xscroll');
-        console.log(rsx);
-        var rsxy = new Scrollbar('xyscroll');
-        console.log(rsxy);
-    })(Tools.Scrollbar);
-
 
     (function (Rnav) {
         var rnav = new Rnav('rnav');
