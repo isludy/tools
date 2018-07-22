@@ -1,6 +1,6 @@
 module.exports = {
     tools: ['Player','Calendar','ScaleControl','Scrollbar','Rnav'],
-    output: './dist/tools.js',
-    outputCss: './dist/tools.css',
+    output: 'dist',
+    filename: 'tools',
     mount: 'Tools'
 };

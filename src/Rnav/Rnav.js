@@ -8,7 +8,8 @@ class Rnav {
                 more: 'nav-more',
                 show: 'nav-show',
                 active: 'nav-active'
-            };
+            },
+            items;
 
         utils.options(o, options);
         options = null;
@@ -18,12 +19,13 @@ class Rnav {
             if(!nav) throw 'Error: nav is null';
         }
 
-        _.nav = nav;
-        _.items = utils.elsByClass(o.item);
-        _.more = utils.elsByClass(o.more)[0];
-        _.length = _.items.length;
+        items = utils.elsByClass(o.item);
 
-        _.update();
+        _.nav = nav;
+        _.more = utils.elsByClass(o.more)[0];
+        _.length = items.length;
+        _.items = [];
+        _.dropItems = [];
 
         utils.addEvent(_.more, 'click', function(e) {
             utils.toggleClass(nav, o.show);
@@ -31,13 +33,15 @@ class Rnav {
         });
 
         for(let i = 0; i<_.length; i++){
-            utils.addEvent(_.items[i], 'click', function(){
+            _.items[i] = items[i];
+            utils.addEvent(items[i], 'click', function(){
                 for(let i = 0; i<_.length; i++) {
-                    utils.removeClass(_.items[i], o.active);
+                    utils.removeClass(items[i], o.active);
                 }
                 utils.addClass(this, o.active);
             });
         }
+        _.update();
     }
     onClickMore(){}
     update(){
@@ -45,12 +49,13 @@ class Rnav {
             count = 0,
             itemsWidth = 0,
             i = 0,
-            bool = false;
+            bool = false,
+            nextNode;
 
         for (; i < _.length; i++) {
             itemsWidth += _.items[i].offsetWidth;
-            if (this.items[i].offsetTop > 0) {
-                _.nav.insertBefore(_.more, this.items[i]);
+            if (_.items[i].offsetTop > 0) {
+                _.nav.insertBefore(_.more, _.items[i]);
                 utils.addClass(_.more, 'nav-more-show');
                 bool = true;
                 break;
@@ -68,6 +73,15 @@ class Rnav {
                 }
             }
         })();
+        _.dropItems.splice(0, _.dropItems.length);
+        nextNode = _.more.nextSibling;
+        while(nextNode){
+            if(nextNode.nodeType === 1){
+                _.dropItems.push(nextNode);
+            }
+            nextNode = nextNode.nextSibling;
+        }
     }
 }
-module.exports = Rnav;
+
+export default Rnav;

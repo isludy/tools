@@ -119,14 +119,9 @@ class Calendar{
 
         return box;
     }
-    static abc(){
-        return 'abc';
-    }
     static toString(){
         return '{ [ class Calendar] }';
     }
 }
-
-var abc = {};
 
 export default Calendar;

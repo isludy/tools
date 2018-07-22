@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const childProcess = require('child_process');
+const uglifyjs = require('uglify-js');
 
 const utils = require('./utils/utils');
 const config = require('./tools.config');
@@ -10,6 +11,18 @@ const exportReg = /export\s+default\s+|(module\.)*exports\s*=/g;
 const utilsReg = /utils\.([\w\d_$]+)/g;
 
 const map = new Map();
+
+
+let mode = process.argv[2],
+    distPath = path.join(__dirname, (config.output || 'dist')),
+    filename = (config.filename || 'tools')+(mode === 'build' ? '.min' : ''),
+    indexPage = path.join(distPath, 'index.html'),
+    templateReg = /<template[^>]*?>([\s\S]*?)<\/template>/g,
+    styleReg = /<style[^>]*?>([\s\S]*?)<\/style>/g,
+    scriptReg = /<script[^>]*?>([\s\S]*?)<\/script>/g,
+    templates = [],
+    styles = [],
+    scripts = [];
 
 /**
  * 把用到的utils添加到map中
@@ -143,16 +156,25 @@ function matchPair(str, start, end){
     return arr;
 }
 
-let pagePath = path.join(__dirname, 'dist', 'index.html'),
-    templateReg = /<template[^>]*?>([\s\S]*?)<\/template>/g,
-    styleReg = /<style[^>]*?>([\s\S]*?)<\/style>/g,
-    scriptReg = /<script[^>]*?>([\s\S]*?)<\/script>/g,
-    templates = [],
-    styles = [],
-    scripts = [];
-function createDemo(input, mount, name){
+/**
+ * 拷贝第三方库
+ */
+function copyLib(){
+    let lib = path.join(__dirname, 'lib');
+    if(fs.existsSync(lib)){
+        childProcess.execSync('xcopy /s /f /h '+lib+' '+path.join(distPath,'lib')+path.sep);
+    }
+}
+
+/**
+ * 解析组件html模板，分别存到styles, templates, scripts数组
+ * @param input
+ * @param mount
+ * @param name
+ */
+function paseDemo(input, mount, name){
     if(fs.existsSync(input)){
-        let code = fs.readFileSync(input).toString(),
+        let code = fs.readFileSync(input,'utf8'),
             arr;
 
         while(arr = styleReg.exec(code)){
@@ -167,6 +189,13 @@ function createDemo(input, mount, name){
     }
 }
 
+/**
+ * 处理一个文件的结果生产
+ * @param tool
+ * @param output
+ * @param outputCss
+ * @param mount
+ */
 function makeOne(tool, output, outputCss, mount){
     let input = path.join(__dirname, 'src', tool, tool+'.js'),
         inputCss = path.join(__dirname, 'src', tool, tool+'.css'),
@@ -175,7 +204,7 @@ function makeOne(tool, output, outputCss, mount){
         code,
         cssCode;
     if(fs.existsSync(input)){
-        code = fs.readFileSync(input).toString();
+        code = fs.readFileSync(input,'utf8');
         findUtilsFun(code);
         fs.appendFileSync(output,
             commentStart+
@@ -183,55 +212,101 @@ function makeOne(tool, output, outputCss, mount){
             commentEnd);
     }
     if(fs.existsSync(inputCss)){
-        cssCode = fs.readFileSync(inputCss).toString();
+        cssCode = fs.readFileSync(inputCss,'utf8');
         fs.appendFileSync(outputCss, commentStart+cssCode+commentEnd);
     }
 
-    createDemo(path.join(__dirname, 'src', tool, tool+'.html'), mount, tool);
+    paseDemo(path.join(__dirname, 'src', tool, tool+'.html'), mount, tool);
+}
+
+/**
+ * 生成index.html
+ */
+function makeIndexPage() {
+    let ver = new Date().getTime(),
+        html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>常用工具组件</title>
+    <!--[if lt IE 9]>
+      <script src="lib/html5shiv.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="${filename}.css?ver=${ver}">
+    <script src="${filename}.js?ver=${ver}"></script>
+    <style>${styles.join('\n')}</style>
+</head>
+<body>
+    ${templates.join('\n')}
+    <script>
+        ${scripts.join('\n')}
+    </script>
+</body>
+</html>`;
+    fs.writeFileSync(indexPage, html);
+}
+
+/**
+ * 压缩css
+ * @param outputCss
+ */
+function compressCss(outputCss) {
+    let cssCode = fs.readFileSync(outputCss, 'utf8');
+    fs.writeFileSync(outputCss,
+        cssCode.replace(/[\r\n]+/g,'')
+            .replace(/\/\*([\s\S]+?)\*\//g,'')
+            .replace(/([{}:;,])\s+/g,'$1')
+            .replace(/\s+/g,' ')
+    );
 }
 /**
- * 合成js
+ * 生产输出
  */
-function mergeJs(callback){
+function production(callback){
     if(Array.isArray(config.tools)){
         let mount = config.mount || 'Tools',
-            output = path.resolve(config.output) || path.join(__dirname, 'dist', 'tools.js'),
-            outputCss = path.resolve(config.outputCss) || path.join(__dirname, 'dist', 'tools.css'),
-            outPath = path.dirname(output),
-            pageCode = fs.readFileSync(pagePath).toString(),
-            argv2 = process.argv[2],
+            output = path.join(distPath, filename+'.js'),
+            outputCss = path.join(distPath, filename+'.css'),
+            argv3 = process.argv[3],
             code;
 
-        if(!fs.existsSync(outPath)){
-            childProcess.execSync('md '+outPath);
+        if(!fs.existsSync(distPath)){
+            childProcess.execSync('md '+distPath);
         }
 
-        fs.writeFileSync(output,'var Tools={};\n');
+        fs.writeFileSync(output,(mount === 'window' ? '' : 'window.'+mount+'={};\n'));
         fs.writeFileSync(outputCss, '');
 
-        if(argv2 && config.tools.includes(argv2)){
-            makeOne(argv2, output, outputCss, mount);
+        if(argv3 && config.tools.includes(argv3)){
+            makeOne(argv3, output, outputCss, mount);
         }else{
             config.tools.forEach(tool=>{
                 makeOne(tool, output, outputCss, mount);
             });
         }
 
-        code = babel('var utils={\n    '+Array.from(map.values()).join(',\n    ')+'\n};\n') + fs.readFileSync(output).toString();
+        code = babel('window.utils={\n    '+Array.from(map.values()).join(',\n    ')+'\n};\n') + fs.readFileSync(output,'utf8');
 
-        fs.writeFileSync(output, code);
+        if(mode === 'build'){
+            fs.writeFileSync(output, uglifyjs.minify(code).code, 'utf8');
+            compressCss(outputCss);
+        }else{
+            fs.writeFileSync(output, code);
+        }
 
-        pageCode = pageCode.replace(/<style>([\s\S]*?)<\/style>/g, '<style>'+styles.join('\n')+'</style>')
-            .replace(/(<body[^>]*?>)[\s\S]*?(<\/body>)/g,
-            '$1\n'+templates.join('\n')+'<script>\n'+
-            scripts.join('\n')+'</script>\n$2');
-        fs.writeFileSync(pagePath, pageCode);
-        callback('ok');
+        makeIndexPage(output, outputCss);
+
+        callback(null, output);
     }else{
-        callback('config.tools 必须是数组');
+        callback(new Error('config.tools 必须是数组'));
     }
 }
 
-mergeJs((msg)=>{
-    console.log(msg);
+production((err, output)=>{
+    if(err){
+        throw err;
+    }
+    console.log(output);
 });

@@ -4,8 +4,9 @@
   "description": "一些小工具",
   "main": "index.js",
   "scripts": {
-    "dev": "node tools.pre.js",
-    "serv": "start /b node tools.server.js"
+    "serv": "start /b node tools.server.js",
+    "dev": "node tools.pre.js dev",
+    "build": "node tools.pre.js build"
   },
   "repository": {
     "type": "git",
@@ -18,6 +19,7 @@
   "author": "令狐长老",
   "license": "ISC",
   "devDependencies": {
-    "http-server": "^0.11.1"
+    "http-server": "^0.11.1",
+    "uglify-js": "^3.4.5"
   }
 }
