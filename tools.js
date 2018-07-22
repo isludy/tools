@@ -1,4 +1,4 @@
-var utils={
+window.utils={
     options: function(target, source, bool){
         bool = bool || true;
         for(var k in source) {
@@ -100,7 +100,7 @@ var utils={
         }
     }
 };
-var Tools={};
+window.Tools={};
 /**----------- Rnav start line -------*/
 (function(){
 function Rnav(nav, options) {
@@ -110,7 +110,8 @@ function Rnav(nav, options) {
                 more: 'nav-more',
                 show: 'nav-show',
                 active: 'nav-active'
-            };
+            },
+            items;
 
         utils.options(o, options);
         options = null;
@@ -120,12 +121,13 @@ function Rnav(nav, options) {
             if(!nav) throw 'Error: nav is null';
         }
 
-        _.nav = nav;
-        _.items = utils.elsByClass(o.item);
-        _.more = utils.elsByClass(o.more)[0];
-        _.length = _.items.length;
+        items = utils.elsByClass(o.item);
 
-        _.update();
+        _.nav = nav;
+        _.more = utils.elsByClass(o.more)[0];
+        _.length = items.length;
+        _.items = [];
+        _.dropItems = [];
 
         utils.addEvent(_.more, 'click', function(e){
             utils.toggleClass(nav, o.show);
@@ -133,13 +135,15 @@ function Rnav(nav, options) {
         });
 
         for(var i = 0; i<_.length; i++){
-            utils.addEvent(_.items[i], 'click', function(){
+            _.items[i] = items[i];
+            utils.addEvent(items[i], 'click', function(){
                 for(var i = 0; i<_.length; i++) {
-                    utils.removeClass(_.items[i], o.active);
+                    utils.removeClass(items[i], o.active);
                 }
                 utils.addClass(this, o.active);
             });
         }
+        _.update();
     }
 Rnav.prototype = {
     onClickMore: function(){},
@@ -148,12 +152,15 @@ Rnav.prototype = {
             count = 0,
             itemsWidth = 0,
             i = 0,
-            bool = false;
+            bool = false,
+            nextNode;
 
         for (; i < _.length; i++) {
             itemsWidth += _.items[i].offsetWidth;
-            if (this.items[i].offsetTop > 0) {
-                _.nav.insertBefore(_.more, this.items[i]);
+            console.log(_.items[i].offsetTop);
+            if (_.items[i].offsetTop > 0) {
+                console.log(_.items[i]);
+                _.nav.insertBefore(_.more, _.items[i]);
                 utils.addClass(_.more, 'nav-more-show');
                 bool = true;
                 break;
@@ -171,10 +178,19 @@ Rnav.prototype = {
                 }
             }
         })();
+        _.dropItems.splice(0, _.dropItems.length);
+        nextNode = _.more.nextSibling;
+        while(nextNode){
+            if(nextNode.nodeType === 1){
+                _.dropItems.push(nextNode);
+            }
+            nextNode = nextNode.nextSibling;
+        }
     }
 };
 
-Tools.Rnav= Rnav;
+
+Tools.Rnav=Rnav;
 })();
 
 /**----------- Rnav end line -------*/
