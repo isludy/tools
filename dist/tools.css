@@ -1,13 +1,6 @@
 /**----------- Rnav start line -------*/
 .nav{
-    background: #a00;
-    font-size: 18px;
-    line-height: 1;
-    font-weight: bold;
-    height: 2em;
     overflow: hidden;
-    max-width: 1200px;
-    margin: 0 auto;
     position: relative;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -22,9 +15,7 @@
 .nav-item,
 .nav-more{
     display: inline-block;
-    color: #fff;
     text-decoration: none;
-    padding: .5em 1em;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;

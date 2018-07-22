@@ -103,9 +103,10 @@ window.utils={
 window.Tools={};
 /**----------- Rnav start line -------*/
 (function(){
-function Rnav(nav, options) {
+function Rnav(navbar, options) {
         var _ = this,
             o = {
+                nav: 'nav',
                 item: 'nav-item',
                 more: 'nav-more',
                 show: 'nav-show',
@@ -116,26 +117,33 @@ function Rnav(nav, options) {
         utils.options(o, options);
         options = null;
 
-        if(nav.nodeType !== 1){
-            nav = document.getElementById(nav);
-            if(!nav) throw 'Error: nav is null';
+        if(navbar.nodeType !== 1){
+            navbar = document.getElementById(navbar);
+            if(!navbar) throw 'Error: nav is null';
         }
 
         items = utils.elsByClass(o.item);
 
-        _.nav = nav;
-        _.more = utils.elsByClass(o.more)[0];
+        _.navbar = navbar;
+        _.nav = utils.elsByClass(o.nav, navbar)[0];
+        _.more = utils.elsByClass(o.more, navbar)[0];
+        _.navdrop = document.createElement('nav');
         _.length = items.length;
-        _.items = [];
-        _.dropItems = [];
+        _.items = items;
+
+        _.navdrop.className = 'nav-drop';
+        _.navbar.appendChild(_.navdrop);
 
         utils.addEvent(_.more, 'click', function(e){
-            utils.toggleClass(nav, o.show);
+            utils.toggleClass(navbar, o.show);
             if(typeof _.onClickMore === 'function') _.onClickMore.call(this, e);
         });
 
         for(var i = 0; i<_.length; i++){
-            _.items[i] = items[i];
+            var dropItem = items[i].cloneNode(true);
+            dropItem.className = 'nav-drop-item';
+            _.navdrop.appendChild(dropItem);
+
             utils.addEvent(items[i], 'click', function(){
                 for(var i = 0; i<_.length; i++) {
                     utils.removeClass(items[i], o.active);
@@ -152,14 +160,11 @@ Rnav.prototype = {
             count = 0,
             itemsWidth = 0,
             i = 0,
-            bool = false,
-            nextNode;
+            bool = false;
 
         for (; i < _.length; i++) {
             itemsWidth += _.items[i].offsetWidth;
-            console.log(_.items[i].offsetTop);
             if (_.items[i].offsetTop > 0) {
-                console.log(_.items[i]);
                 _.nav.insertBefore(_.more, _.items[i]);
                 utils.addClass(_.more, 'nav-more-show');
                 bool = true;
@@ -178,14 +183,6 @@ Rnav.prototype = {
                 }
             }
         })();
-        _.dropItems.splice(0, _.dropItems.length);
-        nextNode = _.more.nextSibling;
-        while(nextNode){
-            if(nextNode.nodeType === 1){
-                _.dropItems.push(nextNode);
-            }
-            nextNode = nextNode.nextSibling;
-        }
     }
 };
 
