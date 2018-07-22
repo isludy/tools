@@ -1,23 +1,35 @@
 <style>
-    .nav{
-        background: #a00;
-        font-size: 18px;
-        line-height: 1;
-        font-weight: bold;
-        height: 2em;
+    .nav-bar{
         max-width: 1200px;
         margin: 0 auto;
+        background: #787a7e;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    .nav{
+        height: 2em;
+        line-height: 2em;
     }
     .nav-item,
     .nav-more{
         color: #fff;
+        padding: 0 .5em;
+    }
+    .nav-item-active{
+        background: #555;
+    }
+    .nav-drop{
+        background: #787a7e;
+    }
+    .nav-drop .nav-item{
+        display: block;
         padding: .5em 1em;
     }
 </style>
 <template>
     <div id="nav-bar" class="nav-bar">
         <nav class="nav">
-            <a class="nav-item nav-active" href="#">首頁</a>
+            <a class="nav-item nav-item-active" href="#">首頁</a>
             <a class="nav-item" href="#">今日文匯</a>
             <a class="nav-item" href="#">快訊</a>
             <a class="nav-item" href="#">視頻</a>
@@ -33,10 +45,6 @@
 </template>
 <script>
     (function (Rnav) {
-        var rnav = new Rnav('nav-bar');
-        window.onresize = function(){
-            rnav.update();
-        }
-        console.log(rnav)
+        new Rnav('nav-bar');
     })(this);
 </script>
