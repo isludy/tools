@@ -157,16 +157,6 @@ function matchPair(str, start, end){
 }
 
 /**
- * 拷贝第三方库
- */
-function copyLib(){
-    let lib = path.join(__dirname, 'lib');
-    if(fs.existsSync(lib)){
-        childProcess.execSync('xcopy /s /f /h '+lib+' '+path.join(distPath,'lib')+path.sep);
-    }
-}
-
-/**
  * 解析组件html模板，分别存到styles, templates, scripts数组
  * @param input
  * @param mount
