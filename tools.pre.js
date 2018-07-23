@@ -280,7 +280,17 @@ function production(callback){
         code = babel('window.utils={\n    '+Array.from(map.values()).join(',\n    ')+'\n};\n') + fs.readFileSync(output,'utf8');
 
         if(mode === 'build'){
-            fs.writeFileSync(output, uglifyjs.minify(code).code, 'utf8');
+            let uglify = uglifyjs.minify(code, {
+                toplevel: true,
+                ie8: true,
+                mangle: true
+            });
+            if(uglify.error){
+                console.log(uglify.error.message);
+            }else{
+                fs.writeFileSync(output, uglify.code, 'utf8');
+            }
+
             compressCss(outputCss);
         }else{
             fs.writeFileSync(output, code);
