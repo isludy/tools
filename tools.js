@@ -1,4 +1,174 @@
 window.utils={
+    dateTable: function(year, month, opt){
+        year = year || -1;
+            month = month || -1;
+        var utils = this,
+            date = new Date(),
+            last,
+            beforeDays,
+            afterDays,
+            startTime,
+            total,
+            table,
+            o = {
+                format: 'Y/M/D',
+                mode: 0,
+                limitRow: true
+            };
+
+        if(typeof year === 'object'){
+            opt = year;
+        }else{
+            if(year !== -1)
+                date.setFullYear(year);
+            if(month !== -1)
+                date.setMonth(month-1);
+        }
+        if(typeof opt === 'object'){
+            for(var k in opt){
+                if(o.hasOwnProperty(k)){
+                    o[k] = opt[k];
+                }
+            }
+        }
+        opt = null;
+
+        last = utils.lastDate(date.getFullYear(), date.getMonth()+1);
+
+        table = {
+            year: date.getFullYear(),
+            month: date.getMonth()+1,
+            weeks: utils.weeks.slice(0),
+            dates: [],
+            prevDates: [],
+            nextDates: []
+        };
+
+        date.setDate(1);
+        beforeDays = date.getDay();
+        date.setTime(date.getTime() - beforeDays * 86400000);
+        startTime = date.getTime();
+        afterDays = (beforeDays + last) % 7;
+        afterDays = afterDays ? 7-afterDays : 0;
+        total = beforeDays + last + afterDays;
+
+        //mode: 0 或 默认，周日在首，周六在末
+        //mode: 1，周一在首，周日在末
+        if(o.mode === 1){
+            //前月填充部分大于0时，整个列队前移1位后，起始时间戳加1天，前部减1天，尾部加1天，如果原本是6天，加1天之后为7天，刚好一行，删除它，total减7
+            if(beforeDays){
+                startTime += 86400000;
+                beforeDays--;
+                if(afterDays < 6)
+                    afterDays++;
+                else{
+                    afterDays = 0;
+                    total -= 7;
+                }
+            }else{
+                //前月填充为0时，整个列队前移1位后，前面需要六个填补，起始时间戳往前6天，尾部如果大于等于6，则减去6天，
+                //前后抵销total不变，否则尾部加一天，加上前部添的6天，total加7天，其实就相当添了一行。
+                startTime -= 6*86400000;
+                beforeDays += 6;
+                if(afterDays >= 6)
+                    afterDays -= 6;
+                else{
+                    afterDays++;
+                    total += 7;
+                }
+            }
+            table.weeks.splice(0, 1);
+            table.weeks.push(utils.weeks[0]);
+        }
+        //limitRow: 默认true, 保持7x6格布局
+        //limitRow: false, 不保持7x6格布局
+        if(o.limitRow && total < 42){
+            //如果天数只有四行，比如2月份有可能，则分别添加到前、后各一行
+            if(42 - total >= 14){
+                startTime -= 7 * 86400000;
+                beforeDays += 7;
+                afterDays += 7;
+            }else{
+                //比较前后部分填充的量，补一行在较少部分
+                if(beforeDays < afterDays){
+                    startTime -= 7 * 86400000;
+                    beforeDays += 7;
+                }else{
+                    afterDays += 7;
+                }
+            }
+            total = 42;
+        }
+
+        for(; total--;)
+            table.dates.unshift(utils.datemat(o.format, startTime+total*86400000));
+
+        table.prevDates = table.dates.splice(0, beforeDays);
+        table.nextDates = table.dates.splice(-afterDays, afterDays);
+        return table;
+    },
+    lastDate: function(year, month){
+        year = year || -1;
+            month = month || -1;
+        var date = new Date();
+
+        switch (arguments.length) {
+            case 1:
+                if(year > 0 && year <= 12)
+                    date.setMonth(year);
+                break;
+            case 2:
+                if(year >= 0)
+                    date.setFullYear(year);
+                if(month > 0 && month <= 12)
+                    date.setMonth(month);
+                break;
+            default:
+                date.setMonth(date.getMonth()+1);
+        }
+
+        date.setDate(0);
+
+        return date.getDate();
+    },
+    weeks: ["日","一","二","三","四","五","六"],
+    datemat: function(format, time){
+        format = format || 'Y/M/D H:I:S.C';
+            time = time || -1;
+        var date = new Date();
+
+        if(typeof format === 'number'){
+            time = format;
+            format = 'Y/M/D H:I:S.C';
+        }
+
+        if(time !== -1)
+            date.setTime(time);
+
+        var o = {
+            Y: date.getFullYear(),
+            m: date.getMonth()+1,
+            d: date.getDate(),
+            h: date.getHours(),
+            i: date.getMinutes(),
+            s: date.getSeconds(),
+            c: date.getMilliseconds()
+        };
+        o.y = (o.Y+'').slice(2);
+        o.M = (o.m+100+'').slice(1);
+        o.D = (o.d+100+'').slice(1);
+        o.H = (o.h+100+'').slice(1);
+        o.I = (o.i+100+'').slice(1);
+        o.S = (o.s+100+'').slice(1);
+        o.C = (o.c+1000+'').slice(1);
+
+        format = format.split('');
+        for(var len=format.length; len--;){
+            var k = format[len];
+            if(o[k]) format[len] = o[k];
+        }
+        return format.join('');
+    },
     options: function(target, source, bool){
         bool = bool || true;
         for(var k in source) {
@@ -10,196 +180,138 @@ window.utils={
         }
         source = null;
         return target;
-    },
-    elsByClass: function(cls, context){
-        context = context || document;
-       if(context.getElementsByClassName){
-           return context.getElementsByClassName(cls);
-       }else if(context.querySelector){
-           return context.querySelectorAll('.'+cls);
-       }else{
-           var utils = this,
-               els = context.getElementsByTagName('*'),
-               len = els.length,
-               i = 0,
-               doms = [];
-
-           for(; i<len; i++){
-               if(utils.hasClass(els[i], cls)){
-                   doms.push(els[i]);
-               }
-           }
-           return doms;
-       }
-    },
-    hasClass: function(el, cls){
-        if(el.classList){
-            return el.classList.contains(cls);
-        }else{
-            var utils = this,
-                list = el.className.split(/\s+/);
-            return utils.indexOf(list, cls) !== -1;
-        }
-    },
-    indexOf: function(arr, item){
-        if(arr.indexOf){
-            return arr.indexOf(item);
-        }else{
-            for(var i=0, l=arr.length; i<l; i++)
-                if(arr[i] === item) return i;
-            return -1;
-        }
-    },
-    addEvent: function(el, evt, fn, capture){
-        capture = capture || false;
-        if(window.addEventListener){
-            el.addEventListener(evt, fn, capture);
-        }else if(window.attachEvent){
-            el.attachEvent('on'+evt, fn);
-        }
-    },
-    removeClass: function(el, cls){
-        if(el.classList){
-            el.classList.remove(cls);
-        }else{
-            var utils = this,
-                list = el.className.split(/\s+/),
-                index;
-            if((index = utils.indexOf(list, cls)) !== -1){
-                list.splice(index, 1);
-            }
-            el.className = list.join(' ');
-        }
-    },
-    addClass: function(el, cls){
-        if(el.classList){
-            el.classList.add(cls);
-        }else{
-            var utils = this,
-                list = el.className.split(/\s+/);
-            if(utils.indexOf(list, cls) === -1){
-                list.push(cls);
-            }
-            el.className = list.join(' ');
-        }
     }
 };
 window.Tools={};
-/**----------- Rnav start line -------*/
+/**----------- Calendar start line -------*/
 (function(){
-function Rnav(navbar, options) {
-        var _ = this,
-            o = {
-                nav: 'nav',
-                item: 'nav-item',
-                more: 'nav-more',
-                moreShow: 'nav-more-show',
-                dropShow: 'nav-drop-show',
-                active: 'nav-item-active',
-                resize: true
-            },
-            items;
+var todayDate = new Date();
+var Rdate = {
+    todayDate,
+    year: todayDate.getFullYear(),
+    month: todayDate.getMonth()+1,
+    date: todayDate.getDate(),
+    day: todayDate.getDay(),
+    time: todayDate.getTime(),
+    hour: todayDate.getHours(),
+    minute: todayDate.getMinutes(),
+    second: todayDate.getSeconds(),
+    ms: todayDate.getMilliseconds()
+};
 
-        utils.options(o, options);
-        options = null;
-        _.options = o;
+function Calendar(year, month, options){
+        var args = arguments,
+            len = args.length;
 
-        if(navbar.nodeType !== 1){
-            navbar = document.getElementById(navbar);
-            if(!navbar) throw 'Error: nav is null';
-        }
+        this.mode = 0;
+        this.format = 'Y/M/D';
+        this.limitRow = true;
 
-        items = utils.elsByClass(o.item);
-
-        _.navbar = navbar;
-        _.nav = utils.elsByClass(o.nav, navbar)[0];
-        _.more = utils.elsByClass(o.more, navbar)[0];
-        _.navdrop = document.createElement('nav');
-        _.length = items.length;
-        _.items = [];
-
-        _.navdrop.className = 'nav-drop';
-        _.navbar.appendChild(_.navdrop);
-
-        for(var i = 0; i<_.length; i++){
-            _.items[i] = items[i];
-            utils.addEvent(items[i], 'click', function(){
-                for(var i = 0; i<_.length; i++) {
-                    utils.removeClass(items[i], o.active);
-                }
-                utils.addClass(this, o.active);
-            });
-        }
-
-        utils.addEvent(_.more, 'click', function(e){
-            if(utils.hasClass(_.navdrop, o.dropShow)){
-                utils.removeClass(_.navdrop, o.dropShow);
-            }else{
-                var dropItem,
-                    count = 0;
-                while(dropItem = _.more.nextSibling){
-                    if(dropItem.nodeType === 1){
-                        _.navdrop.appendChild(dropItem);
-                    }else{
-                        _.nav.removeChild(dropItem);
+        for(; len--; ){
+            if(typeof args[len] === 'object'){
+                for(var k in args[len]){
+                    if(this.hasOwnProperty(k)){
+                        this[k] = args[len][k];
                     }
-                    if(count >= 50) break;
-                    count++;
                 }
-
-                utils.addClass(_.navdrop, o.dropShow);
-            }
-            if(typeof _.onDropMenu === 'function') _.onDropMenu.call(this, e);
-        });
-
-
-        utils.addEvent(window, 'resize',function(){
-            if(o.resize) _.update();
-        });
-
-        _.update();
-    }
-Rnav.prototype = {
-    onDropMenu: function(){},
-    update: function(){
-        var _ = this,
-            count = 0,
-            itemsWidth = 0,
-            i = 0,
-            bool = false,
-            dropItem = _.navdrop.firstChild;
-
-        utils.removeClass(_.navdrop, _.options.dropShow);
-
-        while(dropItem){
-            if(dropItem.nodeType === 1){
-                _.nav.appendChild(dropItem);
-            }
-            dropItem = _.navdrop.firstChild;
-        }
-
-        for (; i < _.length; i++) {
-            itemsWidth += _.items[i].offsetWidth;
-            if (_.items[i].offsetTop > 0) {
-                _.nav.insertBefore(_.more, _.items[i]);
-                utils.addClass(_.more, _.options.moreShow);
-                bool = true;
                 break;
             }
         }
-        if(!bool){
-            utils.removeClass(_.more, _.options.moreShow);
+
+        this.dateTable = utils.dateTable(year, month, options);
+    }
+Calendar.toString = function(){
+        return '{ [ class Calendar] }';
+    };
+Calendar.prototype = {
+    weeker: function(options){
+        var o = {
+            container: 'div',
+            className: 'calendar-weeker',
+            item: 'span',
+            itemClass: 'calendar-weeker-item',
+            activeClass: 'calendar-weeker-active',
+            activeMode: 0
+        };
+        utils.options(o, options);
+        options = null;
+
+        var activeIndex,
+            strictActive = false,
+            html = '',
+            box;
+
+        activeIndex = Rdate.day;
+
+        if(this.mode === 1){
+            activeIndex--;
+            if(activeIndex < 0)
+                activeIndex = 6;
         }
 
-        while(_.more.offsetTop > 0) {
-            _.nav.insertBefore(_.more, _.more.previousSibling);
-            if(count >= _.length) break;
+        if(o.activeMode === 1){
+            if(Rdate.year === this.dateTable.year && Rdate.month === this.dateTable.month)
+                strictActive = true;
+        }else{
+            strictActive = true;
         }
+
+        this.dateTable.weeks.forEach(function(item, index){
+            html += '<'+o.item+' class="'+o.itemClass+(strictActive && index === activeIndex ? ' '+o.activeClass : '')+'">'+item+'</'+o.item+'>';
+        });
+
+        box = document.createElement(o.container);
+        box.className = o.className;
+        box.innerHTML = html;
+        return box;
+    },
+    dater: function(options){
+        var o = {
+            container: 'div',
+            className: 'calendar-dater',
+            item: 'span',
+            itemClass: 'calendar-dater-item',
+            itemPrevClass: 'calendar-dater-prev',
+            itemNextClass: 'calendar-dater-next',
+            activeClass: 'calendar-dater-active',
+            activeMode: 1
+        };
+        utils.options(o, options);
+        options = null;
+
+        var dates = this.dateTable,
+            isCur = dates.year === Rdate.year && dates.month === Rdate.month,
+            active = '',
+            html = '',
+            box;
+
+        dates.prevDates.forEach(function(item){
+            html += '<'+o.item+' class="'+o.itemClass+' '+o.itemPrevClass+'">'+item+'</'+o.item+'>';
+        });
+        dates.dates.forEach(function(item, index){
+            index++;
+            if( (o.activeMode === 0 && index === Rdate.date) || (isCur && index === Rdate.date)){
+                active = ' '+o.activeClass;
+            }else{
+                active = '';
+            }
+            html += '<'+o.item+' class="'+o.itemClass+active+'">'+item+'</'+o.item+'>';
+        });
+        dates.nextDates.forEach(function(item){
+            html += '<'+o.item+' class="'+o.itemClass+' '+o.itemNextClass+'">'+item+'</'+o.item+'>';
+        });
+
+        box = document.createElement(o.container);
+        box.className = o.className;
+        box.innerHTML = html;
+
+        return box;
     }
 };
 
-Tools.Rnav=Rnav;
+
+Tools.Calendar=Calendar;
 })();
 
-/**----------- Rnav end line -------*/
+/**----------- Calendar end line -------*/
 

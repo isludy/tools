@@ -1,44 +1,80 @@
-/**----------- Rnav start line -------*/
-.nav-bar{
-    position: relative;
+/**----------- Calendar start line -------*/
+.calendar{
+    max-width: 320px;
+    margin: 0 auto;
 }
-.nav{
-    overflow: hidden;
-    position: relative;
+.calendar-weeker{
+    background: #82b1ea;
+    color: #fff;
+    font-weight: bolder;
+}
+.calendar-weeker-item,
+.calendar-dater-item{
+    display: inline-block;
+    width: 12.2857%;
+    text-align: center;
+    line-height: 1;
+    font-size: 16px;
+    padding: 3%;
+    margin: 1%;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-    text-align: justify;
-    text-align-last: justify;
-    text-justify: inter-ideograph;
 }
-.nav-show{
-    height: auto;
+.calendar-dater{
+    background: #e8e8e8;
 }
-.nav-item,
-.nav-more{
-    text-decoration: none;
+.calendar-dater-item{
+    background: #fff;
+    border-radius: 4px;
+    color: #333;
+}
+.calendar-dater-prev,
+.calendar-dater-next{
+    color: #fff;
+    background: #d2d2d2;
+}
+.calendar-dater-active{
+    background: #fb0;
+    color: #fff;
+    font-weight: bolder;
+}
+.calendar-picker{
+    width: 4em;
+    height: 1.4em;
+    line-height: 1.4em;
+    text-align: center;
+    position: relative;
+    display: inline-block;
+}
+.calendar-picker-current{
+    width: 100%;
+    height: 100%;
+    border: 1px solid #ddd;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
-.nav-item{
-    display: inline-block;
-}
-.nav-more{
+/*.calendar-picker-current:active,*/
+/*.calendar-picker-current:focus{*/
+    /*border-color: #82b1ea;*/
+/*}*/
+/*.calendar-picker-current:active~.calendar-picker-list{*/
+    /*display: block;*/
+/*}*/
+.calendar-picker-list{
     display: none;
-}
-.nav-more-show{
-    display: inline-block;
-}
-.nav-drop{
-    display: none;
-}
-.nav-drop-show{
-    display: block;
+    border: 1px solid #82b1ea;
     position: absolute;
+    width: 100%;
+    height: 8em;
+    overflow: auto;
+    background: #fff;
+    left: 0;
     top: 100%;
-    right: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
-/**----------- Rnav end line -------*/
+/**----------- Calendar end line -------*/
 
