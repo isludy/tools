@@ -1,25 +1,30 @@
+<style>
+	.player-container{
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+</style>
 <template>
-	<div id="player" style="max-width: 1280px; margin: 0 auto;"></div>
-	<p>
-		<button id="btn1">更新</button>
-		<button id="btn2">切换歌词模式</button>
-	</p>
+	<div class="player-container">
+		<div id="player" style="max-width: 1280px; margin: 0 auto;"></div>
+		<p>
+			<button id="btn1">更新</button>
+			<button id="btn2">切换歌词模式</button>
+		</p>
+	</div>
 </template>
 <script>
 	(function(Player){
-		var basePath = 'http://localhost/music/',
+		var basePath = /localhost/.test(window.location.href) ? 'http://localhost/music/' : '/static/media/',
 			player = new Player('#player'),
 			btn1 = document.getElementById('btn1'),
 			btn2 = document.getElementById('btn2');
 
 		player.src = basePath+'lanlianhua.mp3';
 		player.lrc = basePath+'lanlianhua.lrc';
-		player.src = 'http://assets.wenweipo.com/video/mv/2018/06/04/20180604v0.mp4';
-		player.poster = 'http://image.wenweipo.com/2018/06/04/20180604lml0025.jpg';
 		btn1.onclick = function () {
 			player.src = basePath+'yuanzougaofei.mp3';
 			player.lrc = basePath+'yuanzougaofei1.lrc';
-			player.poster = '';
 		};
 		btn2.onclick = function(){
 			if(player.lrcMode === 1){
