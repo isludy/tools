@@ -108,8 +108,6 @@ class Rnav {
             _.nav.insertBefore(_.more, _.more.previousSibling);
             if(count >= _.length) break;
         }
-
     }
 }
-
 export default Rnav;
