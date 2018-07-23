@@ -8,22 +8,47 @@
     <!--[if lt IE 9]>
       <script src="lib/html5shiv.min.js"></script>
     <![endif]-->
-    <link rel="stylesheet" href="tools.css?ver=1532332934582">
-    <script src="tools.js?ver=1532332934582"></script>
-    <style></style>
+    <link rel="stylesheet" href="tools.min.css?ver=1532336010834">
+    <script src="tools.min.js?ver=1532336010834"></script>
+    <style>
+	.player-container{
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+</style>
 </head>
 <body>
     
-    <div id="calendar" class="calendar"></div>
+	<div class="player-container">
+		<div id="player" style="max-width: 1280px; margin: 0 auto;"></div>
+		<p>
+			<button id="btn1">更新</button>
+			<button id="btn2">切换歌词模式</button>
+		</p>
+	</div>
 
     <script>
         
-    (function(Calendar){
-        var box = document.getElementById('calendar');
-        var cld = new Calendar({mode: 1, format: 'd'});
-        box.appendChild(cld.weeker());
-        box.appendChild(cld.dater({activeMode:1}));
-    })(Tools.Calendar);
+	(function(Player){
+		var basePath = /localhost/.test(window.location.href) ? 'http://localhost/music/' : '/static/media/',
+			player = new Player('#player'),
+			btn1 = document.getElementById('btn1'),
+			btn2 = document.getElementById('btn2');
+
+		player.src = basePath+'lanlianhua.mp3';
+		player.lrc = basePath+'lanlianhua.lrc';
+		btn1.onclick = function () {
+			player.src = basePath+'yuanzougaofei.mp3';
+			player.lrc = basePath+'yuanzougaofei1.lrc';
+		};
+		btn2.onclick = function(){
+			if(player.lrcMode === 1){
+				player.setLrcMode(0);
+			}else{
+				player.setLrcMode(1);
+			}
+		};
+    })(Tools.Player);
 
     </script>
 </body>
