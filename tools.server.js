@@ -1,10 +1,20 @@
 const fs = require('fs');
 const path = require('path');
-
-const {www, port, lh} = require('./tools.serv.conf');
-
+const os = require('os');
 const {exec} = require('child_process');
 
+const config = require('./tools.config');
+
+let www = path.join(__dirname, (config.output || 'dist')),
+    port = 3000,
+    lh;
+
+try {
+    let network = os.networkInterfaces();
+    lh = network[Object.keys(network)[0]][1].address;
+} catch (e) {
+    lh = 'localhost';
+}
 
 if(!fs.existsSync(www)){
     fs.writeFileSync(path.join(www,'index.html'),
