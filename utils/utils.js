@@ -1,18 +1,15 @@
 module.exports = {
-    indexOf(arr, item){
-        if(arr.indexOf){
-            return arr.indexOf(item);
-        }else{
-            for(let i=0, l=arr.length; i<l; i++)
-                if(arr[i] === item) return i;
-            return -1;
-        }
-    },
-    elsByClass(cls, context){
-        context = context || document;
+    isTouch: 'ontouchstart' in document,
+    /**
+     * 通过className查找节点
+     * @param cls
+     * @param context
+     * @returns {*}
+     */
+    elsByClass(cls, context = document){
        if(context.getElementsByClassName){
            return context.getElementsByClassName(cls);
-       }else if(context.querySelector){
+       }else if(context.querySelectorAll){
            return context.querySelectorAll('.'+cls);
        }else{
            let utils = this,
@@ -29,9 +26,74 @@ module.exports = {
            return doms;
        }
     },
-    isTouch(){
-        return 'ontouchstart' in document;
+    /**
+     * 简化querySelectorAll
+     * @param selector
+     * @param context
+     * @returns {*}
+     */
+    $(selector, context = document){
+        return context.querySelectorAll(selector);
     },
+    /**
+     * 节点的contains兼容处理
+     * @param target
+     * @param context
+     * @returns {*}
+     */
+    contains(target, context){
+        if(context.contains){
+            return context.contains(target);
+        }else{
+            if(target === context){
+                return true;
+            }else{
+                let children = context.getElementsByTagName('*'),
+                    len = children.length,
+                    i = 0;
+                for(; i<len; i++){
+                    if(target === children[i]) return true;
+                }
+            }
+        }
+        return false;
+    },
+    /**
+     * 数组的includes兼容处理
+     * @param arr
+     * @param item
+     * @returns {*}
+     */
+    includes(arr, item){
+        if(arr.includes){
+            return arr.includes(item);
+        }else{
+            for(let i=0, l=arr.length; i<l; i++){
+                if(arr[i] === item) return true;
+            }
+        }
+        return false;
+    },
+    /**
+     * indexOf的兼容处理
+     * @param arr
+     * @param item
+     * @returns {*}
+     */
+    indexOf(arr, item){
+        if(arr.indexOf){
+            return arr.indexOf(item);
+        }else{
+            for(let i=0, l=arr.length; i<l; i++)
+                if(arr[i] === item) return i;
+            return -1;
+        }
+    },
+    /**
+     * 单个元素添加className
+     * @param el
+     * @param cls
+     */
     addClass(el, cls){
         if(el.classList){
             el.classList.add(cls);
@@ -44,6 +106,11 @@ module.exports = {
             el.className = list.join(' ');
         }
     },
+    /**
+     * 单个元素移除className
+     * @param el
+     * @param cls
+     */
     removeClass(el, cls){
         if(el.classList){
             el.classList.remove(cls);
@@ -57,6 +124,12 @@ module.exports = {
             el.className = list.join(' ');
         }
     },
+    /**
+     * 单个元素判断是否有指定的className
+     * @param el
+     * @param cls
+     * @returns {boolean}
+     */
     hasClass(el, cls){
         if(el.classList){
             return el.classList.contains(cls);
@@ -66,6 +139,11 @@ module.exports = {
             return utils.indexOf(list, cls) !== -1;
         }
     },
+    /**
+     * 单个元素添加或移除指定的className
+     * @param el
+     * @param cls
+     */
     toggleClass(el, cls){
         if(el.classList){
             el.classList.toggle(cls);
@@ -82,20 +160,89 @@ module.exports = {
             el.className = list.join(' ');
         }
     },
-    addEvent(el, evt, fn, capture=false){
-        if(window.addEventListener){
-            el.addEventListener(evt, fn, capture);
-        }else if(window.attachEvent){
-            el.attachEvent('on'+evt, fn);
-        }
+    /**
+     * 单个元素切换两个指定的className
+     * @param el
+     * @param oldCls
+     * @param newCls
+     */
+    switchClass(el, oldCls, newCls){
+        let utils = this;
+        utils.removeClass(el, oldCls);
+        utils.addClass(el, newCls);
     },
-    removeEvent(el, evt, fn){
-        if(window.removeEventListener){
-            el.removeEventListener(evt, fn);
+    /**
+     * 操作单个或多个元素的className
+     * @param els
+     * @param type
+     * @param cls
+     */
+    classes(els, type, cls){
+        let utils = this,
+            arg3 = arguments[3];
+        if(els.nodeType === 1){
+            utils[type+'Class'](els, cls, arg3);
         }else{
-            el.detachEvent('on'+evt, fn);
+            try{
+                for(let i=0, l=els.length; i<l; i++){
+                    if(els[i].nodeType === 1){
+                        utils[type+'Class'](els[i], cls, arg3);
+                    }
+                }
+            }catch(err){
+                console.error(err);
+            }
         }
     },
+    /**
+     * 绑定单个或多个元素的事件
+     * @param el
+     * @param evt
+     * @param fn
+     * @param capture
+     */
+    on(el, evt, fn, capture=false){
+        let listen1 = window.addEventListener,
+            listen2 = window.attachEvent,
+            els = (el.nodeType === 1 || el === document || el === window) ? [el] : el,
+            len = els.length;
+
+        for(let i=0; i<len; i++){
+            if(els[i].nodeType === 3) continue;
+            if(listen1){
+                els[i].addEventListener(evt, fn, capture);
+            }else if(listen2){
+                els[i].attachEvent('on'+evt, fn);
+            }
+        }
+    },
+    /**
+     * 移除单个或多个元素的事件
+     * @param el
+     * @param evt
+     * @param fn
+     */
+    off(el, evt, fn){
+        let listen1 = window.removeEventListener,
+            listen2 = window.detachEvent,
+            els = (el.nodeType === 1 || el === document || el === window) ? [el] : el,
+            len = els.length;
+
+        for(let i=0; i<len; i++){
+            if(els[i].nodeType === 3) continue;
+            if(listen1){
+                els[i].removeEventListener(evt, fn, capture);
+            }else if(listen2){
+                els[i].detachEvent('on'+evt, fn);
+            }
+        }
+    },
+    /**
+     * 滚轮事件的兼容处理
+     * @param elem
+     * @param callback
+     * @param useCapture
+     */
     wheel(elem, callback, useCapture){
         let prefix = "", _addEventListener, support;
         // detect event model
@@ -154,34 +301,70 @@ module.exports = {
             }, useCapture || false );
         }
     },
-    toBottom(el, deviation) {
+    /**
+     * 判断元素的滚动条是否到达底部
+     * @param el
+     * @param deviation 误差值
+     * @returns {boolean}
+     */
+    toBottom(el, deviation = 2) {
         if(!el)
             return false;
         return el.scrollHeight - el.offsetHeight - el.scrollTop <= deviation;
     },
-    toTop(el, deviation){
+    /**
+     * 判断元素的滚动是否到达顶部
+     * @param el
+     * @param deviation
+     * @returns {boolean}
+     */
+    toTop(el, deviation = 0){
         if(!el)
             return false;
         return el.scrollTop <= deviation;
     },
-    setTransition(el, v) {
+    /**
+     * css3 transition的（前缀）兼容
+     * @param el
+     * @param v
+     */
+    transition(el, v) {
         el.style.webkitTransition =
             el.style.mozTransition =
                 el.style.msTransition =
                     el.style.oTransition =
                         el.style.transition = v;
     },
-    setTransformY(el, v, bool){
+    /**
+     * transform 的部分兼容处理
+     * @param el
+     * @param val
+     */
+    transform(el, val){
         if('transform' in document.documentElement.style){
             el.style.webkitTransform =
                 el.style.mozTransform =
                     el.style.msTransform =
                         el.style.oTransform =
-                            el.style.transform = 'translateY('+ (bool ? v+'px' : '-'+v+'00%') + ')';
+                            el.style.transform = val;
         }else{
-            el.style.top = bool ? v+'px' : '-'+v+'00%';
+            if(/translateY/.test(val)){
+                el.style.top = val;
+            }else if(/translateX/.test(val)){
+                el.style.left = val;
+            }else if(/scaleY/.test(val)){
+                let h = el.offsetHeight;
+                el.style.height = h * parseFloat(val)+'px';
+            }else if(/scaleX/.test(val)){
+                let w = el.offsetWidth;
+                el.style.width = w * parseFloat(val) + 'px';
+            }
         }
     },
+    /**
+     * 元素全屏
+     * @param el
+     */
     fullscreen(el){
         if(el.requestFullscreen) {
             el.requestFullscreen();
@@ -193,6 +376,9 @@ module.exports = {
             el.msRequestFullscreen();
         }
     },
+    /**
+     * 退出全屏
+     */
     exitFullscreen(){
         if(document.exitFullscreen) {
             document.exitFullscreen();
@@ -206,29 +392,75 @@ module.exports = {
             document.msExitFullscreen();
         }
     },
+    /**
+     * 是否全屏
+     * @returns {boolean}
+     */
     isFullscreen() {
         return document.fullscreen || document.webkitIsFullScreen || document.mozFullScreen || false;
     },
-    calced(node, attr){
-        if(node && node.nodeType === 1 && window.getComputedStyle){
-            return window.getComputedStyle(node)[attr];
+    /**
+     * getComputedStyle || currentStyle的简写
+     * @param el
+     * @param attr
+     * @returns {*}
+     */
+    calced(el, attr){
+        if(el && el.nodeType === 1){
+            if(window.getComputedStyle){
+                return window.getComputedStyle(node)[attr];
+            }else{
+                return el.currentStyle[attr];
+            }
         }else{
             return 0;
         }
     },
+    /**
+     * 获取节点指定className的第一个祖节点
+     * @param el
+     * @param cls
+     * @param context
+     * @returns {*}
+     */
     parent(el, cls, context = document.documentElement){
+        let utils = this;
         while (el !== context){
+            el = el.parentNode;
             if(!el) return false;
-            if(el.className && (el.className.split(/\s+/).indexOf(cls) !== -1)){
+            if(utils.hasClass(el, cls)){
                 return el;
-            }else{
-                el = el.parentNode;
             }
         }
     },
+    /**
+     * 获取节点指定className的所有祖节点
+     * @param el
+     * @param cls
+     * @param context
+     * @returns {*}
+     */
+    parents(el, cls, context = document.documentElement){
+        let utils = this, els = [];
+        while (el !== context){
+            el = el.parentNode;
+            if(!el) return false;
+            if(utils.hasClass(el, cls)){
+                els.push(el);
+            }
+        }
+        return els;
+    },
+    /**
+     * 鼠标、手指的三事件组合
+     * @param els
+     * @param fn1
+     * @param fn2
+     * @param fn3
+     */
     eventGroup(els, fn1, fn2, fn3){
         let utils = this,
-            events = utils.isTouch() ? ['touchstart','touchmove','touchend'] : ['mousedown','mousemove','mouseup'],
+            events = utils.isTouch ? ['touchstart','touchmove','touchend'] : ['mousedown','mousemove','mouseup'],
             el1, el2, el3;
         if(!els || !fn1 || !fn2 || !fn3) return;
         el1 = els[0];
@@ -249,6 +481,13 @@ module.exports = {
             fn3.call(this, e);
         }
     },
+    /**
+     * 参数处理，用于封装函数或类的options参数与默认参数的合并
+     * @param target
+     * @param source
+     * @param bool
+     * @returns {*}
+     */
     options(target, source, bool = true){
         for(let k in source) {
             if (source.hasOwnProperty(k)) {
@@ -260,23 +499,12 @@ module.exports = {
         source = null;
         return target;
     },
-    contains(target, context){
-        if(context.contains){
-            return context.contains(target);
-        }else{
-            if(target === context){
-                return true;
-            }else{
-                let children = context.getElementsByTagName('*'),
-                    len = children.length,
-                    i = 0;
-                for(; i<len; i++){
-                    if(target === children[i]) return true;
-                }
-            }
-        }
-        return false;
-    },
+    /**
+     * each遍历加强版，可以通过返回值来决定循环的中止，跳过
+     * @param obj
+     * @param fn
+     * @returns {*}
+     */
     each(obj, fn){
         let len = obj.length, callback;
         if(len){
@@ -295,6 +523,10 @@ module.exports = {
             }
         }
     },
+    /**
+     *
+     * @param options
+     */
     pageSlide(options){
         let utils = this,
             o = {
@@ -309,10 +541,7 @@ module.exports = {
             beforeSlide: null,
             afterSlide: null
         };
-        if(typeof options === 'object')
-            for(let k in options)
-                if(o.hasOwnProperty(k))
-                    o[k] = options[k];
+        utils.options(o, options);
         options = null;
 
         let view = document.querySelector(o.view);
@@ -337,16 +566,16 @@ module.exports = {
 
             utils.eventGroup([view, view, document], function(e){
                 if(e.button === 2) return false;
-                start = utils.isTouch() ? e.touches[0].clientY : e.clientY;
+                start = utils.isTouch ? e.touches[0].clientY : e.clientY;
                 delta = 0;
 
                 scrollEl = utils.parent(e.target, o.scrollbar, wrapper);
-                utils.setTransition(wrapper, 'none');
+                utils.transition(wrapper, 'none');
             }, function(e){
-                delta = (utils.isTouch() ? e.touches[0].clientY : e.clientY) - start;
+                delta = (utils.isTouch ? e.touches[0].clientY : e.clientY) - start;
                 if(!scrollEl || (delta<0 &&  utils.toBottom(scrollEl, o.deviation)) || (delta>0 &&  utils.toTop(scrollEl, o.deviation))){
                     if(!o.fireDistance || Math.abs(delta) > o.fireDistance){
-                        utils.setTransformY(wrapper, delta-page*viewH, true);
+                        utils.transform(wrapper, 'translateY('+delta-page*viewH+')', true);
                         allowTurn = true;
                     }else{
                         allowTurn = false;
@@ -355,7 +584,7 @@ module.exports = {
                     allowTurn = false;
                 }
             }, function(){
-                utils.setTransition(wrapper, 'all ' + o.duration/1000 + 's');
+                utils.transition(wrapper, 'all ' + o.duration/1000 + 's');
                 if( allowTurn && (Math.abs(delta) > o.distance) && ( (delta > 0 && page > 0) || (delta < 0 && page < maxIndex) ) ){
                     if(o.beforeSlide) o.beforeSlide(page, slides);
                     if(delta > 0) {
@@ -368,12 +597,17 @@ module.exports = {
                         if(o.afterSlide) o.afterSlide(page, slides);
                     }, o.duration);
                 }
-                utils.setTransformY(wrapper, page);
+                utils.transform(wrapper, 'translateY('+page+')');
                 scrollEl = null;
             });
         }
         if(view) main();
     },
+    /**
+     * 时间字符串转秒
+     * @param timemat
+     * @returns {number}
+     */
     time(timemat){
         let arr = timemat.split(/[:：]+/);
         if(arr.length === 3){
@@ -382,6 +616,12 @@ module.exports = {
             return parseInt(arr[0])*60 + parseFloat(arr[1]);
         }
     },
+    /**
+     * 秒转时间字符串
+     * @param time
+     * @param type 是否要小时
+     * @returns {string}
+     */
     timemat(time, type=0){
         let h = !type ? 0 : Math.floor(time/3600),
             i = Math.floor((time - h*3600) / 60),
@@ -605,6 +845,12 @@ module.exports = {
         }
         return list;
     },
+    /**
+     * 版本控制
+     * @param attr
+     * @param version
+     * @param exclude
+     */
 	verControl(attr, version, exclude){
 		let oSrc = document.querySelectorAll('['+attr+']'),
 			len = oSrc.length,

@@ -49,7 +49,7 @@ function findUtilsFun(code){
 }
 
 /**
- * 简单的把ES6转为ES5
+ * 简单通过正则的把ES6转为ES5
  * @param code
  * @return {string}
  */
