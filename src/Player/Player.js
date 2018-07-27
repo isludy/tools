@@ -21,6 +21,8 @@ class Player{
             this.__dom__();
             this.__obs__();
 
+
+
             box.appendChild(this[0]);
             this.__events__();
             this.volume = .5;
@@ -29,7 +31,6 @@ class Player{
                 value: 1
             });
         }
-
     }
     __dom__(){
         Player.__check__(this.private, '__dom__');
@@ -384,5 +385,4 @@ class Player{
         return '{ [ class Player ] }';
     }
 }
-
 export default Player;

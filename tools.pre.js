@@ -85,55 +85,10 @@ function babel(code) {
         //转换模板字符
         .replace(/`([^`]*?)`/g,function ($0, $1) {
             return '\''+$1.replace(/[\r\n]+/g,'\\\n').replace(/\${([^}])}/g,'\'+$1+\'')+'\'';
-        }).replace(/(?<!([\w$_]+[\w\d$_]*\s*\([^)]*?\)))\s*{\s*[\w$_]+[\w\d$_]*\s*[:,(]/g, function($0){
-            console.log($0);
-            return $0;
         });
 }
-let cc = babel(`
-function(){
-    for(let i=0; i<len; i++){
-    
-    }
-    while(a = true){
-    
-    }
-    function(){
-       let fndate,
-           abcd,
-           i = 0,
-           o = {
-               isli: abcd,
-               fndate,
-               cb(){
-               
-               }
-           }
-    }
-    var til = {
-        date,
-        isTouch: a in b,
-        has(){
-        
-        },
-        abc: {
-            var opt = {
-                img: null,
-                foo(){}
-            }
-        }
-    }
-    function ffn(){
-        var a = {
-           foocc(){
-           
-           },
-           cc
-        }
-    
-    }
-}
-`);
+
+fs.writeFileSync('t.js',babel(fs.readFileSync('./utils/utils.js', 'utf8')));
 // console.log(cc);
 /**
  * 把获取class构建的es5代码（如果class有自定义静态方法toString，必须把constructor构造器替换为普通方法_contructor）
