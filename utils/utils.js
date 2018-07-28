@@ -862,8 +862,5 @@ module.exports = {
         	uri = uri.replace(/[?&]v=[^&]+(&|$)/g,'');
             oSrc[i].setAttribute(attr, /\?/.test(uri) ? uri+'&v='+version : uri+'?v='+version);
 		}
-	},
-    abc(a=1, c=2, d){
-
-    }
+	}
 };
