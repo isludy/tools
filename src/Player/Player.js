@@ -151,15 +151,15 @@ class Player{
             btn = _this.els.btn,
             loading = _this.els.loading;
 
-        utils.addEvent(window, 'resize', function () {
+        utils.on(window, 'resize', function () {
             _this.setLrcMode();
         });
 
-        utils.addEvent(video, 'loadstart', function () {
+        utils.on(video, 'loadstart', function () {
             _this[0].appendChild(loading);
         });
 
-        utils.addEvent(video, 'durationchange', function(){
+        utils.on(video, 'durationchange', function(){
             _this.duration = this.duration;
             _this.currentTime = 0;
             _this.els.dur.innerText = '/ ' + utils.timemat(this.duration);
@@ -167,17 +167,17 @@ class Player{
             _this.loadLrc();
         });
 
-        utils.addEvent(video, 'loadeddata', function () {
+        utils.on(video, 'loadeddata', function () {
             _this[0].removeChild(loading);
         });
 
-        utils.addEvent(video, 'error', function () {
+        utils.on(video, 'error', function () {
             loading.innerHTML = '加载失败';
             utils.addClass(loading, 'r-loadend');
             utils.removeClass(loading, 'r-loading');
         });
 
-        utils.addEvent(btn, 'click', function(){
+        utils.on(btn, 'click', function(){
             if(video.paused){
                 video.play();
                 video.autoplay = true;
@@ -189,14 +189,14 @@ class Player{
             }
         });
 
-        utils.addEvent(video, 'timeupdate', function () {
+        utils.on(video, 'timeupdate', function () {
             try{
                 _this.els.buf.style.width = (video.buffered.end(video.buffered.length-1) / this.duration) * 100 + '%';
             }catch (err){}
             _this.currentTime = this.currentTime;
         });
 
-        utils.addEvent(_this.els.thumb.parentNode, 'click', function(e){
+        utils.on(_this.els.thumb.parentNode, 'click', function(e){
             if(video.duration > 0){
                 let percent = e.offsetX / this.offsetWidth;
                 _this.currentTime = percent * video.duration;
@@ -204,12 +204,12 @@ class Player{
             }
         });
 
-        utils.addEvent(_this.els.vslider.parentNode, 'click',function(e){
+        utils.on(_this.els.vslider.parentNode, 'click',function(e){
             let info = this.getBoundingClientRect();
             _this.volume = (info.bottom - e.clientY)/info.height;
         });
 
-        utils.addEvent(_this.els.vbtn, 'click', function (e) {
+        utils.on(_this.els.vbtn, 'click', function (e) {
             if(!_this.els.vslider.parentNode.parentNode.contains(e.target)){
                 if(video.muted = !video.muted){
                     utils.addClass(_this[0], 'player-muted');
@@ -219,7 +219,7 @@ class Player{
             }
         },true);
 
-        utils.addEvent(_this.els.rate, 'click', function(){
+        utils.on(_this.els.rate, 'click', function(){
             let rate = parseFloat(this.innerText);
             rate += .25;
             if(rate > 2) rate = .25;
@@ -227,7 +227,7 @@ class Player{
             this.innerText = rate+'x';
         });
 
-        utils.addEvent(_this.els.fscreen, 'click', function(){
+        utils.on(_this.els.fscreen, 'click', function(){
             if(utils.isFullscreen()){
                 utils.exitFullscreen();
                 utils.removeClass(_this.els.fscreen, 'player-fullscreen-on');
@@ -237,7 +237,7 @@ class Player{
             }
         });
 
-        utils.addEvent(_this[0], 'mousemove', function(e){
+        utils.on(_this[0], 'mousemove', function(e){
             if(_this.timer) clearTimeout(_this.timer);
 
             if(!_this.els.ctrls.contains(e.target)){
@@ -246,7 +246,7 @@ class Player{
             }
         });
 
-        utils.addEvent(_this[0], 'mouseleave', ()=>{_this.hideMouse()});
+        utils.on(_this[0], 'mouseleave', ()=>{_this.hideMouse()});
     }
     showMouse(){
         clearTimeout(this.timer);
@@ -370,7 +370,7 @@ class Player{
         }else{
             lrcTop = this[0].offsetHeight - lh*2;
         }
-        utils.setTransformY(this.els.lrc, lrcTop, true);
+        utils.transform(this.els.lrc, 'translateY('+lrcTop+'px)');
     }
     setLrcLines(num){
         if(typeof num === 'number'){

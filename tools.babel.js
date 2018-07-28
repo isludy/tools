@@ -177,7 +177,8 @@ function obj2Array(code){
         pre = 0,
         start,
         end,
-        len;
+        len,
+        isLast;
 
     code = code.trim().slice(1,-1);
     len = code.length;
@@ -200,8 +201,9 @@ function obj2Array(code){
         if(count === 0){
             start = '';
         }
-        if(!start && (code[i] === ',' || i === len-1) ){
-            let v = code.slice(pre, i).trim();
+        isLast = i === len-1;
+        if(!start && (code[i] === ',' || isLast) ){
+            let v = code.slice(pre, (isLast ? i+1 : i)).trim();
             if(/^[\w$_][\w\d$_]*$/.test(v)){
                 v = v + ': '+v;
             }
@@ -218,74 +220,35 @@ function obj2Array(code){
  * @returns {string}
  */
 function babelObj(code){
-    let reg = /(?<=[(,=])\s*{[\s\S]+}/g,
-        part1,
-        part2,
-        result = [];
-    // fs.writeFileSync('t.js','');
-    function re(code){
-        let index = 0, r;
-        r = code.replace(reg, ($0, $1)=>{
-            let totalLen = $0.length,
-                obj = matchPair($0.trim(), '{', '}')[0],
-                objLen = $0.indexOf('{')+obj.length;
-            console.log(':\n'+obj+'\n\n------------');
-            console.log($0+'\n====   '+$1.length+'=>'+obj.length+' | '+totalLen+'='+objLen)
-            index = $1;
-            if(obj){
-                obj = obj2Array(obj);
-                return '{\n'+obj.join(',\n')+'\n}'+(totalLen === objLen ? '' : $0.substr(objLen - totalLen));
-            }
-            return $0;
-        });
-        // console.log(r+'\n===');
-        if(index){
-            part1 = r.slice(0, index+1);
-            part2 = r.slice(index+1);
+    let reg = /(?<=[(,=]\s*){[\s\S]+}/,
+        result = [],
+        match,
+        obj;
+    while(match = reg.exec(code)){
+        result.push(code.slice(0, match.index+1));
+        obj = matchPair(match[0], '{', '}')[0];
+        let after = code.slice(match.index + obj.length);
 
-            // fs.appendFileSync('t.js', part2+'\n//========='+(index+1));
-            result.push(part1);
-            if(reg.test(part2)){
-                re(part2);
-            }else{
-                result.push(part2);
-            }
-
-        }else{
-            result.push(r);
-        }
+        obj = obj2Array(obj);
+        code = obj.join(',')+'\}'+after;
     }
-    re(code);
-    // fs.writeFileSync('t.js', result.join('\n//=============\n'));
+    result.push(code);
     return result.join('');
 }
-let ob = babelObj(`Name.prototype =      {
-        abc(){
-        
-        },
-        c: function(){
-        
-        },
-        ccc,
-        str: function(){
-            var c= {
-                ssg}
-        }}`)
-fs.writeFileSync('t.js', ob);
 
 function codeFormat(code){
-    return code.replace(/\s*([^\w\d$_'"])\s*/g,'$1')//.replace(/(?<![\w\d$_])\s+/g,'');
-}
-//const importReg = /import([\s\S]+?)from[\s\n\r]+['"]([^'"]+?)['"][;\s\r\n]*|(?:const|let|var)([\s\S]+?)=\s*require\s*\(\s*['"]([^'"]*?)['"]\s*\)[;\s\r\n]*/g;
-//const exportReg = /export\s+default\s+|(module\.)*exports\s*=/g;
-// let a = babel(fs.readFileSync('./src/Calendar/Calendar.js','utf8'));
-// let a = babel(fs.readFileSync('./utils/utils.js','utf8'));
-// let b = babel(fs.readFileSync('./src/Player/Player.js','utf8'));
-// a = a.replace(importReg,'').replace(exportReg, 'window.utils = ');
-// b = b.replace(importReg,'').replace(exportReg, 'window.Player = ');
-// fs.writeFileSync('./t.js', b);
-// let o = /(?<=[(,=])(\s*)({[\s\S]+})/g.exec(b);
-// console.log(o[1],o[2]);
+    //清除所有无用空格或换行
+    code = code.replace(/\s*([^\w\d$_'"])\s*/g,'$1');
 
-// fs.writeFileSync('t.js', obj2Array(matchPair(o[2], '{', '}')[0]));
+    return code;
+}
+const importReg = /import([\s\S]+?)from[\s\n\r]+['"]([^'"]+?)['"][;\s\r\n]*|(?:const|let|var)([\s\S]+?)=\s*require\s*\(\s*['"]([^'"]*?)['"]\s*\)[;\s\r\n]*/g;
+const exportReg = /export\s+default\s+|(module\.)*exports\s*=/g;
+// let a = babel(fs.readFileSync('./src/Calendar/Calendar.js','utf8'));
+let a = babel(fs.readFileSync('./utils/utils.js','utf8'));
+let b = babel(fs.readFileSync('./src/Player/Player.js','utf8'));
+a = a.replace(importReg,'').replace(exportReg, 'window.utils = ');
+b = b.replace(importReg,'').replace(exportReg, 'window.Player = ');
+fs.writeFileSync('./t.js', codeFormat(a+b));
+
 exports = {babel, matchPair, babelClass, obj2Array, babelObj};

@@ -408,7 +408,7 @@ module.exports = {
     calced(el, attr){
         if(el && el.nodeType === 1){
             if(window.getComputedStyle){
-                return window.getComputedStyle(node)[attr];
+                return window.getComputedStyle(el)[attr];
             }else{
                 return el.currentStyle[attr];
             }

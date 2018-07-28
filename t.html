@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="src/Player/Player.css">
     <style>
         .container{
             max-width: 1200px;
@@ -16,7 +17,11 @@
 </div>
 <script src="t.js"></script>
 <script>
-    var player = new Player('#player');
+    console.log(utils)
+    var basePath = 'https://rudyhub.github.io/static/media/';
+        player = new Player('#player');
+    player.src = basePath+'lanlianhua.mp3';
+    player.lrc = basePath+'lanlianhua.lrc';
     console.log(utils, player);
 </script>
 </body>
