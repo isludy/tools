@@ -1,7 +1,7 @@
 import utils from '../../utils/utils';
 
 const todayDate = new Date();
-const Rdate =   {
+const Rdate = {
     todayDate,
     year: todayDate.getFullYear(),
     month: todayDate.getMonth()+1,
