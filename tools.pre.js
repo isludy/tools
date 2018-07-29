@@ -53,43 +53,41 @@ function findUtilsFun(code){
  * @param code
  * @return {string}
  */
-function babel(code) {
-        //转换声明的关键字
-    return code.replace(/(const|let)\s+/g,'var ')
-        //转换箭头函数
-        .replace(/(\(\s*[^()]*?\s*\))\s*=>\s*{/g,'function$1{').replace(/([\w\d_$]+?)\s*=>\s*{/g,'function($1){')
-        //转换代默认值的参数
-        .replace(/function\s*\(\s*([^)]+?)\s*\)\s*{/g, function ($0,$1) {
-            if($1){
-                let vars = [];
+// function babel(code) {
+//         //转换声明的关键字
+//     return code.replace(/(const|let)\s+/g,'var ')
+//         //转换箭头函数
+//         .replace(/(\(\s*[^()]*?\s*\))\s*=>\s*{/g,'function$1{').replace(/([\w\d_$]+?)\s*=>\s*{/g,'function($1){')
+//         //转换代默认值的参数
+//         .replace(/function\s*\(\s*([^)]+?)\s*\)\s*{/g, function ($0,$1) {
+//             if($1){
+//                 let vars = [];
+//
+//                 $1 = $1.replace(/([\w\d_$]+?)\s*=\s*(.*?)(,|$)/g, function ($10, $11, $12,$13) {
+//                     vars.push($11+' = '+$11+' || '+($12 || '\'\''));
+//                     return $11+($13 || '');
+//                 });
+//
+//                 return 'function('+$1+'){'+(vars.length ? ('\n        '+vars.join(';\n            ')+';') : '');
+//             }
+//         })
+//         //转换class构建类
+//         .replace(/class\s+([^{]+?)\s*({[\s\S]+})/g,function ($0, $1, $2) {
+//             let len1 = $2.length, len2, classMod;
+//             $2 = matchPair($2, '{', '}');
+//             $2 = $2[0];
+//             len2 = $2.length;
+//
+//             $2 = $2.replace('constructor', '_constructor');
+//             classMod = eval('(class '+$1+$2+')');
+//             return babelClass(classMod) + (len1 === len2 ? '' : $0.substr(len1, len2));
+//         })
+//         //转换模板字符
+//         .replace(/`([^`]*?)`/g,function ($0, $1) {
+//             return '\''+$1.replace(/[\r\n]+/g,'\\\n').replace(/\${([^}])}/g,'\'+$1+\'')+'\'';
+//         });
+// }
 
-                $1 = $1.replace(/([\w\d_$]+?)\s*=\s*(.*?)(,|$)/g, function ($10, $11, $12,$13) {
-                    vars.push($11+' = '+$11+' || '+($12 || '\'\''));
-                    return $11+($13 || '');
-                });
-
-                return 'function('+$1+'){'+(vars.length ? ('\n        '+vars.join(';\n            ')+';') : '');
-            }
-        })
-        //转换class构建类
-        .replace(/class\s+([^{]+?)\s*({[\s\S]+})/g,function ($0, $1, $2) {
-            let len1 = $2.length, len2, classMod;
-            $2 = matchPair($2, '{', '}');
-            $2 = $2[0];
-            len2 = $2.length;
-
-            $2 = $2.replace('constructor', '_constructor');
-            classMod = eval('(class '+$1+$2+')');
-            return babelClass(classMod) + (len1 === len2 ? '' : $0.substr(len1, len2));
-        })
-        //转换模板字符
-        .replace(/`([^`]*?)`/g,function ($0, $1) {
-            return '\''+$1.replace(/[\r\n]+/g,'\\\n').replace(/\${([^}])}/g,'\'+$1+\'')+'\'';
-        });
-}
-
-fs.writeFileSync('t.js',babel(fs.readFileSync('./utils/utils.js', 'utf8')));
-// console.log(cc);
 /**
  * 把获取class构建的es5代码（如果class有自定义静态方法toString，必须把constructor构造器替换为普通方法_contructor）
  * @param mod 类对象
@@ -306,7 +304,9 @@ function production(callback){
         callback(new Error('config.tools 必须是数组'));
     }
 }
-
+const {babel} = require('./tools.babel');
+console.log(babel)
+fs.writeFileSync('t.js',babel(fs.readFileSync('./utils/utils.js', 'utf8')));
 // production((err, output)=>{
 //     if(err){
 //         throw err;

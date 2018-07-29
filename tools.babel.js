@@ -1,10 +1,10 @@
-const fs = require('fs');
+const beautify = require('js-beautify').js_beautify;
 /**
  * 执行转换的主函数
  * @param code
  * @return {string}
  */
-function babel(code) {
+function babel(code, opt) {
         //去掉注释
     code = code.replace(/(\/\*[\s\S]*?\*\/)|(\/\/[^\r\n]*?[\r\n])/g,'')
         //处理class
@@ -23,7 +23,7 @@ function babel(code) {
         //处理省略function定义的函数
         .replace(/(?<!function)\s+([\w$_][\w\d$_]*)(\s*\([^()]*?\)\s*)(?={)/g, ($0, $1, $2)=>{
             if(!/^(for|if|while|switch|function)$/.test($1.trim())){
-                return '\n    '+$1+': function'+$2;
+                return $1+': function'+$2;
             }
             return $0;
         })
@@ -36,13 +36,13 @@ function babel(code) {
         .replace(/(?<=function)\s*\(\s*([^()]*?=[^()]*?)\s*\)\s*{/g, ($0,$1)=>{
             let defs = '';
             $1 = $1.replace(/\s+/g,'').replace(/([\w$_][\w\d$_]*?)=([\s\S]*?)(,|$)/g, ($10, $11, $12)=>{
-                defs += '\n        '+$11 + ' = ' + $11 + ' || ' + $12+';';
+                defs += $11 + ' = ' + $11 + ' || ' + $12+';';
                 return $11+',';
             }).replace(/,$/g,'');
             return '('+$1+'){'+defs;
         });
     //将object{item} key与value相同简写处理为key:value，并返回
-    return babelObj(code);
+    return beautify(babelObj(code), opt);
 }
 
 /**
@@ -164,7 +164,7 @@ function babelClass(code) {
             }
         });
     }
-    return  classArr.join('') + constructorName+ '.prototype = {'+api.join(',\n')+'};';
+    return  classArr.join('') + constructorName+ '.prototype = {'+api.join(',')+'};';
 }
 /**
  * 处理 object{ item1, item2, ... } 为 array[ 'item1: item1', 'item2: item', ...]
@@ -230,25 +230,10 @@ function babelObj(code){
         let after = code.slice(match.index + obj.length);
 
         obj = obj2Array(obj);
-        code = obj.join(',')+'\}'+after;
+        code = obj.join(',')+'}'+after;
     }
     result.push(code);
     return result.join('');
 }
 
-function codeFormat(code){
-    //清除所有无用空格或换行
-    code = code.replace(/\s*([^\w\d$_'"])\s*/g,'$1');
-
-    return code;
-}
-const importReg = /import([\s\S]+?)from[\s\n\r]+['"]([^'"]+?)['"][;\s\r\n]*|(?:const|let|var)([\s\S]+?)=\s*require\s*\(\s*['"]([^'"]*?)['"]\s*\)[;\s\r\n]*/g;
-const exportReg = /export\s+default\s+|(module\.)*exports\s*=/g;
-// let a = babel(fs.readFileSync('./src/Calendar/Calendar.js','utf8'));
-let a = babel(fs.readFileSync('./utils/utils.js','utf8'));
-let b = babel(fs.readFileSync('./src/Player/Player.js','utf8'));
-a = a.replace(importReg,'').replace(exportReg, 'window.utils = ');
-b = b.replace(importReg,'').replace(exportReg, 'window.Player = ');
-fs.writeFileSync('./t.js', codeFormat(a+b));
-
-exports = {babel, matchPair, babelClass, obj2Array, babelObj};
+module.exports = {babel, matchPair, babelClass, obj2Array, class2Array};
