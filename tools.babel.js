@@ -254,4 +254,5 @@ function babelObj(code){
     return result.join('');
 }
 
+
 module.exports = {babel, matchPair, babelClass, obj2Array, class2Array};
