@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "serv": "start /b node tools.server.js",
-    "dev": "node tools.pre.js dev",
-    "build": "node tools.pre.js build"
+    "dev": "node tools.main.js dev",
+    "build": "node tools.main.js build"
   },
   "repository": {
     "type": "git",

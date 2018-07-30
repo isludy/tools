@@ -21,8 +21,6 @@ class Player{
             this.__dom__();
             this.__obs__();
 
-
-
             box.appendChild(this[0]);
             this.__events__();
             this.volume = .5;

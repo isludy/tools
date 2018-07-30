@@ -1,12 +1,22 @@
 const beautify = require('js-beautify').js_beautify;
+
+/**
+ * 清除注释
+ * @param code
+ * @return {string | * | void}
+ */
+function clearComment(code){
+    return code.replace(/(\/\*[\s\S]*?\*\/)|(\/\/[\s\S]*?[\r\n])/g,'');
+}
 /**
  * 执行转换的主函数
  * @param code
+ * @param opt
  * @return {string}
  */
 function babel(code, opt) {
         //去掉注释
-    code = code.replace(/(\/\*[\s\S]*?\*\/)|(\/\/[^\r\n]*?[\r\n])/g,'')
+    code = clearComment(code)
         //处理class
         .replace(/class\s+([\w$_][\w\d$_]*?)\s*({[\s\S]+})/g, function ($0, $1, $2) {
             let totalLen = $2.length, classLen;
@@ -21,9 +31,9 @@ function babel(code, opt) {
         //处理const和let
         .replace(/(const|let)\s+/g,'var ')
         //处理省略function定义的函数
-        .replace(/(?<!function)\s+([\w$_][\w\d$_]*)(\s*\([^()]*?\)\s*)(?={)/g, ($0, $1, $2)=>{
-            if(!/^(for|if|while|switch|function)$/.test($1.trim())){
-                return $1+': function'+$2;
+        .replace(/(?<!function)([{=\s,]+)([\w$_][\w\d$_]*)(\s*\([^()]*?\)\s*)(?={)/g, ($0, $1, $2, $3)=>{
+            if(!/^(for|if|while|switch|function)$/.test($2.trim())){
+                return $1+$2+': function'+$3;
             }
             return $0;
         })
@@ -41,8 +51,11 @@ function babel(code, opt) {
             }).replace(/,$/g,'');
             return '('+$1+'){'+defs;
         });
-    //将object{item} key与value相同简写处理为key:value，并返回
-    return beautify(babelObj(code), opt);
+    code = beautify(babelObj(code), opt).split(/[\r\n]/);
+    code = code.filter(item=>{
+        return item.trim();
+    });
+    return code.join('\n');
 }
 
 /**
@@ -53,6 +66,7 @@ function babel(code, opt) {
  * @return {Array}
  */
 function matchPair(str, start, end){
+    str = clearComment(str);
     let reg = new RegExp('['+start+']|['+end+']','g'),
         wait = true,
         starts = [],
@@ -96,6 +110,7 @@ function matchPair(str, start, end){
  * @returns {Array}
  */
 function class2Array(code){
+    code = clearComment(code);
     let split = [],
         count = 0,
         pre = 0,
@@ -143,6 +158,7 @@ function class2Array(code){
  * @return {string}
  */
 function babelClass(code) {
+    code = clearComment(code);
     let reg = /^class\s+([\w$_][\w\d$_]*?)\s*({[\s\S]+})$/g,
         api = [],
         constructorName,
@@ -172,6 +188,7 @@ function babelClass(code) {
  * @returns {Array}
  */
 function obj2Array(code){
+    code = clearComment(code);
     let split = [],
         count = 0,
         pre = 0,
@@ -220,6 +237,7 @@ function obj2Array(code){
  * @returns {string}
  */
 function babelObj(code){
+    code = clearComment(code);
     let reg = /(?<=[(,=]\s*){[\s\S]+}/,
         result = [],
         match,

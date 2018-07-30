@@ -1,4 +1,5 @@
 module.exports = {
+    version: '1.0.0',
     isTouch: 'ontouchstart' in document,
     /**
      * 通过className查找节点
