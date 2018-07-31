@@ -9,7 +9,9 @@ let utils = {
         let sobj = {
             utobj,
             ss(){
+                setTimeout(()=>{
 
+                });
             }
         }
     },
@@ -35,7 +37,9 @@ class At{
      * bb注释
      */
     static bb(){
-
+        [].forEach(item=>{
+            console.log(item);
+        })
     }
 }
 let ccc = 'ccc';
@@ -46,6 +50,10 @@ function b(){
 class Bt{
     constructor(){
         this.name = 'd\'d\'dd';
+        [].forEach((item, k)=>{
+
+            console.log(item,k);
+        })
     }
     static cn(){
         let opt = {};
@@ -58,7 +66,19 @@ class Bt{
 
     }
 }
-function cm(){}
+function cm(){
+    const icon = ()=>{
+
+    };
+    const iee = (d, year=1)=>{
+
+    };
+    const cee = (b={
+            ac:'ac',bc(){return 'fn';}
+        }, cb = function(){})=>{
+
+    }
+}
 class Ct extends At{
     constructor(){
         super();

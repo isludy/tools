@@ -176,11 +176,8 @@ class Babel{
     babelObj(){
         let _this = this,
             reg = /(?<!\)\s*|=>\s*){[\s\S]+}/,
-            arr = [],
             str,
             mc,
-            mark,
-            index = 0,
             count = 0,
             code,
             objCode;
@@ -197,27 +194,22 @@ class Babel{
                 }else if(code[i] === '}'){
                     count--;
                     if(count === 0){
-                        mark = '____OBJECT'+(index++)+'____';
                         objCode = code.slice(0, i+1);
-                        arr.push({
-                            mark,
-                            code: objCode
-                        });
-                        _this.code = _this.code.replace(objCode, mark);
-                        str = code.slice(i+1);
+                        let objArr = Babel.obj2Array(objCode);
+                        _this.code = _this.code.replace(objCode, '{\n'+objArr.join(',\n')+'\n}');
+                        str = code.slice(1);
                         break;
                     }
                 }
             }
         }
-
-        arr.forEach(item=>{
-            let objArr = Babel.obj2Array(item.code);
-            _this.code = _this.code.replace(item.mark, '{'+objArr.join(',\n')+'}');
-        });
     }
     babelArrowFn(){
-
+        let reg = /(\([\s\S]+\)|[\w$_][\w\d$_]*)\s*=>(?=\s*{)/g;
+        this.code = this.code.replace(reg, ($0, $1)=>{
+            console.log($1);
+            return $0;
+        });
     }
     babelFunParams(){
 
@@ -228,4 +220,5 @@ let c = fs.readFileSync('t.js', 'utf8');
 let bab = new Babel(c);
 bab.babelClasses();
 bab.babelObj();
-console.log(bab.code);
+bab.babelArrowFn();
+// console.log(bab.code);
