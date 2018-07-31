@@ -1,6 +1,6 @@
 let utobj = 'sdg';
 let utils = {
-    isTouch: 'ontouchstart' in document,
+    // isTouch: 'ontouchstart' in document,
     weeks: ['1','2'],
     addClass(){
         let sobj = {
@@ -22,9 +22,11 @@ class At{
         let str2 = "sdgsa\"hgasd";
     }
     fn(){
-
+        console.log('this is fn')
     }
-
+    afn(){
+        console.log('this is afn')
+    }
     /**
      * bb注释
      */
@@ -56,5 +58,8 @@ function cm(){}
 class Ct extends At{
     constructor(){
         super();
+    }
+    abn(){
+
     }
 }

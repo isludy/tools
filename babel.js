@@ -33,89 +33,90 @@ class Babel{
             return key;
         });
     }
+    /**
+     * 转换所有class（类）对象
+     */
     babelClasses(){
-        let arr = [], mc, str, index = 0;
+        let _this = this,
+            reg = /(?<![\w\d$_])class\s+([\w$_][\w\d$_]*)(?:\s+extends\s+([\w$_][\w\d$_]*))*\s*{[\s\S]+}/,
+            arr = [], mc, str, index = 0;
 
-        this.markComment();
-        this.markString();
+        _this.markComment();
+        _this.markString();
 
-        str = this.code;
+        str = _this.code;
 
-        while(mc = /(?<![\w\d$_])class\s+([\w$_][\w\d$_]*)(\s+[\w$_][\w\d$_]*)*\s*{[\s\S]+}/g.exec(str)){
+        while(mc = reg.exec(str)){
             let count = 0,
-                code = mc[0];
+                code = mc[0],
+                start = 0;
 
             for(let i=0, len=code.length; i<len; i++){
                 if(code[i] === '{'){
                     count++;
                 }
+                if(count === 0){
+                    start++;
+                }
                 if(code[i] === '}'){
                     count--;
                     if(count === 0){
-                        let key = '___CLASS'+(index++)+'____';
+                        let mark = '___CLASS'+(index++)+'____';
                         arr.push({
-                            key,
-                            code: code.slice(0, i+1)
+                            mark,
+                            extend: mc[2],
+                            name: mc[1],
+                            code: code.slice(start, i+1)
                         });
-                        this.code = this.code.replace(code.slice(0, i+1), key);
+                        _this.code = _this.code.replace(code.slice(0, i+1), mark);
                         str = code.slice(i+1);
                         break;
                     }
                 }
             }
         }
+        let exclude = /^(name|length|prototype)$/,
+            newClassStr, classObj, staticApi, api;
         arr.forEach(item=>{
-            let newClassStr = 'class '+item.key+item.code.slice(item.code.indexOf('{'));
-            let classO = eval('('+newClassStr+')');
-            console.log(classO);
-        });
-        return arr;
-    }
-    /**
-     * 查找多层嵌套的成对符号的最外层里的内容。
-     * @param str   输入的字符串
-     * @param start 符号左半边
-     * @param end   符号右半边
-     * @return {Array}
-     */
-    static matchPair(str, start, end){
-        let reg = new RegExp('['+start+']|['+end+']','g'),
-            wait = true,
-            starts = [],
-            ends = [],
-            n = 0,
-            arr;
-        while (arr = reg.exec(str)){
-            if(wait && arr[0] === end) continue;
-            if(arr[0] === start){
-                wait = false;
-                n++;
-                if(n === 1) starts.push(arr.index);
-            }else{
-                n--;
-                if(n === 0){
-                    wait = true;
-                    ends.push(arr.index);
+            newClassStr = 'class '+item.name+item.code.replace(/(?<![\w\d$_])constructor(\s*\([^)]*?\))/, '_constructor$1')
+                .replace(/(?<![\w\d$_])(super\([^)]*?\))/,'/*____$1*/');
+
+            classObj = eval('('+newClassStr+')');
+            staticApi = Object.getOwnPropertyNames(classObj);
+            api = Object.getOwnPropertyNames(classObj.prototype);
+
+            str = 'function '+item.name+classObj.prototype['_constructor'].toString().slice(12);
+
+            staticApi.forEach(staticFn=>{
+                if(!exclude.test(staticFn)) {
+                    str += item.name + '.' + staticFn + ' = function' + classObj[staticFn].toString().slice(staticFn.length)+';';
                 }
-            }
-        }
+            });
 
-        arr = [];
+            let tmpArr = [];
+            api.forEach(fn=>{
+                if(fn !== '_constructor' && fn !== 'constructor'){
+                    tmpArr.push(fn+': function'+classObj.prototype[fn].toString().slice(fn.length));
+                }
+            });
+            str += item.name + '.prototype = {' + tmpArr.join(',') + '};';
 
-        starts.forEach((v, i)=>{
-            if(i < ends.length){
-                arr.push(str.slice(v, ends[i]+end.length));
+            if(item.extend) {
+                str = str.replace(/\/\*____super\(([^)]*?)\)\*\//, ($0, $1) => {
+                    return item.extend + '.call(this' + ($1.trim() ? ',' + $1 : '') + ')';
+                });
+                str += 'var ' + item.name + 'PROTO = Object.create(' + item.extend + '.prototype);\n' +
+                    'for(var proto in ' + item.name + 'PROTO){\n' +
+                    item.name + '.prototype[proto] = ' + item.name + 'PROTO[proto];\n' +
+                    '}\n' +
+                    item.name + 'PROTO = null;';
             }
+            _this.code = _this.code.replace(item.mark, str);
         });
-
-        return arr;
     }
 }
 
 let c = fs.readFileSync('t.js', 'utf8');
 let bab = new Babel(c);
-// bab.markComment();
-// bab.markString();
-let arr = bab.babelClasses();
-// console.log(bab.code);
-// console.log(arr);
+ bab.babelClasses();
+console.log(bab.code);
