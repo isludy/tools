@@ -1,7 +1,10 @@
 let utobj = 'sdg';
+let bbbc = 'bbbc';
 let utils = {
-    // isTouch: 'ontouchstart' in document,
+    isTouch: 'ontouchstart' in document,
     weeks: ['1','2'],
+    bbbc,
+    //在在在
     addClass(){
         let sobj = {
             utobj,
@@ -10,6 +13,7 @@ let utils = {
             }
         }
     },
+    //这样注释
     utobj,
     removeClass(){}
 };

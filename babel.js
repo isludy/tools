@@ -13,22 +13,16 @@ class Babel{
         this.increase = 0;
         this.storege = new Map();
     }
+
     /**
-     * 必免干扰，暂存注释
+     * 替换并暂存被替换部分，以防干扰一些其他的处理
+     * @param regName
+     * @param prefix
+     * @param postfix
      */
-    markComment(){
-        this.code = this.code.replace(this.reg.comment, $0=>{
-            let key = '/*____'+(this.increase++)+'____*/';
-            this.storege.set(key,$0);
-            return key;
-        });
-    }
-    /**
-     * 必免干扰，暂标记、替换字符串的位置
-     */
-    markString(){
-        this.code = this.code.replace(this.reg.string, $0=>{
-            let key = '`____'+(this.increase++)+'____`';
+    replaceStorage(regName, prefix, postfix){
+        this.code = this.code.replace(this.reg[regName], $0=>{
+            let key = prefix+(this.increase++)+postfix;
             this.storege.set(key,$0);
             return key;
         });
@@ -39,17 +33,24 @@ class Babel{
     babelClasses(){
         let _this = this,
             reg = /(?<![\w\d$_])class\s+([\w$_][\w\d$_]*)(?:\s+extends\s+([\w$_][\w\d$_]*))*\s*{[\s\S]+}/,
-            arr = [], mc, str, index = 0;
+            arr = [],
+            mc,
+            str,
+            index = 0,
+            mark,
+            count,
+            code,
+            start;
 
-        _this.markComment();
-        _this.markString();
+        _this.replaceStorage('comment', '/*____', '____*/');
+        _this.replaceStorage('string', '`____', '____`');
 
         str = _this.code;
 
         while(mc = reg.exec(str)){
-            let count = 0,
-                code = mc[0],
-                start = 0;
+            count = 0;
+            code = mc[0];
+            start = 0;
 
             for(let i=0, len=code.length; i<len; i++){
                 if(code[i] === '{'){
@@ -61,7 +62,7 @@ class Babel{
                 if(code[i] === '}'){
                     count--;
                     if(count === 0){
-                        let mark = '___CLASS'+(index++)+'____';
+                        mark = '____CLASS'+(index++)+'____';
                         arr.push({
                             mark,
                             extend: mc[2],
@@ -114,9 +115,117 @@ class Babel{
             _this.code = _this.code.replace(item.mark, str);
         });
     }
+
+    /**
+     * 处理 object{ item, fn(){}, ... } 为 array[ 'item: item', 'item: function(){}', ...]
+     * 返回数组给下一步处理
+     * @param code
+     * @returns {Array}
+     */
+    static obj2Array(code){
+        let regKeyValue = /(?<=(\/\/[^\r\n\u2028\u2029]*?[\r\n\u2028\u2029]|\/\*[\s\S]*?\*\/[\r\n\u2028\u2029]*|^)\s*)[\w$_][\w\d$_]*$/,
+            regFunc = /(?<=(\/\/[^\r\n\u2028\u2029]*?[\r\n\u2028\u2029]|\/\*[\s\S]*?\*\/[\r\n\u2028\u2029]*|^)\s*)[\w$_][\w\d$_]*(?=\s*\([^()]*?\))/,
+            split = [],
+            count = 0,
+            pre = 0,
+            start,
+            end,
+            len,
+            isLast;
+
+        code = code.trim().slice(1,-1);
+        len = code.length;
+
+        for(let i=0; i<len; i++){
+            if(!start && (code[i] === '{' || code[i] === '(' || code[i] === '[')){
+                start = code[i];
+                switch (start){
+                    case '{': end = '}'; break;
+                    case '[': end = ']'; break;
+                    case '(': end = ')'; break;
+                }
+            }
+            if(code[i] === start){
+                count++;
+            }
+            if(code[i] === end){
+                count--;
+            }
+            if(count === 0){
+                start = '';
+            }
+            isLast = i === len-1;
+            if(!start && (code[i] === ',' || isLast) ){
+                let v = code.slice(pre, (isLast ? i+1 : i)).trim(),
+                    match;
+                if(match = regKeyValue.exec(v)){
+                    v = v + ': ' + match[0];
+                }else if(match = regFunc.exec(v)){
+                    v = v.slice(0, match.index)+match[0] + ': function' + v.slice(match.index+match[0].length);
+                }
+                split.push(v);
+                pre = i+1;
+            }
+        }
+        return split;
+    }
+
+    /**
+     * 转换object
+     */
+    babelObj(){
+        let _this = this,
+            reg = /(?<!\)\s*|=>\s*){[\s\S]+}/,
+            arr = [],
+            str,
+            mc,
+            mark,
+            index = 0,
+            count = 0,
+            code,
+            objCode;
+
+        str = _this.code;
+
+        while(mc = reg.exec(str)){
+            count = 0;
+            code = mc[0];
+
+            for(let i=0, len=code.length; i<len; i++){
+                if(code[i] === '{'){
+                    count++;
+                }else if(code[i] === '}'){
+                    count--;
+                    if(count === 0){
+                        mark = '____OBJECT'+(index++)+'____';
+                        objCode = code.slice(0, i+1);
+                        arr.push({
+                            mark,
+                            code: objCode
+                        });
+                        _this.code = _this.code.replace(objCode, mark);
+                        str = code.slice(i+1);
+                        break;
+                    }
+                }
+            }
+        }
+
+        arr.forEach(item=>{
+            let objArr = Babel.obj2Array(item.code);
+            _this.code = _this.code.replace(item.mark, '{'+objArr.join(',\n')+'}');
+        });
+    }
+    babelArrowFn(){
+
+    }
+    babelFunParams(){
+
+    }
 }
 
 let c = fs.readFileSync('t.js', 'utf8');
 let bab = new Babel(c);
- bab.babelClasses();
+bab.babelClasses();
+bab.babelObj();
 console.log(bab.code);
