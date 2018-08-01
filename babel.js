@@ -2,8 +2,8 @@ const fs = require('fs');
 
 const reg = {
     comment: /\/\*[\s\S]*?\*\/|\/\/[^\r\n\u2028\u2029]*?[\r\n\u2028\u2029]/g,
-    string: /`[^`]*?`|'.*[\\']*.*?'|".*[\\"]*.*?"/g,
-    classObj: /(?<![\w\d$_])class\s+([\w$_][\w\d$_]*)(\s+[\w$_][\w\d$_]*)*\s*(?={)/g,
+    string: /(['"`])[^\1]*?\1/g,
+    classObj: /(?<![\w\d$_])class\s+([\w$_][\w\d$_]*)(\s+[\w$_][\w\d$_]*)*(?=\s*{)/g,
 };
 
 class Babel{
@@ -147,8 +147,7 @@ class Babel{
             }
             if(code[i] === start){
                 count++;
-            }
-            if(code[i] === end){
+            }else if(code[i] === end){
                 count--;
             }
             if(count === 0){
@@ -204,10 +203,35 @@ class Babel{
             }
         }
     }
+    static getPairOf(code, start, end, bool=false){
+        let len = code.length,
+            i = 0,
+            count = 0,
+            pre = 0,
+            index = 0;
+        for(; i<len; i++){
+            index = bool ? (len-i): i;
+            if(code[index] === start){
+                count++;
+                if(count === 1){
+                    pre = index;
+                }
+            }else if(code[index] === end){
+                count--;
+                if(count === 0){
+                    return bool ? code.slice(len-i, pre+1) : code.slice(pre, i+1);
+                }
+            }
+
+        }
+    }
     babelArrowFn(){
-        let reg = /(\([\s\S]+\)|[\w$_][\w\d$_]*)\s*=>(?=\s*{)/g;
+        let _this = this,
+            reg = /=>(?=\s*{)/g;
         this.code = this.code.replace(reg, ($0, $1)=>{
-            console.log($1);
+            let a = Babel.getPairOf(_this.code.slice(0, $1), ')', '(', true);
+            let f = eval('(function'+a+'{})');
+            console.log(f);
             return $0;
         });
     }
