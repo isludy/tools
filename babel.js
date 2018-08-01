@@ -227,13 +227,12 @@ class Babel{
     }
     babelArrowFn(){
         let _this = this,
-            reg = /=>(?=\s*{)/g;
-        this.code = this.code.replace(reg, ($0, $1)=>{
-            let a = Babel.getPairOf(_this.code.slice(0, $1), ')', '(', true);
-            let f = eval('(function'+a+'{})');
-            console.log(f);
-            return $0;
-        });
+            reg = /=>(?=\s*{)/g,
+            mc;
+        while(mc = reg.exec(_this.code)){
+            let a = Babel.getPairOf(_this.code.slice(0, mc.index), ')', '(', true);
+            console.log(a);
+        }
     }
     babelFunParams(){
 
