@@ -3,7 +3,7 @@ const fs = require('fs');
 const reg = {
     comment: /\/\*[\s\S]*?\*\/|\/\/[^\r\n\u2028\u2029]*?[\r\n\u2028\u2029]/g,
     string: /(['"`])[^\1]*?\1/g,
-    classObj: /(?<![\w\d$_])class\s+([\w$_][\w\d$_]*)(\s+[\w$_][\w\d$_]*)*(?=\s*{)/g,
+    classObj: /(?<![\w$])class\s+([a-zA-Z$_][\w$]*)(\s+[a-zA-Z$_][\w$]*)*(?=\s*{)/g,
 };
 
 class Babel{
@@ -27,12 +27,24 @@ class Babel{
             return key;
         });
     }
+    static saveToStorage(code, test, prefix, postfix){
+        let map = new Map(), id = 0, key;
+        code = code.replace(test, $0=>{
+            key = prefix+(id++)+postfix;
+            map.set(key,$0);
+            return key;
+        });
+        return {
+            code,
+            storage: map
+        }
+    }
     /**
      * 转换所有class（类）对象
      */
     babelClasses(){
         let _this = this,
-            reg = /(?<![\w\d$_])class\s+([\w$_][\w\d$_]*)(?:\s+extends\s+([\w$_][\w\d$_]*))*\s*{[\s\S]+}/,
+            reg = /(?<![\w$])class\s+([a-zA-Z$_][\w$]*)(?:\s+extends\s+([a-zA-Z$_][\w$]*))*\s*{[\s\S]+}/,
             arr = [],
             mc,
             str,
@@ -79,8 +91,8 @@ class Babel{
         let exclude = /^(name|length|prototype)$/,
             newClassStr, classObj, staticApi, api;
         arr.forEach(item=>{
-            newClassStr = 'class '+item.name+item.code.replace(/(?<![\w\d$_])constructor(\s*\([^)]*?\))/, '_constructor$1')
-                .replace(/(?<![\w\d$_])(super\([^)]*?\))/,'/*____$1*/');
+            newClassStr = 'class '+item.name+item.code.replace(/(?<![\w$])constructor(\s*\([^)]*?\))/, '_constructor$1')
+                .replace(/(?<![\w$])(super\([^)]*?\))/,'/*____$1*/');
 
             classObj = eval('('+newClassStr+')');
             staticApi = Object.getOwnPropertyNames(classObj);
@@ -123,8 +135,8 @@ class Babel{
      * @returns {Array}
      */
     static obj2Array(code){
-        let regKeyValue = /(?<=(\/\/[^\r\n\u2028\u2029]*?[\r\n\u2028\u2029]|\/\*[\s\S]*?\*\/[\r\n\u2028\u2029]*|^)\s*)[\w$_][\w\d$_]*$/,
-            regFunc = /(?<=(\/\/[^\r\n\u2028\u2029]*?[\r\n\u2028\u2029]|\/\*[\s\S]*?\*\/[\r\n\u2028\u2029]*|^)\s*)[\w$_][\w\d$_]*(?=\s*\([^()]*?\))/,
+        let regKeyValue = /(?<=(\/\/[^\r\n\u2028\u2029]*?[\r\n\u2028\u2029]|\/\*[\s\S]*?\*\/[\r\n\u2028\u2029]*|^)\s*)[a-zA-Z$_][\w$]*$/,
+            regFunc = /(?<=(\/\/[^\r\n\u2028\u2029]*?[\r\n\u2028\u2029]|\/\*[\s\S]*?\*\/[\r\n\u2028\u2029]*|^)\s*)[a-zA-Z$_][\w$]*(?=\s*\([^()]*?\))/,
             split = [],
             count = 0,
             pre = 0,
@@ -225,19 +237,78 @@ class Babel{
 
         }
     }
+    static getArgsObj(code){
+        let reg = /(?<=(\/\/[^\r\n\u2028\u2029]*?[\r\n\u2028\u2029]|\/\*[\s\S]*?\*\/[\r\n\u2028\u2029]*|^)\s*)([a-zA-Z$_][\w$]*)(?:\s*=\s*(.*?)$|$)/,
+            chars = code.slice(1,-1),
+            len = chars.length,
+            i = 0,
+            count = 0,
+            start,
+            end,
+            sliceStart,
+            arr = [],
+            args = [];
+
+        for(; i<len; i++){
+            if(!start && (chars[i] === '{' || chars[i] === '(' || chars[i] === '[')){
+                start = chars[i];
+                sliceStart = i;
+                switch (start){
+                    case '[': end = ']';break;
+                    case '{': end = '}';break;
+                    case '(': end = ')';break;
+                }
+            }
+            if(chars[i] === start){
+                count++;
+            }else if(chars[i] === end){
+                count--;
+                if(count === 0){
+                    arr.push({
+                        start: sliceStart,
+                        end: i+1,
+                        code: chars.slice(sliceStart, i+1)
+                    });
+                    sliceStart = i+1;
+                    start = end = null;
+                }
+            }
+        }
+        arr.forEach((item, k)=>{
+            if(k===0){
+                args.push(chars.slice(0, item.start), '____ARGS'+k+'____');
+            }else{
+                args.push(chars.slice(arr[k-1].end, item.start), '____ARGS'+k+'____');
+            }
+        });
+        args.join('').split(',').forEach((item, k)=>{
+            let m = reg.exec(item);
+            if(m){
+                args[k] = {
+                    comment: m[1] || '',
+                    key: m[2],
+                    value: (m[3] ? m[3].replace(/____ARGS(\d+)____/g, function ($0,$1) {
+                        return arr[$1].code;
+                    }) : undefined)
+                }
+            }
+        });
+        return args;
+    }
     babelArrowFn(){
         let _this = this,
             reg = /=>(?=\s*{)/g,
             mc;
         while(mc = reg.exec(_this.code)){
             let a = Babel.getPairOf(_this.code.slice(0, mc.index), ')', '(', true);
-            console.log(a);
+            Babel.getArgsObj(a);
         }
     }
     babelFunParams(){
 
     }
 }
+
 
 let c = fs.readFileSync('t.js', 'utf8');
 let bab = new Babel(c);

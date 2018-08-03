@@ -1,13 +1,14 @@
 function cm(){
-    const icon = ()=>{
-
-    };
-    const iee = (d, year=1)=>{
-
-    };
-    const cee = (b={
+    // const icon = ()=>{
+    //
+    // };
+    // const iee = (d, year=1)=>{
+    //
+    // };
+    var aac;
+    const cee = (aac,b={
             ac:'ac',bc(){return 'fn'}
-        }, cb = function(){})=>{
+        }, /*这里有注释怎么办*/cb = function(){})=>{
 
     }
 }
