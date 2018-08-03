@@ -220,24 +220,29 @@ class Babel{
             i = 0,
             count = 0,
             pre = 0,
-            index = 0;
+            index = 0,
+            space = 0;
         for(; i<len; i++){
             index = bool ? (len-i): i;
             if(code[index] === start){
                 count++;
                 if(count === 1){
                     pre = index;
+                    space = i;
                 }
             }else if(code[index] === end){
                 count--;
                 if(count === 0){
-                    return bool ? code.slice(len-i, pre+1) : code.slice(pre, i+1);
+                    return {
+                        space,
+                        code : bool ? code.slice(len-i, pre+1) : code.slice(pre, i+1)
+                    };
                 }
             }
 
         }
     }
-    static getArgsObj(code){
+    static getArgs(code){
         let reg = /(?<=(\/\/[^\r\n\u2028\u2029]*?[\r\n\u2028\u2029]|\/\*[\s\S]*?\*\/[\r\n\u2028\u2029]*|^)\s*)([a-zA-Z$_][\w$]*)(?:\s*=\s*(.*?)$|$)/,
             chars = code.slice(1,-1),
             len = chars.length,
@@ -247,65 +252,84 @@ class Babel{
             end,
             sliceStart,
             arr = [],
-            args = [];
+            args = [],
+            map = [];
 
-        for(; i<len; i++){
-            if(!start && (chars[i] === '{' || chars[i] === '(' || chars[i] === '[')){
-                start = chars[i];
-                sliceStart = i;
-                switch (start){
-                    case '[': end = ']';break;
-                    case '{': end = '}';break;
-                    case '(': end = ')';break;
+        if(!/[\[({]/.test(chars)){
+            args = chars.split(',');
+        }else{
+            for(; i<len; i++){
+                if(!start && (chars[i] === '{' || chars[i] === '(' || chars[i] === '[')){
+                    start = chars[i];
+                    sliceStart = i;
+                    switch (start){
+                        case '[': end = ']';break;
+                        case '{': end = '}';break;
+                        case '(': end = ')';break;
+                    }
+                }
+                if(chars[i] === start){
+                    count++;
+                }else if(chars[i] === end){
+                    count--;
+                    if(count === 0){
+                        arr.push({
+                            start: sliceStart,
+                            end: i+1,
+                            code: chars.slice(sliceStart, i+1)
+                        });
+                        sliceStart = i+1;
+                        start = end = null;
+                    }
                 }
             }
-            if(chars[i] === start){
-                count++;
-            }else if(chars[i] === end){
-                count--;
-                if(count === 0){
-                    arr.push({
-                        start: sliceStart,
-                        end: i+1,
-                        code: chars.slice(sliceStart, i+1)
-                    });
-                    sliceStart = i+1;
-                    start = end = null;
+            arr.forEach((item, k)=>{
+                if(k===0){
+                    args.push(chars.slice(0, item.start), '____ARGS'+k+'____');
+                }else{
+                    args.push(chars.slice(arr[k-1].end, item.start), '____ARGS'+k+'____');
                 }
-            }
+            });
+            args = args.join('').split(',');
         }
-        arr.forEach((item, k)=>{
-            if(k===0){
-                args.push(chars.slice(0, item.start), '____ARGS'+k+'____');
-            }else{
-                args.push(chars.slice(arr[k-1].end, item.start), '____ARGS'+k+'____');
-            }
-        });
-        args.join('').split(',').forEach((item, k)=>{
+
+        args.forEach(item=>{
             let m = reg.exec(item);
             if(m){
-                args[k] = {
+                map.push({
                     comment: m[1] || '',
                     key: m[2],
                     value: (m[3] ? m[3].replace(/____ARGS(\d+)____/g, function ($0,$1) {
                         return arr[$1].code;
                     }) : undefined)
-                }
+                });
             }
         });
-        return args;
+        return map;
     }
     babelArrowFn(){
         let _this = this,
             reg = /=>(?=\s*{)/g,
-            mc;
+            mc,
+            arg;
         while(mc = reg.exec(_this.code)){
-            let a = Babel.getPairOf(_this.code.slice(0, mc.index), ')', '(', true);
-            Babel.getArgsObj(a);
+            arg = Babel.getPairOf(_this.code.slice(0, mc.index), ')', '(', true);
+            _this.code = _this.code.slice(0, mc.index-arg.code.length-arg.space+1)+'function'+arg.code+_this.code.slice(mc.index+2);
         }
     }
     babelFunParams(){
-
+        let _this = this,
+            reg = /(?<=(?:function(?:\s+[a-zA-Z$_][\w$]*)*\s*))\(/g,
+            mc,
+            arg,
+            args;
+        while(mc = reg.exec(_this.code)){
+            arg = Babel.getPairOf(_this.code.slice(mc.index), '(', ')');
+            if(!/^\(\s*\)$/.test(arg.code)){
+                args = Babel.getArgs(arg.code);
+                console.log(args);
+            }
+        }
     }
 }
 
@@ -315,4 +339,5 @@ let bab = new Babel(c);
 bab.babelClasses();
 bab.babelObj();
 bab.babelArrowFn();
+bab.babelFunParams();
 // console.log(bab.code);
