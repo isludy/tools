@@ -1,5 +1,7 @@
 import utils from '../../utils/utils';
 
+import './Player.css';
+
 const lrcModeReg = /player-lrc-mode-[0-9]+/g;
 
 class Player{

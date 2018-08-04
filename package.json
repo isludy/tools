@@ -4,9 +4,9 @@
   "description": "一些小工具",
   "main": "index.js",
   "scripts": {
-    "serv": "start /b node tools.server.js",
-    "dev": "node tools.main.js dev",
-    "build": "node tools.main.js build"
+    "serv": "start /b node SERVER.js",
+    "dev": "node CORE.js development",
+    "build": "node CORE.js production"
   },
   "repository": {
     "type": "git",
@@ -19,8 +19,12 @@
   "author": "令狐长老",
   "license": "ISC",
   "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "css-loader": "^1.0.0",
     "http-server": "^0.11.1",
-    "js-beautify": "^1.7.5",
-    "uglify-js": "^3.4.5"
+    "style-loader": "^0.21.0",
+    "webpack": "^4.16.4"
   }
 }
