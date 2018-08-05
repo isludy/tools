@@ -1,5 +1,5 @@
 import utils from '../../utils/utils';
-
+import './ScaleControl.css';
 class ScaleControl {
     constructor(){
         let box = document.createElement('div'),
@@ -109,11 +109,11 @@ class ScaleControl {
 
         function upHandler(){
             utils.removeClass(_this.el, 'scale-control-unselect');
-            utils.removeEvent(document, 'mousemove', moveHandler);
-            utils.removeEvent(document, 'mouseup', upHandler);
+            utils.off(document, 'mousemove', moveHandler);
+            utils.off(document, 'mouseup', upHandler);
         }
 
-        utils.addEvent(_this[0], 'mousedown', function (e) {
+        utils.on(_this[0], 'mousedown', function (e) {
             let target = e.target;
             utils.addClass(_this.el, 'scale-control-unselect');
 
@@ -146,8 +146,8 @@ class ScaleControl {
             isLeft = target === points.topLeft || target === points.midLeft || target === points.bottomLeft;
             isTop = target === points.topLeft || target === points.topCenter || target === points.topRight;
 
-            utils.addEvent(document, 'mousemove', moveHandler);
-            utils.addEvent(document, 'mouseup', upHandler);
+            utils.on(document, 'mousemove', moveHandler);
+            utils.on(document, 'mouseup', upHandler);
         });
     }
 }

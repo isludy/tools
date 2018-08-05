@@ -1,5 +1,5 @@
 import utils from '../../utils/utils';
-
+import './Rnav.css';
 class Rnav {
     constructor(navbar, options) {
         let _ = this,
@@ -37,7 +37,7 @@ class Rnav {
 
         for(let i = 0; i<_.length; i++){
             _.items[i] = items[i];
-            utils.addEvent(items[i], 'click', function(){
+            utils.on(items[i], 'click', function(){
                 for(let i = 0; i<_.length; i++) {
                     utils.removeClass(items[i], o.active);
                 }
@@ -45,7 +45,7 @@ class Rnav {
             });
         }
 
-        utils.addEvent(_.more, 'click', function(e) {
+        utils.on(_.more, 'click', function(e) {
             if(utils.hasClass(_.navdrop, o.dropShow)){
                 utils.removeClass(_.navdrop, o.dropShow);
             }else{
@@ -67,7 +67,7 @@ class Rnav {
         });
 
 
-        utils.addEvent(window, 'resize',()=>{
+        utils.on(window, 'resize',()=>{
             if(o.resize) _.update();
         });
 

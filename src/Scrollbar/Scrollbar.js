@@ -6,7 +6,7 @@ class Scrollbar {
      * @param id
      */
     constructor(id){
-        let isTouch = utils.isTouch();
+        let isTouch = utils.isTouch;
         this.body = document.getElementById(id);
         if(!this.body)
             throw new Error('Element is not found by id "'+id+'"');
@@ -61,7 +61,7 @@ class Scrollbar {
      * @returns {*}
      */
     static createScroll(_, y, offsetHeight, offsetTop, height, top, scrollHeight, scrollTop, clientY, offsetY, maxY, spaceY){
-        let oh, sh, th, isTouch = utils.isTouch(), start = 0, end = 0, cur = 0, prev = 0, result = 0, dir = 0, prevent = {passive: false};
+        let oh, sh, th, isTouch = utils.isTouch, start = 0, end = 0, cur = 0, prev = 0, result = 0, dir = 0, prevent = {passive: false};
 
         oh = _.content[offsetHeight];
         sh = _.content[scrollHeight];

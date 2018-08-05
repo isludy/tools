@@ -135,7 +135,7 @@ const fns = {
     findUtilsFun(filename, map){
         map = map || new Map();
         function re(code){
-            let reg = /utils(?:\.([\w$_][\w\d$_]*)|\[\s*(['"]?)(.*?)\2\s*])/g,
+            let reg = /utils(?:\.([\w$]*)|\[\s*(['"]?)(.*?)\2\s*])/g,
                 matchKey;
 
             while(matchKey = reg.exec(code)){
@@ -144,6 +144,7 @@ const fns = {
                     map.set(matchKey, utils.get(matchKey));
                 }
             }
+
             map.forEach(item=>{
                 while (matchKey = reg.exec(item)){
                     matchKey = matchKey[1] || matchKey[3];
@@ -158,7 +159,6 @@ const fns = {
         }else{
             re(filename);
         }
-        return map;
     },
     eachFile(dir, exclude, callback){
         if(typeof exclude === 'function'){
@@ -201,12 +201,19 @@ const fns = {
             html = [],
             script = [],
             code,
-            match;
-
+            match,
+            mounts = {};
+        opt.mount.forEach(item=>{
+            if(/\./.test(item)){
+                mounts[item.slice(item.lastIndexOf('.')+1)] = item;
+            }
+        });
         files.forEach(file=>{
             if(fs.existsSync(file)){
+                let tool = path.dirname(file).split(/[\/\\]+/);
+                tool = tool[tool.length - 1];
+                code = fs.readFileSync(file, 'utf8');
                 while(match = reg.exec(code)){
-                    console.log(match[1]);
                     switch (match[1]){
                         case 'style':
                             if(match[2]) style.push(match[2]);
@@ -215,15 +222,14 @@ const fns = {
                             if(match[2]) html.push(match[2]);
                             break;
                         case 'script':
-                            if(match[2]) script.push('(function(){\n'+match[2]+'\n})();');
+                            if(match[2]) script.push('(function(){\n    var '+tool+' = '+mounts[tool]+';\n'+match[2]+'\n})();');
                             break;
                     }
                 }
             }
         });
         fs.writeFileSync(path.join(opt.dist,'index.html'),
-`
-<!DOCTYPE html>
+`<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -234,12 +240,13 @@ const fns = {
     </style>
 </head>
 <body>
-<script src="${opt.script}"></script>
 ${html.join('\n')}
+<script src="${opt.script}"></script>
+<script>
 ${script.join('\n')}
+</script>
 </body>
-</html>     
-`
+</html>`
         );
 
     }
@@ -249,6 +256,7 @@ const toolConfig = require('./tools.config');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const utilsSourcePath = path.join(__dirname,'utils','utils.js');
 const utils = fns.utils(utilsSourcePath);
+
 const config = {
     entry: {},
     mode: process.argv[2] || 'production',
@@ -295,7 +303,7 @@ if(argv3 === '*' || argv3 === '.'){
     config.entry = [];
     toolConfig.tools.forEach(tool=>{
         thisTempOut = path.join(__dirname, 'src', tool, tempname);
-        code = fs.readFileSync(path.join(__dirname, 'src', tool, tool+'.js'), 'utf8').replace(reg.utilsImport, 'import utils from "../../utils/'+path.basename(uTempOut)+'";\n');
+        code = fs.readFileSync(path.join(__dirname, 'src', tool, tool+'.js'), 'utf8').replace(reg.utilsImport, 'const utils = require("../../utils/'+tempname+'");\n');
         fns.findUtilsFun(code, usedUtilsMap);
         fs.writeFileSync(thisTempOut, fns.mountCode(mount, tool, code));
         info.entry.push('./src/'+tool+'/'+tool+'.js');
@@ -306,22 +314,22 @@ if(argv3 === '*' || argv3 === '.'){
         uOutCode.push(key+': '+val);
     });
 
-    fs.writeFileSync(uTempOut,'var utils = {\n' + uOutCode.join(',') + '\n}; module.exports = utils;' );
+    fs.writeFileSync(uTempOut,'const utils = {\n' + uOutCode.join(',') + '\n}; module.exports = utils;' );
 }else if(toolConfig.tools.includes(argv3)){
     let thisToolPath = path.join(__dirname, 'src', argv3),
         thisTempOut = path.join(thisToolPath, tempname),
-        uTempOut = path.join(thisToolPath, tempname),
-        uMap,
+        uTempOut = path.join(__dirname, 'utils', tempname),
+        uMap = new Map(),
         uOutCode = [],
         code = fs.readFileSync(path.join(thisToolPath, argv3+'.js'),'utf8');
 
-    uMap = fns.findUtilsFun(code);
+    fns.findUtilsFun(code, uMap);
     uMap.forEach((val, key)=>{
         uOutCode.push(key+': '+val);
     });
 
-    fs.writeFileSync(thisTempOut, fns.mountCode(argv3, '', code.replace(reg.utilsImport, 'import utils from "./'+path.basename(uTempOut)+'";\n')) );
-    fs.writeFileSync(uTempOut, 'var utils = {\n' + uOutCode.join(',') + '\n}; module.exports = utils;');
+    fs.writeFileSync(thisTempOut, fns.mountCode(argv3, '', code.replace(reg.utilsImport, 'const utils = require("../../utils/'+tempname+'");\n')) );
+    fs.writeFileSync(uTempOut, 'const utils = {\n' + uOutCode.join(',') + '\n}; module.exports = utils;');
     config.entry = thisTempOut;
     info.entry.push('./src/'+argv3+'/'+argv3+'.js');
 }else{
@@ -357,7 +365,8 @@ webpack(config, (err, state)=>{
         fns.createDemo(demoFiles, {
             dist: toolConfig.output || 'dist',
             script,
-            css
+            css,
+            mount: info.mount
         });
         console.log('\x1B[32m %s \x1B[0m', 'success');
         console.log('\x1b[32m %s \x1b[0m', 'entry: ');

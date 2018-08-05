@@ -222,8 +222,9 @@ let utils = {
      * @param el
      * @param evt
      * @param fn
+     * @param capture
      */
-    off(el, evt, fn){
+    off(el, evt, fn, capture=false){
         let listen1 = window.removeEventListener,
             listen2 = window.detachEvent,
             els = (el.nodeType === 1 || el === document || el === window) ? [el] : el,
