@@ -1,0 +1,102 @@
+<style>
+    #yscroll,
+    #xscroll,
+    #xyscroll{
+        max-width: 640px;
+        height: 300px;
+        border: 1px solid #ddd;
+        margin: 10px auto;
+        overflow: hidden;
+        position: relative;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    .scroll-content{
+        white-space: nowrap;
+    }
+</style>
+
+<template>
+    <div id="yscroll">
+        <div class="scroll-bar scroll-y">
+            <div class="scroll-thumb"></div>
+        </div>
+        <div class="scroll-content">
+            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+            <p>text content</p><p>text content</p><p>text content</p><p>text content</p><p>text content</p>
+        </div>
+    </div>
+    <h1>X方向</h1>
+    <div id="xscroll">
+        <div class="scroll-bar scroll-x">
+            <div class="scroll-thumb"></div>
+        </div>
+        <div class="scroll-content">
+            text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content
+        </div>
+    </div>
+    <h1>YX方向</h1>
+    <div id="xyscroll">
+        <div class="scroll-bar scroll-x">
+            <div class="scroll-thumb"></div>
+        </div>
+        <div class="scroll-bar scroll-y">
+            <div class="scroll-thumb"></div>
+        </div>
+        <div class="scroll-content">
+            <p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p>
+            <p>text content text content text content text content text content text content text content text content
+                text content text content text content text content text content text content text content text content</p>
+            <p>text content text content text content text content text content text content text content text content
+                text content text content text content text content text content text content text content text content</p>
+            <p>text content text content text content text content text content text content text content text content
+                text content text content text content text content text content text content text content text content</p>
+            <p>text content text content text content text content text content text content text content text content
+                text content text content text content text content text content text content text content text content</p>
+            <p>text content text content text content text content text content text content text content text content
+                text content text content text content text content text content text content text content text content</p>
+            <p>text content text content text content text content text content text content text content text content
+                text content text content text content text content text content text content text content text content</p>
+            <p>text content text content text content text content text content text content text content text content
+                text content text content text content text content text content text content text content text content</p>
+            <p>text content text content text content text content text content text content text content text content
+                text content text content text content text content text content text content text content text content</p>
+            <p>text content text content text content text content text content text content text content text content
+                text content text content text content text content text content text content text content text content</p><p>text content text content text content text content text content text content text content text content
+            text content text content text content text content text content text content text content text content</p>
+            <p>text content text content text content text content text content text content text content text content
+                text content text content text content text content text content text content text content text content</p>
+            <p>text content text content text content text content text content text content text content text content
+                text content text content text content text content text content text content text content text content</p>
+            <p>text content text content text content text content text content text content text content text content
+                text content text content text content text content text content text content text content text content</p>
+            <p>text content text content text content text content text content text content text content text content
+                text content text content text content text content text content text content text content text content</p>
+            <p>text content text content text content text content text content text content text content text content
+                text content text content text content text content text content text content text content text content</p>
+        </div>
+    </div>
+</template>
+<script>
+    (function (Scrollbar) {
+        var rsy = new Scrollbar('yscroll');
+        console.log(rsy);
+        var rsx = new Scrollbar('xscroll');
+        console.log(rsx);
+        var rsxy = new Scrollbar('xyscroll');
+        console.log(rsxy);
+    })(this);
+</script>
