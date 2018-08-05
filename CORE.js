@@ -194,6 +194,54 @@ const fns = {
                 }
             }
         });
+    },
+    createDemo(files, opt){
+        let reg = /<(style|template|script)[^>]*?>([\s\S]*?)<\/\1>/g,
+            style = [],
+            html = [],
+            script = [],
+            code,
+            match;
+
+        files.forEach(file=>{
+            if(fs.existsSync(file)){
+                while(match = reg.exec(code)){
+                    console.log(match[1]);
+                    switch (match[1]){
+                        case 'style':
+                            if(match[2]) style.push(match[2]);
+                            break;
+                        case 'template':
+                            if(match[2]) html.push(match[2]);
+                            break;
+                        case 'script':
+                            if(match[2]) script.push('(function(){\n'+match[2]+'\n})();');
+                            break;
+                    }
+                }
+            }
+        });
+        fs.writeFileSync(path.join(opt.dist,'index.html'),
+`
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Your Tools</title>
+    <link rel="stylesheet" href="${opt.css}">
+    <style>
+    ${style.join('\n')}
+    </style>
+</head>
+<body>
+<script src="${opt.script}"></script>
+${html.join('\n')}
+${script.join('\n')}
+</body>
+</html>     
+`
+        );
+
     }
 };
 
@@ -291,11 +339,31 @@ webpack(config, (err, state)=>{
     if(err){
         console.log(err);
     }else{
+        let demoFiles = [],
+            assets = Object.keys(state.compilation.assets),
+            script,
+            css;
+        info.entry.forEach(entry=>{
+            demoFiles.push(path.join(__dirname, path.dirname(entry), 'demo.html'));
+        });
+        assets.forEach(item=>{
+            if(/\.css$/.test(item)){
+                css = item;
+            }
+            if(/\.js$/.test(item)){
+                script = item;
+            }
+        });
+        fns.createDemo(demoFiles, {
+            dist: toolConfig.output || 'dist',
+            script,
+            css
+        });
         console.log('\x1B[32m %s \x1B[0m', 'success');
         console.log('\x1b[32m %s \x1b[0m', 'entry: ');
         console.log(info.entry);
         console.log('\x1b[32m %s \x1b[0m', 'output: ');
-        console.log(Object.keys(state.compilation.assets));
+        console.log(assets);
         console.log('\x1b[32m %s \x1b[0m', 'mount: ');
         console.log(info.mount);
     }
