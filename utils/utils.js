@@ -1,4 +1,4 @@
-module.exports = {
+let utils = {
     version: '1.0.0',
     isTouch: 'ontouchstart' in document,
     /**
@@ -865,3 +865,4 @@ module.exports = {
 		}
 	}
 };
+module.exports = utils;

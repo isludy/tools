@@ -1,5 +1,5 @@
 import utils from '../../utils/utils';
-
+import './Scrollbar.css';
 class Scrollbar {
     /**
      * 必须的id

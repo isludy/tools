@@ -1,5 +1,5 @@
 module.exports = {
-    tools: ['Player','Calendar','ScaleControl','Scrollbar','Rnav'],
+    tools: ['Player','Scrollbar','ScaleControl','Calendar','Rnav'],
     output: 'dist',
     filename: 'tools',
     mount: 'Tools'

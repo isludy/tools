@@ -1,8 +1,11 @@
 const webpack = require('webpack');
 const path = require('path');
 const fs = require('fs');
-const toolConfig = require('./tools.config');
-
+const info = {
+    entry: [],
+    output: [],
+    mount: []
+};
 const reg = {
     comment: /\/\*[\s\S]*?\*\/|\/\/[^\r\n\u2028\u2029]*?[\r\n\u2028\u2029]/g,
     oKeyValue: /(?<=(\/\/[^\r\n\u2028\u2029]*?[\r\n\u2028\u2029]|\/\*[\s\S]*?\*\/[\r\n\u2028\u2029]*|^)\s*)[a-zA-Z$_][\w$]*$/,
@@ -111,12 +114,17 @@ const fns = {
         return fns.obj2Array(o.code);
     },
     mountCode(mount, name, filename){
-        name = name ? '.'+name : '';
-        mount = /^window/.test(mount) ? mount+name+' = ' : 'window.'+mount+name+' = ';
-        if(fs.existsSync(filename)){
-            return fs.readFileSync(filename, 'utf8').replace(reg.exports, mount);
+        if(mount){
+            mount = mount !== 'window' ? 'window.'+mount : mount;
         }else{
-            return filename.replace(reg.exports, mount);
+            mount = 'window';
+        }
+        let str = 'if(!'+mount+')'+mount+'={};\n'+mount+(name ? '.'+name : '')+' = ';
+        info.mount.push(mount+(name ? '.'+name : ''));
+        if(fs.existsSync(filename)){
+            return fs.readFileSync(filename, 'utf8').replace(reg.exports, str);
+        }else{
+            return filename.replace(reg.exports, str);
         }
     },
     /**
@@ -151,8 +159,46 @@ const fns = {
             re(filename);
         }
         return map;
+    },
+    eachFile(dir, exclude, callback){
+        if(typeof exclude === 'function'){
+            callback = exclude;
+            exclude = /node_module|\..*/g;
+        }else{
+            exclude = (exclude instanceof RegExp) ? exclude : /node_module|\..*/g;
+        }
+
+        function fileDisplay(filePath){
+            let files = fs.readdirSync(filePath);
+
+            files.forEach(function(filename) {
+                let filedir = path.join(filePath, filename);
+                let stats = fs.statSync(filedir);
+                if (stats.isFile()) {
+                    if (callback) callback(filedir);
+                }
+                if (stats.isDirectory() && !exclude.test(filedir)) {
+                    fileDisplay(filedir);
+                }
+            });
+        }
+        fileDisplay(__dirname);
+    },
+    clearTemp(tempReg){
+        fns.eachFile(__dirname, (temp)=>{
+            if(tempReg.test(temp)){
+                try {
+                    fs.unlinkSync(temp);
+                }catch (e) {
+
+                }
+            }
+        });
     }
 };
+
+const toolConfig = require('./tools.config');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const utilsSourcePath = path.join(__dirname,'utils','utils.js');
 const utils = fns.utils(utilsSourcePath);
 const config = {
@@ -164,31 +210,47 @@ const config = {
     },
     module: {
         rules: [
-            {test: /\.js$/, exclude: /node_modules/, loader: "babel-loader"},
-            {test: /\.css$/, exclude: /node_modules/, loader: ['style-loader', 'css-loader']}
+            {test: /\.js$/, exclude: /node_modules/, use: "babel-loader"},
+            {
+                test: /\.css$/,
+                exclude: /node_modules/,
+                use: [{loader: MiniCssExtractPlugin.loader}, "css-loader"]
+            }
         ]
-    }
+    },
+    plugins: [
+        new MiniCssExtractPlugin({
+            filename: (toolConfig.filename || 'tools')+'.css',
+            chunkFilename: "[id].css"
+        })
+    ]
 };
-const tempFiles = [];
 
 let mount = toolConfig.mount ||  'window',
-    timestamp = new Date().getTime(),
+    tempname = 'TOOL_TEMP.JS',
+    tempReg = new RegExp(tempname.replace('.','\\.'),'g'),
     argv3 = process.argv[3];
 
+
+if(process.argv[2] === 'clear') {
+    fns.clearTemp(tempReg);
+    console.log('\x1b[32m %s \x1b[0m', 'All is cleared');
+    return;
+}
 
 if(argv3 === '*' || argv3 === '.'){
     let usedUtilsMap = new Map(),
         thisTempOut,
-        uTempOut = path.join(__dirname, 'utils', 'utils'+timestamp+'.js'),
+        uTempOut = path.join(__dirname, 'utils', tempname),
         uOutCode = [],
         code;
     config.entry = [];
     toolConfig.tools.forEach(tool=>{
-        thisTempOut = path.join(__dirname, 'src', tool, tool+timestamp+'.js');
+        thisTempOut = path.join(__dirname, 'src', tool, tempname);
         code = fs.readFileSync(path.join(__dirname, 'src', tool, tool+'.js'), 'utf8').replace(reg.utilsImport, 'import utils from "../../utils/'+path.basename(uTempOut)+'";\n');
         fns.findUtilsFun(code, usedUtilsMap);
         fs.writeFileSync(thisTempOut, fns.mountCode(mount, tool, code));
-        tempFiles.push(thisTempOut);
+        info.entry.push('./src/'+tool+'/'+tool+'.js');
         config.entry.push(thisTempOut);
     });
 
@@ -196,12 +258,11 @@ if(argv3 === '*' || argv3 === '.'){
         uOutCode.push(key+': '+val);
     });
 
-    fs.writeFileSync(uTempOut,'export default {\n' + uOutCode.join(',') + '\n}' );
-    tempFiles.push(uTempOut);
+    fs.writeFileSync(uTempOut,'var utils = {\n' + uOutCode.join(',') + '\n}; module.exports = utils;' );
 }else if(toolConfig.tools.includes(argv3)){
     let thisToolPath = path.join(__dirname, 'src', argv3),
-        thisTempOut = path.join(thisToolPath, argv3+timestamp+'.js'),
-        uTempOut = path.join(thisToolPath, 'utils'+timestamp+'.js'),
+        thisTempOut = path.join(thisToolPath, tempname),
+        uTempOut = path.join(thisToolPath, tempname),
         uMap,
         uOutCode = [],
         code = fs.readFileSync(path.join(thisToolPath, argv3+'.js'),'utf8');
@@ -212,25 +273,34 @@ if(argv3 === '*' || argv3 === '.'){
     });
 
     fs.writeFileSync(thisTempOut, fns.mountCode(argv3, '', code.replace(reg.utilsImport, 'import utils from "./'+path.basename(uTempOut)+'";\n')) );
-    tempFiles.push(thisTempOut);
-    fs.writeFileSync(uTempOut, 'export default {\n' + uOutCode.join(',') + '\n}');
-    tempFiles.push(uTempOut);
+    fs.writeFileSync(uTempOut, 'var utils = {\n' + uOutCode.join(',') + '\n}; module.exports = utils;');
     config.entry = thisTempOut;
+    info.entry.push('./src/'+argv3+'/'+argv3+'.js');
 }else{
-    let tempOut = path.dirname(utilsSourcePath)+'/utils'+timestamp+'.js';
+    if(argv3){
+        console.log('\x1b[32m %s \x1b[0m', '指令npm run '+(config.mode === 'production'?'build':'dev')+' '+argv3+'有误，找不到“'+argv3+'”，若已创建，请将它添加到tools.config.js中的tools里');
+        return;
+    }
+    let tempOut = path.join(path.dirname(utilsSourcePath),tempname);
     fs.writeFileSync(tempOut, fns.mountCode(mount, '', utilsSourcePath));
-    tempFiles.push(tempOut);
     config.entry = tempOut;
+    info.entry.push('./utils/utils.js');
 }
-console.log(config);
 
-webpack(config, (err)=>{
+webpack(config, (err, state)=>{
     if(err){
         console.log(err);
+    }else{
+        console.log('\x1B[32m %s \x1B[0m', 'success');
+        console.log('\x1b[32m %s \x1b[0m', 'entry: ');
+        console.log(info.entry);
+        console.log('\x1b[32m %s \x1b[0m', 'output: ');
+        console.log(Object.keys(state.compilation.assets));
+        console.log('\x1b[32m %s \x1b[0m', 'mount: ');
+        console.log(info.mount);
     }
+    fns.clearTemp(tempReg);
     try{
-        tempFiles.forEach(tempFile=>{
-            fs.unlinkSync(tempFile);
-        });
-    }catch(e){}
+        fs.unlinkSync('./TOOLS.TEMP');
+    }catch (e) {}
 });

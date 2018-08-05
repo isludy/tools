@@ -6,7 +6,8 @@
   "scripts": {
     "serv": "start /b node SERVER.js",
     "dev": "node CORE.js development",
-    "build": "node CORE.js production"
+    "build": "node CORE.js production",
+    "clear": "node CORE.js clear"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
     "babel-preset-env": "^1.7.0",
     "css-loader": "^1.0.0",
     "http-server": "^0.11.1",
+    "mini-css-extract-plugin": "^0.4.1",
     "style-loader": "^0.21.0",
     "webpack": "^4.16.4"
   }
