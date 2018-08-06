@@ -2,39 +2,29 @@ let utils = {
     version: '1.0.0',
     isTouch: 'ontouchstart' in document,
     /**
-     * 通过className查找节点
-     * @param cls
-     * @param context
-     * @returns {*}
-     */
-    elsByClass(cls, context = document){
-       if(context.getElementsByClassName){
-           return context.getElementsByClassName(cls);
-       }else if(context.querySelectorAll){
-           return context.querySelectorAll('.'+cls);
-       }else{
-           let utils = this,
-               els = context.getElementsByTagName('*'),
-               len = els.length,
-               i = 0,
-               doms = [];
-
-           for(; i<len; i++){
-               if(utils.hasClass(els[i], cls)){
-                   doms.push(els[i]);
-               }
-           }
-           return doms;
-       }
-    },
-    /**
      * 简化querySelectorAll
      * @param selector
      * @param context
      * @returns {*}
      */
     $(selector, context = document){
-        return context.querySelectorAll(selector);
+        if(context.querySelectorAll){
+            return context.querySelectorAll(selector);
+        }else{
+            let style = document.createElement('style'), els = [], el;
+            document.getElementsByTagName('head')[0].appendChild(style);
+            window.__query__ = [];
+            style.styleSheet.cssText = selector+'{queryElements: expression(window.__query__ && window.__query__.push(this))}';
+            window.scrollBy(0, 0);
+            style.parentNode.removeChild(style);
+            while (window.__query__.length) {
+                el = window.__query__.shift();
+                el.style.removeAttribute('queryElements');
+                els.push(el);
+            }
+            window.__query__ = null;
+            return els;
+        }
     },
     /**
      * 节点的contains兼容处理
@@ -364,6 +354,25 @@ let utils = {
         }
     },
     /**
+     * 添加style
+     * @param el
+     * @param o
+     */
+    css(el, o){
+        let reg = /^(transition|transform|animation)/,
+            upcase;
+        for(let k in o){
+            if(reg.test(k)){
+                upcase = k.slice(0,1).toUpperCase()+k.slice(1);
+                el.style['o'+upcase] =
+                el.style['ms'+upcase] =
+                el.style['moz'+upcase] =
+                el.style['webkit'+upcase] = o[k];
+            }
+            el.style[k] = o[k];
+        }
+    },
+    /**
      * 元素全屏
      * @param el
      */
@@ -468,18 +477,18 @@ let utils = {
         el1 = els[0];
         el2 = els[1] || el1 || document;
         el3 = els[2] || document;
-        utils.addEvent(el1, events[0], startFn);
+        utils.on(el1, events[0], startFn);
         function startFn(e){
             fn1.call(this, e);
-            utils.addEvent(el2, events[1], moveFn);
-            utils.addEvent(el3, events[2], endFn);
+            utils.on(el2, events[1], moveFn);
+            utils.on(el3, events[2], endFn);
         }
         function moveFn(e){
             fn2.call(this, e);
         }
         function endFn(e){
-            utils.removeEvent(el2, events[1], moveFn);
-            utils.removeEvent(el3, events[2], endFn);
+            utils.off(el2, events[1], moveFn);
+            utils.off(el3, events[2], endFn);
             fn3.call(this, e);
         }
     },
